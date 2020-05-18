@@ -2,8 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-int *lsb1(const int *bmpFile, const char *cipherText);
-int *replaceLeastSignificantBit(const int *bmpByte, const char cipherTextByte, int cbCursor);
+unsigned int *lsb1(const unsigned int *bmpFile, const char *cipherText);
+unsigned int replaceLSB(const unsigned int bmpByte, const char cipherTextByte, unsigned int cbCursor);
+unsigned int flippingLSBToZero(const unsigned int bytes);
+unsigned int getLastBitOfChar(const char cipherTextChar, unsigned int cbCursor);
 
 /* 
 * REMEMBER THAT BMP FILES ARE READ FROM DOWNSIDE-UP AND FROM LEFT TO RIGHT
@@ -22,7 +24,7 @@ int *replaceLeastSignificantBit(const int *bmpByte, const char cipherTextByte, i
  * @param bmpFile: the bmpFile to do the stego-thing (a matrix of ints) 
  * @param cipherText: the cipherText to hide inside the bmpFile
  */
-int *lsb1(const int *bmpFile, const char *cipherText)
+unsigned int *lsb1(const unsigned int *bmpFile, const char *cipherText)
 {
 }
 
@@ -34,14 +36,44 @@ int *lsb1(const int *bmpFile, const char *cipherText)
  * @param cipherTextByte: the current ciphertext byte 
  * @param cbCursor: represents the cipher text byte cursor (0 <= cbCursor <= 7)
  */
-int *replaceLeastSignificantBit(const int *bmpByte, const char cipherTextByte, int cbCursor)
+unsigned int replaceLSB(const unsigned int bmpByte, const char cipherTextByte, unsigned int cbCursor)
 {
+    printf("Printing cipherText bits\n");
+    printingBits(cipherTextByte);
+    printf("Printing bmp bits\n");
+    printingBits(bmpByte);
+
+    // flipping last bit of bmpByte to 0
+    unsigned int bmpWithLSBToZero = flippingLSBToZero(bmpByte);
+    // changing last bit of bmpByte to cipherTextByte[cbCursor]
+    unsigned int newBmpByte = (bmpByte & ~1) | getLastBitOfChar(cipherTextByte, cbCursor);
+    
+    printf("printing new bmp bits\n");
+    printingBits(newBmpByte);
+    
+    return newBmpByte;
 }
 
+// TODO remove this
+void printingBits(int number)
+{
+    unsigned i;
+    // Reverse loop
+    for (i = 1 << 31; i > 0; i >>= 1)
+        printf("%u", !!(number & i));
+    printf("\n");
+}
 
-int main()
+unsigned int flippingLSBToZero(const unsigned int bytes) {
+    return (bytes & ~1) | 0;
+}
+
+unsigned int getLastBitOfChar(const char cipherTextChar, unsigned int cbCursor) {
+    return ((cipherTextChar >> cbCursor) & 1);
+}
+
+unsigned int main()
 {
     printf("IN LSB1 MAIN \n");
-    printf("sizeof(char) %ld \n", sizeof(char));
-    printf("sizeof(int) %ld \n", sizeof(int));
+    replaceLSB(5, 'p', 0);
 }
