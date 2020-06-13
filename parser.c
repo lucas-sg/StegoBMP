@@ -2,43 +2,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
-#include "./include/parser.h"
-
-
-
-typedef enum OPTION {
-    EMBED = 0,
-    EXTRACT,
-    INPUT,
-    OUTPUT,
-    CARRIER,
-    STEG,
-    ALGO,
-    MODE,
-    PASS,
-    END
-} OPTION;
-// typedef enum ACTION {
-//     EMBED,
-//     EXTRACT
-// } ACTION;
-typedef enum STEGO_ALGO {
-    LSB1,
-    LSB2,
-    LSBI
-} STEGO_ALGO;
-typedef enum EXTENSION_CHECK {
-    BMP_OK,
-    NOT_BMP_EXTENSION_ERROR
-} EXTENSION_CHECK;
-struct UserInput {
-    // enum ACTION action;
-    char *inputFileName;
-    char *outputFileName;
-    char *carrierFileName;
-    enum STEGO_ALGO algorithm;
-    enum PARSE_RET parsingStatus;
-};
+#include "include/parser.h"
 
 void printUsage();
 void initOption(OPTION currOpt, const char *name, int has_arg, int val);
@@ -46,8 +10,6 @@ struct option * initLongOptions();
 
 static struct option *longOpts;
 static int *flags;
-
-
 
 PARSE_RET
 parseInput(int argc, char *argv[], UserInput *params) {

@@ -4,4 +4,4 @@ project(stegoBMP)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(cli main.c)
+add_executable(cli main.c parser.c)
