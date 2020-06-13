@@ -2,10 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-unsigned int *lsb1(const unsigned int *bmpFile, const char *cipherText);
-unsigned int replaceLSB(const unsigned int bmpByte, const char cipherTextByte, unsigned int cbCursor);
-unsigned int flippingLSBToZero(const unsigned int bytes);
-unsigned int getLastBitOfChar(const char cipherTextChar, unsigned int cbCursor);
+unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText);
+unsigned char replaceLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned char cbCursor);
+unsigned char flippingLSBToZero(const unsigned char bytes);
+unsigned char getLastBitOfChar(const char cipherTextChar, unsigned char cbCursor);
 
 /* 
 * REMEMBER THAT BMP FILES ARE READ FROM DOWNSIDE-UP AND FROM LEFT TO RIGHT
@@ -24,7 +24,7 @@ unsigned int getLastBitOfChar(const char cipherTextChar, unsigned int cbCursor);
  * @param bmpFile: the bmpFile to do the stego-thing (a matrix of ints) 
  * @param cipherText: the cipherText to hide inside the bmpFile
  */
-unsigned int *lsb1(const unsigned int *bmpFile, const char *cipherText)
+unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText)
 {
 }
 
@@ -36,7 +36,7 @@ unsigned int *lsb1(const unsigned int *bmpFile, const char *cipherText)
  * @param cipherTextByte: the current ciphertext byte 
  * @param cbCursor: represents the cipher text byte cursor (0 <= cbCursor <= 7)
  */
-unsigned int replaceLSB(const unsigned int bmpByte, const char cipherTextByte, unsigned int cbCursor)
+unsigned char replaceLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned char cbCursor)
 {
     printf("Printing cipherText bits\n");
     printingBits(cipherTextByte);
@@ -44,9 +44,9 @@ unsigned int replaceLSB(const unsigned int bmpByte, const char cipherTextByte, u
     printingBits(bmpByte);
 
     // flipping last bit of bmpByte to 0
-    unsigned int bmpWithLSBToZero = flippingLSBToZero(bmpByte);
+    unsigned char bmpWithLSBToZero = flippingLSBToZero(bmpByte);
     // changing last bit of bmpByte to cipherTextByte[cbCursor]
-    unsigned int newBmpByte = (bmpByte & ~1) | getLastBitOfChar(cipherTextByte, cbCursor);
+    unsigned char newBmpByte = (bmpByte & ~1) | getLastBitOfChar(cipherTextByte, cbCursor);
     
     printf("printing new bmp bits\n");
     printingBits(newBmpByte);
@@ -64,11 +64,11 @@ void printingBits(int number)
     printf("\n");
 }
 
-unsigned int flippingLSBToZero(const unsigned int bytes) {
+unsigned char flippingLSBToZero(const unsigned char bytes) {
     return (bytes & ~1) | 0;
 }
 
-unsigned int getLastBitOfChar(const char cipherTextChar, unsigned int cbCursor) {
+unsigned char getLastBitOfChar(const char cipherTextChar, unsigned char cbCursor) {
     return ((cipherTextChar >> cbCursor) & 1);
 }
 
