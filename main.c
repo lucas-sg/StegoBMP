@@ -4,10 +4,7 @@
 
 
 int main(int argc, char *argv[]) {
-    UserInput userInput;
-    parseInput(argc, argv, &userInput);
-
-    printf("%s", userInput.inputFileName);
-
+    UserInput parsedInput;
+    parseInput(argc, argv, &parsedInput);
     return EXIT_SUCCESS;
 }

@@ -9,6 +9,7 @@ void testParsedOk();
 void testMissingEmbedExtract();
 void testMissingParameter();
 void testMissingArgument();
+void testBothEmbedAndExtract();
 void testCheckForBMPExtension();
 
 size_t MANDATORY_PARAM_SIZE = 9;
@@ -20,8 +21,10 @@ testParser() {
     testParsedOk();
     testMissingEmbedExtract();
     testMissingParameter();
-    // testMissingArgument();
+    testMissingArgument();
+    testBothEmbedAndExtract();
     testCheckForBMPExtension();
+    // TODO: Test optional parameters
 }
 
 void
@@ -35,11 +38,10 @@ testParsedOk() {
     int argc = 10;
     UserInput *params = malloc(sizeOfUserInputStruct());
 
-    printf("Opcion %d\n", parseInput(argc, argvEmbed, params));
     assert(parseInput(argc, argvEmbed, params) == PARSED_OK);
-    printf("Opcion %d\n", parseInput(argc, argvExtract, params));
     assert(parseInput(argc, argvExtract, params) == PARSED_OK);
     printf("[PASSED] Parsing embedding and extraction\n\n");
+    free(params);
 }
 
 void
@@ -56,6 +58,7 @@ testMissingParameter() {
     assert(parseInput(argc, missingCarrier, params) == MISSING_PARAMETER);
     assert(parseInput(argc, missingSteg, params)    == MISSING_PARAMETER);
     printf("[PASSED] Will fail when missing mandatory parameters\n\n");
+    free(params);
 }
 
 void
@@ -71,37 +74,44 @@ testMissingArgument() {
     assert(parseInput(argc, missingOutput, params)  == MISSING_ARGUMENT);
     assert(parseInput(argc, missingCarrier, params) == MISSING_ARGUMENT);
     assert(parseInput(argc, missingSteg, params)    == MISSING_ARGUMENT);
-    printf("[PASSED] Will fail when missing arguments to mandatory parameters\n\n");    
+    printf("[PASSED] Will fail when missing arguments to mandatory parameters\n\n");
+    free(params);
 }
 
 void
 testMissingEmbedExtract() {
-    char *argv[] = { "program", "-in", "\"somefilePath\"", "-p", "\"somefilePath.bmp\"", "-out", "\"somefilePath.bmp\"", "-steg", "LSB1" };
+    char *missingBothEmbedAndExtract[] = { "program", "-in", "\"somefilePath\"", "-p", "\"somefilePath.bmp\"", "-out", "\"somefilePath.bmp\"", "-steg", "LSB1" };
     int argc = 9;
     UserInput *params = malloc(sizeOfUserInputStruct());
 
-    assert(parseInput(argc, argv, params) == MISSING_ACTION);
-    printf("[PASSED] Will fail when there is no action (embed or extract) present\n\n");    
+    assert(parseInput(argc, missingBothEmbedAndExtract, params) == MISSING_ACTION);
+    printf("[PASSED] Will fail when there is no action (embed or extract) present\n\n");
+    free(params);
 }
 
 void
 testBothEmbedAndExtract() {
-    char *argv[] = { "program", "-embed", "-extract", "\"somefilePath\"", "-p", "\"somefilePath.bmp\"", "-out", "\"somefilePath.bmp\"", "-steg", "LSB1" };
+    char *tooManyActions[] = { "program", "-embed", "-extract", "\"somefilePath\"", "-p", "\"somefilePath.bmp\"", "-out", "\"somefilePath.bmp\"", "-steg", "LSB1" };
     int argc = 11;
     UserInput *params = malloc(sizeOfUserInputStruct());
 
-    assert(parseInput(argc, argv, params) == EMBED_AND_EXTRACT_ERROR); 
+    assert(parseInput(argc, tooManyActions, params) == EMBED_AND_EXTRACT_ERROR);
+    printf("[PASSED] Will fail when both 'embed' and 'extract' are present\n\n");
+    free(params);
 }
 
 void
 testCheckForBMPExtension() {
-    char *okFileName     = "./images/carriers/big_carrier.bmp";
+    char *fileNameOk     = "./images/carriers/big_carrier.bmp";
     char *noExtension    = "./images/carriers/big_carrier";
     char *extensionTypo  = "./images/carriers/big_carrier.bmpp";
     char *wrongExtension = "./images/carriers/big_carrier.png";
+    char *smallFileName  = ".bmp";
 
-    // assert(checkForBMPExtension(okFileName)     == BMP_OK);
-    // assert(checkForBMPExtension(noExtension)    == NOT_BMP_EXTENSION_ERROR);
-    // assert(checkForBMPExtension(extensionTypo)  == NOT_BMP_EXTENSION_ERROR);
-    // assert(checkForBMPExtension(wrongExtension) == NOT_BMP_EXTENSION_ERROR);
+    assert(checkForBMPExtension(fileNameOk)     == BMP_OK);
+    assert(checkForBMPExtension(noExtension)    == NOT_BMP_EXTENSION_ERROR);
+    assert(checkForBMPExtension(extensionTypo)  == NOT_BMP_EXTENSION_ERROR);
+    assert(checkForBMPExtension(wrongExtension) == NOT_BMP_EXTENSION_ERROR);
+    assert(checkForBMPExtension(smallFileName)  == SMALL_FILE_NAME_ERROR);
+    printf("[PASSED] Will fail when the file name extension isn't .bmp\n\n");
 }

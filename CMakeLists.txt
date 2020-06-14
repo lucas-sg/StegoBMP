@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-
-project(stegoBMP)
-
+project(StegoBMP)
 set(CMAKE_CXX_STANDARD 14)
-
-add_executable(cli main.c parser.c)
+add_executable(main main.c parser.c)
+include_directories(include)
