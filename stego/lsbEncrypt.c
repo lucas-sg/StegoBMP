@@ -5,9 +5,10 @@
 
 unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText);
 unsigned char *lsb4(const unsigned char *bmpFile, const char *cipherText);
-unsigned char replaceNthLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned int cbCursor, int bitToReplace);
+unsigned char replaceNthLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace);
 unsigned char flippingNthLSBToZero(const unsigned char bytes, int bitToReplace);
 unsigned char getCurrentBitOfChar(const char cipherTextChar, unsigned int cbCursor);
+int isCursorWithinOneByteRange(unsigned int cursor);
 size_t strlen(const char *s);
 
 /* 
@@ -41,7 +42,14 @@ unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText)
             cBitCursor = 0;
         }
 
-        stegoBmp[bmpCursor] = replaceNthLSB(bmpFile[bmpCursor++], cipherText[cCursor++], cBitCursor, 0);
+        unsigned char newBmpByte = replaceNthLSB(bmpFile[bmpCursor++], cipherText[cCursor++], cBitCursor, 0);
+
+        if (newBmpByte == NULL)
+        {
+            return NULL; // handle this
+        }
+
+        stegoBmp[bmpCursor] = newBmpByte;
     }
     stegoBmp[bmpFileSize + 1] = '\0';
 
@@ -67,6 +75,11 @@ unsigned char *lsb4(const unsigned char *bmpFile, const char *cipherText)
         unsigned char lsb3 = replaceNthLSB(lsb2, cipherText[cCursor++], cBitCursor, 2);
         unsigned char lsb4 = replaceNthLSB(lsb3, cipherText[cCursor++], cBitCursor, 3);
 
+        if (lsb4 == NULL) // we could handle this at lsb1
+        {
+            return NULL; // handle this
+        }
+
         stegoBmp[bmpCursor] = lsb4;
 
         bmpCursor += 4;
@@ -74,6 +87,11 @@ unsigned char *lsb4(const unsigned char *bmpFile, const char *cipherText)
     stegoBmp[bmpFileSize + 1] = '\0';
 
     return stegoBmp;
+}
+
+int isCursorWithinOneByteRange(unsigned int cursor)
+{
+    return cursor >= 0 && cursor <= 7;
 }
 
 /* 
@@ -84,9 +102,13 @@ unsigned char *lsb4(const unsigned char *bmpFile, const char *cipherText)
  * @param cipherTextByte: the current ciphertext byte 
  * @param cbCursor: represents the cipher text byte cursor (0 <= cbCursor <= 7)
  */
-unsigned char replaceNthLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned int cbCursor, int bitToReplace)
+unsigned char replaceNthLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace)
 {
-    printf("Position %d\n", bitToReplace);
+    if (!isCursorWithinOneByteRange(cbCursor) || !isCursorWithinOneByteRange(bitToReplace) || bmpByte == NULL || cipherTextByte == NULL)
+    {
+        return NULL;
+    }
+
     printf("Printing cipherText bits\n");
     printingBits(cipherTextByte);
     printf("Printing bmp bits\n");
@@ -115,6 +137,8 @@ void printingBits(int number)
 
 unsigned char flippingNthLSBToZero(const unsigned char bytes, int bitToReplace)
 {
+    if (!isCursorWithinOneByteRange(bitToReplace) || bytes == NULL)
+        return NULL;
     return bytes & (~(1 << bitToReplace));
 }
 
@@ -123,24 +147,7 @@ unsigned char flippingNthLSBToZero(const unsigned char bytes, int bitToReplace)
  */
 unsigned char getCurrentBitOfChar(const char cipherTextChar, unsigned int cbCursor)
 {
+    if (!isCursorWithinOneByteRange(cbCursor) || cipherTextChar == NULL)
+        return NULL;
     return ((cipherTextChar >> cbCursor) & 1);
-}
-
-unsigned int main()
-{
-    replaceNthLSB(255, 'p', 0, 0);
-    printf("\n");
-    replaceNthLSB(255, 'p', 1, 1);
-    printf("\n");
-    replaceNthLSB(255, 'p', 2, 2);
-    printf("\n");
-    replaceNthLSB(255, 'p', 3, 3);
-    printf("\n");
-    replaceNthLSB(255, 'p', 4, 4);
-    printf("\n");
-    replaceNthLSB(255, 'p', 5, 5);
-    printf("\n");
-    replaceNthLSB(255, 'p', 6, 6);
-    printf("\n");
-    replaceNthLSB(255, 'p', 7, 7);
 }
