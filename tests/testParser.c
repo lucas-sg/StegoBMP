@@ -2,7 +2,6 @@
 #include "../include/parser.h"
 #include <assert.h>
 #include <stdio.h>
-#include <string.h>
 
 
 void testParsedOk();
@@ -12,8 +11,8 @@ void testMissingArgument();
 void testBothEmbedAndExtract();
 void testCheckForBMPExtension();
 void testOptionalParamsOk();
+void testMissingOptionalParam();
 
-size_t MANDATORY_PARAM_SIZE = 9;
 
 void
 testParser() {
@@ -26,7 +25,7 @@ testParser() {
     testBothEmbedAndExtract();
     testCheckForBMPExtension();
     testOptionalParamsOk();
-    // TODO: Test optional parameters
+    testMissingOptionalParam();
 }
 
 void
@@ -117,37 +116,64 @@ testCheckForBMPExtension() {
 void
 testOptionalParamsOk() {
     char *embedWithOptParams[] = { "program",
-                                 "-embed",
-                                 "-in", "someFilePath",
-                                 "-p", "someFilePath.bmp",
-                                 "-out", "someFilePath.bmp",
-                                 "-steg", "LSB1",
-                                 "-a", "aes128",
-                                 "-m", "cbc",
-                                 "-pass", "dummyPassword" };
-    char *extractWithOptParams[] = { "program",
-                                   "-extract",
+                                   "-embed",
+                                   "-in", "someFilePath",
                                    "-p", "someFilePath.bmp",
                                    "-out", "someFilePath.bmp",
                                    "-steg", "LSB1",
                                    "-a", "aes128",
                                    "-m", "cbc",
                                    "-pass", "dummyPassword" };
+    char *extractWithOptParams[] = { "program",
+                                     "-extract",
+                                     "-p", "someFilePath.bmp",
+                                     "-out", "someFilePath.bmp",
+                                     "-steg", "LSB1",
+                                     "-a", "aes128",
+                                     "-m", "cbc",
+                                     "-pass", "dummyPassword" };
     int embedArgs = 16;
     int extractArgs = 14;
     UserInput *parsedInput = malloc(sizeOfUserInputStruct());
 
     assert(parseInput(embedArgs, embedWithOptParams, parsedInput) == PARSED_OK);
     assert(parseInput(extractArgs, extractWithOptParams, parsedInput) == PARSED_OK);
-    free(parsedInput);
     printf("[PASSED] Parsing embedding and extraction with optional parameters\n\n");
+    free(parsedInput);
 }
 
 void
-testMissingOptParam() {
-    char *missingEncryptionParam[] = {};
-    int arg = 15;
+testMissingOptionalParam() {
+    char *missingEncAlgo[]   = { "program",
+                                 "-embed",
+                                 "-in", "somefilePath",
+                                 "-p", "somefilePath.bmp",
+                                 "-out", "somefilePath.bmp",
+                                 "-steg", "LSB1",
+                                 "-m", "cbc",
+                                 "-pass", "password123"};
+    char *missingMode[] = { "program",
+                            "-embed",
+                            "-in", "somefilePath",
+                            "-p", "somefilePath.bmp",
+                            "-out", "somefilePath.bmp",
+                            "-steg", "LSB1",
+                            "-a", "aes128",
+                            "-pass", "password123"};
+    char *missingPassword[] = { "program",
+                                "-embed",
+                                "-in", "somefilePath",
+                                "-p", "somefilePath.bmp",
+                                "-out", "somefilePath.bmp",
+                                "-steg", "LSB1",
+                                "-a", "aes128",
+                                "-m", "cbc"};
+    int argc = 14;
     UserInput *parsedInput = malloc(sizeOfUserInputStruct());
 
-//    assert();
+    assert(parseInput(argc, missingEncAlgo, parsedInput)  == MISSING_PARAMETER);
+    assert(parseInput(argc, missingMode, parsedInput)     == MISSING_PARAMETER);
+    assert(parseInput(argc, missingPassword, parsedInput) == MISSING_PARAMETER);
+    printf("[PASSED] Will fail when missing one optional parameter\n\n");
+    free(parsedInput);
 }

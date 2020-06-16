@@ -5,9 +5,9 @@
 
 void initOption(OPTION currOpt, const char *name, int has_arg, int val);
 void initLongOptions();
-int checkParamsRead();
+PARSE_RET checkMissingParams(UserInput *parsedInput);
 void freeLongOpts();
-void parseAction();
+void parseAction(int opt, UserInput *parsedInput);
 void parseFileName(int opt, UserInput *parsedInput);
 void parseStegoAlgo(UserInput *parsedInput);
 void parseEncryptionAlgo(UserInput *parsedInput);
@@ -24,7 +24,6 @@ static int options = 9;
 
 PARSE_RET
 parseInput(int argc, char *argv[], UserInput *parsedInput) {
-    int parseStatus;
     int opt, optIndex = 0;
     char *shortOpts = "";
     struct option parsedOpt;
@@ -44,8 +43,6 @@ parseInput(int argc, char *argv[], UserInput *parsedInput) {
             case 'b':   // -embed
             case 'x':   // -extract
                 parseAction(opt, parsedInput);
-                if (parsedInput->status != PARSED_OK)
-                    return EMBED_AND_EXTRACT_ERROR;
                 break;
             case 'i':   // -in
             case 'c':   // -p
@@ -57,18 +54,19 @@ parseInput(int argc, char *argv[], UserInput *parsedInput) {
                 if (optarg == NULL || optarg[0] == '-')
                     return MISSING_ARGUMENT;
                 parseParamWithArg(opt, parsedInput);
-                if (parsedInput->status != PARSED_OK)
-                    return parsedInput->status;
                 break;
             default:
                 if (optarg == NULL || optarg[0] == '-')
                     return MISSING_ARGUMENT;
                 break;
         }
+
+        if (parsedInput->status != PARSED_OK)
+            return parsedInput->status;
     }
 
-    if ((parseStatus = checkParamsRead()) != PARSED_OK)
-        return parseStatus;
+    if (checkMissingParams(parsedInput) != PARSED_OK)
+        return parsedInput->status;
 
     free(flags);
     freeLongOpts();
@@ -161,13 +159,13 @@ parseOutputFileName(UserInput *parsedInput) {
 void
 parseFileName(int opt, UserInput *parsedInput) {
     switch (opt) {
-        case 'i':   // -in
+        case 'i':
             parseInputFileName(parsedInput);
             break;
-        case 'c':   // -p
+        case 'c':
             parseCarrierFileName(parsedInput);
             break;
-        case 'o':   // -out
+        case 'o':
             parseOutputFileName(parsedInput);
             break;
         default:
@@ -216,20 +214,30 @@ parseEncryptionMode(UserInput *parsedInput) {
 }
 
 int
-checkParamsRead() {
+missingMandatoryParam() {
+    int missingInput = flags[EMBD] != 0 && flags[INPUT] == 0;
+
+    return missingInput || flags[OUTPUT] == 0 || flags[CARRIER] == 0 || flags[STEG] == 0;
+}
+
+int
+missingOptionalParam() {
+    int onlyAlgo = flags[ALGO] != 0 && (flags[MODE] == 0 || flags[PASS] == 0);
+    int onlyMode = flags[MODE] != 0 && (flags[ALGO] == 0 || flags[PASS] == 0);
+    int onlyPass = flags[PASS] != 0 && (flags[ALGO] == 0 || flags[MODE] == 0);
+
+    return onlyAlgo || onlyMode || onlyPass;
+}
+
+PARSE_RET
+checkMissingParams(UserInput *parsedInput) {
     if (flags[EMBD] == 0 && flags[EXTR] == 0)
-        return MISSING_ACTION;
+        parsedInput->status = MISSING_ACTION;
 
-    if ((flags[EMBD] != 0 && flags[INPUT] == 0) ||
-        flags[OUTPUT] == 0 || flags[CARRIER] == 0 || flags[STEG] == 0)
-        return MISSING_PARAMETER;
+    else if (missingMandatoryParam() || missingOptionalParam())
+        parsedInput->status = MISSING_PARAMETER;
 
-    if ((flags[ALGO] != 0 && (flags[MODE] == 0 || flags[PASS] == 0)) ||
-        (flags[MODE] != 0 && (flags[ALGO] == 0 || flags[PASS] == 0)) ||
-        (flags[PASS] != 0 && (flags[ALGO] == 0 || flags[MODE] == 0)))
-        return MISSING_PARAMETER;
-
-    return PARSED_OK;
+    return parsedInput->status;
 }
 
 void
