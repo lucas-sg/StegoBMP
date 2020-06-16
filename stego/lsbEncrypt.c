@@ -56,6 +56,7 @@ unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText)
     return stegoBmp;
 }
 
+// HANDLE CASE WHERE CIPHER TEXT IS BIGGER TAN BMP FILE --> I THINK THIS SHOULD BE IN ANOTHER PLACE
 unsigned char *lsb4(const unsigned char *bmpFile, const char *cipherText)
 {
     size_t bmpFileSize = strlen(bmpFile);
@@ -70,15 +71,11 @@ unsigned char *lsb4(const unsigned char *bmpFile, const char *cipherText)
             cBitCursor = 0;
         }
 
+        // handle error here, bmpFile's length could be lower than cipherText's length and viceversa
         unsigned char lsb1 = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor++], cBitCursor, 0);
         unsigned char lsb2 = replaceNthLSB(lsb1, cipherText[cCursor++], cBitCursor, 1);
         unsigned char lsb3 = replaceNthLSB(lsb2, cipherText[cCursor++], cBitCursor, 2);
         unsigned char lsb4 = replaceNthLSB(lsb3, cipherText[cCursor++], cBitCursor, 3);
-
-        if (lsb4 == NULL) // we could handle this at lsb1
-        {
-            return NULL; // handle this
-        }
 
         stegoBmp[bmpCursor] = lsb4;
 
@@ -104,11 +101,6 @@ int isCursorWithinOneByteRange(unsigned int cursor)
  */
 unsigned char replaceNthLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace)
 {
-    if (!isCursorWithinOneByteRange(cbCursor) || !isCursorWithinOneByteRange(bitToReplace) || bmpByte == NULL || cipherTextByte == NULL)
-    {
-        return NULL;
-    }
-
     printf("Printing cipherText bits\n");
     printingBits(cipherTextByte);
     printf("Printing bmp bits\n");
@@ -137,8 +129,6 @@ void printingBits(int number)
 
 unsigned char flippingNthLSBToZero(const unsigned char bytes, int bitToReplace)
 {
-    if (!isCursorWithinOneByteRange(bitToReplace) || bytes == NULL)
-        return NULL;
     return bytes & (~(1 << bitToReplace));
 }
 
@@ -147,7 +137,5 @@ unsigned char flippingNthLSBToZero(const unsigned char bytes, int bitToReplace)
  */
 unsigned char getCurrentBitOfChar(const char cipherTextChar, unsigned int cbCursor)
 {
-    if (!isCursorWithinOneByteRange(cbCursor) || cipherTextChar == NULL)
-        return NULL;
     return ((cipherTextChar >> cbCursor) & 1);
 }
