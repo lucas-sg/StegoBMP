@@ -5,26 +5,35 @@
 
 void initOption(OPTION currOpt, const char *name, int has_arg, int val);
 void initLongOptions();
+int checkParamsRead();
 void freeLongOpts();
+void parseAction();
+void parseFileName(int opt, UserInput *parsedInput);
+void parseStegoAlgo(UserInput *parsedInput);
+void parseEncryptionAlgo(UserInput *parsedInput);
+void parseEncryptionMode(UserInput *parsedInput);
+void parseParamWithArg(int opt, UserInput *parsedInput);
 
 static struct option *longOpts;
 /*
-    file: Array filled with the int values that represent each option read.
-          It is filled at each call of getopt_long_only()
+    flags: Array filled with the int values that represent each option read.
+           It is filled at each call of getopt_long_only()
  */
 static int *flags;
 static int options = 9;
 
 PARSE_RET
-parseInput(int argc, char *argv[], UserInput *params) {
+parseInput(int argc, char *argv[], UserInput *parsedInput) {
+    int parseStatus;
     int opt, optIndex = 0;
     char *shortOpts = "";
     struct option parsedOpt;
 
-    opterr = 0; // Set to 0 to avoid seeing default error messages
+    opterr = 0;     // Set to 0 to avoid seeing default error messages
     optind = 1;
     flags  = calloc(options, sizeof(int));
     initLongOptions();
+    parsedInput->status = PARSED_OK;
 
     while ((opt = getopt_long_only(argc, argv, shortOpts, longOpts,
             &optIndex)) != -1) {
@@ -32,22 +41,25 @@ parseInput(int argc, char *argv[], UserInput *params) {
         opt       = parsedOpt.flag == NULL ? parsedOpt.val : *(parsedOpt.flag);
 
         switch (opt) {
-            case 'b':
-                if (flags[EXTRACT] != 0)
+            case 'b':   // -embed
+            case 'x':   // -extract
+                parseAction(opt, parsedInput);
+                if (parsedInput->status != PARSED_OK)
                     return EMBED_AND_EXTRACT_ERROR;
                 break;
-
-            case 'x':
-                if (flags[EMBED] != 0)
-                    return EMBED_AND_EXTRACT_ERROR;
+            case 'i':   // -in
+            case 'c':   // -p
+            case 'o':   // -out
+            case 's':   // -steg
+            case 'a':   // -a
+            case 'm':   // -m
+            case 'p':   // -pass
+                if (optarg == NULL || optarg[0] == '-')
+                    return MISSING_ARGUMENT;
+                parseParamWithArg(opt, parsedInput);
+                if (parsedInput->status != PARSED_OK)
+                    return parsedInput->status;
                 break;
-    
-            case '?':
-                return MISSING_ARGUMENT;
-
-            case ':':
-                return MISSING_ARGUMENT;
-
             default:
                 if (optarg == NULL || optarg[0] == '-')
                     return MISSING_ARGUMENT;
@@ -55,12 +67,8 @@ parseInput(int argc, char *argv[], UserInput *params) {
         }
     }
 
-    if (flags[EMBED] == 0 && flags[EXTRACT] == 0)
-        return MISSING_ACTION;
-
-    if ((flags[EMBED] != 0 && flags[INPUT] == 0) || 
-        flags[OUTPUT] == 0 || flags[CARRIER] == 0 || flags[STEG] == 0)
-        return MISSING_PARAMETER;
+    if ((parseStatus = checkParamsRead()) != PARSED_OK)
+        return parseStatus;
 
     free(flags);
     freeLongOpts();
@@ -69,13 +77,169 @@ parseInput(int argc, char *argv[], UserInput *params) {
 }
 
 void
+parseAction(int opt, UserInput *parsedInput) {
+    if (opt == 'b') {
+        if (flags[EXTR] != 0) {
+            parsedInput->status = EMBED_AND_EXTRACT_ERROR;
+            return;
+        }
+        parsedInput->action = EMBED;
+    } else if (opt == 'x') {
+        if (flags[EMBD] != 0) {
+            parsedInput->status = EMBED_AND_EXTRACT_ERROR;
+            return;
+        }
+        parsedInput->action = EXTRACT;
+    }
+}
+
+void
+parseMandatoryParam(int opt, UserInput *parsedInput) {
+    switch (opt) {
+        case 'c':
+        case 'o':
+            if (checkForBMPExtension(optarg) != BMP_OK) {
+                parsedInput->status = NOT_BMP_FILE_ERROR;
+                return;
+            }
+        case 'i':
+            parseFileName(opt, parsedInput);
+            break;
+        case 's':
+            parseStegoAlgo(parsedInput);
+            break;
+        default:
+            break;
+    }
+}
+
+void
+parseOptionalParam(int opt, UserInput *parsedInput) {
+    switch (opt) {
+        case 'a':
+            parseEncryptionAlgo(parsedInput);
+            break;
+        case 'm':
+            parseEncryptionMode(parsedInput);
+            break;
+        case 'p':
+            parsedInput->password = calloc(strlen(optarg) + 1, sizeof(char));
+            strcpy(parsedInput->password, optarg);
+            break;
+        default:
+            break;
+    }
+}
+
+void
+parseParamWithArg(int opt, UserInput *parsedInput) {
+    if (opt == 'i' || opt == 'c' || opt == 'o' || opt == 's') {
+        parseMandatoryParam(opt, parsedInput);
+    } else {
+        parseOptionalParam(opt, parsedInput);
+    }
+}
+
+void
+parseInputFileName(UserInput *parsedInput) {
+    parsedInput->inputFileName = calloc(strlen(optarg) + 1, sizeof(char));
+    strcpy(parsedInput->inputFileName, optarg);
+}
+
+void
+parseCarrierFileName(UserInput *parsedInput) {
+    parsedInput->carrierFileName = calloc(strlen(optarg) + 1, sizeof(char));
+    strcpy(parsedInput->carrierFileName, optarg);
+}
+
+void
+parseOutputFileName(UserInput *parsedInput) {
+    parsedInput->outputFileName = calloc(strlen(optarg) + 1, sizeof(char));
+    strcpy(parsedInput->outputFileName, optarg);
+}
+
+void
+parseFileName(int opt, UserInput *parsedInput) {
+    switch (opt) {
+        case 'i':   // -in
+            parseInputFileName(parsedInput);
+            break;
+        case 'c':   // -p
+            parseCarrierFileName(parsedInput);
+            break;
+        case 'o':   // -out
+            parseOutputFileName(parsedInput);
+            break;
+        default:
+            break;
+    }
+}
+
+void
+parseStegoAlgo(UserInput *parsedInput) {
+    if (strcmp("LSB1", optarg) == 0)
+        parsedInput->stegoAlgorithm = LSB1;
+    else if (strcmp("LSB4", optarg) == 0)
+        parsedInput->stegoAlgorithm = LSB4;
+    else if (strcmp("LSBI", optarg) == 0)
+        parsedInput->stegoAlgorithm = LSBI;
+    else
+        parsedInput->status = NOT_STEG_OPTION_ERROR;
+}
+
+void
+parseEncryptionAlgo(UserInput *parsedInput) {
+    if (strcmp("aes128", optarg) == 0)
+        parsedInput->encryption = AES_128;
+    else if (strcmp("aes192", optarg) == 0)
+        parsedInput->encryption = AES_192;
+    else if (strcmp("aes256", optarg) == 0)
+        parsedInput->encryption = AES_256;
+    else if (strcmp("des", optarg) == 0)
+        parsedInput->encryption = DES;
+    else
+        parsedInput->status = NOT_ENC_OPTION_ERROR;
+}
+
+void
+parseEncryptionMode(UserInput *parsedInput) {
+    if (strcmp("ecb", optarg) == 0)
+        parsedInput->mode = ECB;
+    else if (strcmp("cfb", optarg) == 0)
+        parsedInput->mode = CFB;
+    else if (strcmp("ofb", optarg) == 0)
+        parsedInput->mode = OFB;
+    else if (strcmp("cbc", optarg) == 0)
+        parsedInput->mode = CBC;
+    else
+        parsedInput->status = NOT_MODE_OPTION_ERROR;
+}
+
+int
+checkParamsRead() {
+    if (flags[EMBD] == 0 && flags[EXTR] == 0)
+        return MISSING_ACTION;
+
+    if ((flags[EMBD] != 0 && flags[INPUT] == 0) ||
+        flags[OUTPUT] == 0 || flags[CARRIER] == 0 || flags[STEG] == 0)
+        return MISSING_PARAMETER;
+
+    if ((flags[ALGO] != 0 && (flags[MODE] == 0 || flags[PASS] == 0)) ||
+        (flags[MODE] != 0 && (flags[ALGO] == 0 || flags[PASS] == 0)) ||
+        (flags[PASS] != 0 && (flags[ALGO] == 0 || flags[MODE] == 0)))
+        return MISSING_PARAMETER;
+
+    return PARSED_OK;
+}
+
+void
 initLongOptions() {
     longOpts = malloc(sizeof(struct option) * (options + 1));
 
-    initOption(EMBED,   "embed",   no_argument,       'b');
-    initOption(EXTRACT, "extract", no_argument,       'x');
+    initOption(EMBD,    "embed",   no_argument,       'b');
+    initOption(EXTR,    "extract", no_argument,       'x');
     initOption(INPUT,   "in",      required_argument, 'i');
-    initOption(CARRIER, "p",       required_argument, 'f');
+    initOption(CARRIER, "p",       required_argument, 'c');
     initOption(OUTPUT,  "out",     required_argument, 'o');
     initOption(STEG,    "steg",    required_argument, 's');
     initOption(ALGO,    "a",       required_argument, 'a');
@@ -104,14 +268,13 @@ initOption(OPTION currOpt, const char *name, int has_arg, int val) {
 
 void
 freeLongOpts() {
-    for (int i = 0; i < options + 1; ++i) {
+    for (int i = 0; i < options + 1; ++i)
         free((char *)(*(longOpts + i)).name);
-    }
 
     free(longOpts);
 }
 
-enum EXTENSION_CHECK
+EXTENSION_CHECK
 checkForBMPExtension(const char *fileName) {
     const char *bmp = ".bmp";
 
