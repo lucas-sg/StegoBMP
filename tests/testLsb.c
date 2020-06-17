@@ -90,7 +90,7 @@ void flipFirstLSBOfAOneBitToZeroTest()
 }
 
 // unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText);
-void lsb1WithAllOnesTest()
+void lsb1WithAllOnesAndSomeBytesWithoutStegoTest()
 {
     printf(RUNNING_TEST, __func__);
     const char bmpFile[9] = {0b00011110, 0b11111110, 0b00011000,
@@ -99,11 +99,11 @@ void lsb1WithAllOnesTest()
     const char cipherText[1] = {0b11111111};
 
     const char *newBmpFile = lsb1(bmpFile, cipherText);
-    for (int i = 0; i < strlen(newBmpFile); i++)
+    for (int i = 8; i >= 0; i--)
     {
-        if (i < 8)
+        if (i <= 8 && i >= 1)
         {
-            assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(cipherText[0], i));
+            assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(cipherText[0], 8 - i));
         }
         else
         {
@@ -111,11 +111,28 @@ void lsb1WithAllOnesTest()
         }
     }
     printf(TEST_PASSED);
-    printf("LSB1 on current bmp file with c = 1^8 has worked as expected\n");
+    printf("LSB1 on current bmp file with c = 1^8 has worked as expected\n\n");
+}
+
+void lsb1WithZerosAndOnesWithAllBytesInStegoTest()
+{
+    printf(RUNNING_TEST, __func__);
+    const char bmpFile[9] = {0b00011111, 0b11111110, 0b00011001,
+                             0b00011000, 0b01010011, 0b11011110,
+                             0b11011111, 0b01011110};
+    const char cipherText[1] = {0b01010101};
+
+    const char *newBmpFile = lsb1(bmpFile, cipherText);
+    for (int i = 7; i >= 0; i--)
+    {
+        assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(cipherText[0], 7 - i));
+    }
+    printf(TEST_PASSED);
+    printf("LSB1 on current bmp file with c = (01)^4 has worked as expected\n\n");
 }
 
 // unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText);
-void lsb1WithAllZerosTest()
+void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
 {
     printf(RUNNING_TEST, __func__);
     const char bmpFile[9] = {0b00011111, 0b11111111, 0b00011001,
@@ -124,11 +141,11 @@ void lsb1WithAllZerosTest()
     const char cipherText[1] = {0b00000000};
 
     const char *newBmpFile = lsb1(bmpFile, cipherText);
-    for (int i = 0; i < strlen(newBmpFile); i++)
+    for (int i = 8; i >= 0; i--)
     {
-        if (i < 8)
+        if (i <= 8 && i >= 1)
         {
-            assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(cipherText[0], i));
+            assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(cipherText[0], 8 - i));
         }
         else
         {
@@ -136,7 +153,7 @@ void lsb1WithAllZerosTest()
         }
     }
     printf(TEST_PASSED);
-    printf("LSB1 on current bmp file with c=0^8 has worked as expected\n");
+    printf("LSB1 on current bmp file with c=0^8 has worked as expected\n\n");
 }
 
 int main()
@@ -150,5 +167,7 @@ int main()
     flipFirstLSBOfAZeroBitToZeroTest();
     flipFirstLSBOfAOneBitToZeroTest();
 
-    lsb1WithAllOnesTest();
+    lsb1WithAllOnesAndSomeBytesWithoutStegoTest();
+    lsb1WithAllZerosAndSomeBytesWithoutStegoTest();
+    lsb1WithZerosAndOnesWithAllBytesInStegoTest();
 }

@@ -34,7 +34,8 @@ unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText)
     size_t cCursor = 0;
     size_t cBitCursor = 0;
     unsigned char *stegoBmp = malloc(bmpFileSize + 1);
-    for (size_t bmpCursor = 0; bmpCursor < strlen(bmpFile);)
+    int bmpCursor = bmpFileSize - 1;
+    while (bmpCursor >= 0)
     {
         if (cBitCursor == 8)
         {
@@ -42,8 +43,10 @@ unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText)
             cBitCursor = 0;
             if (cCursor >= strlen(cipherText))
             {
-                for (int j = bmpCursor; j < strlen(bmpFile); j++)
+                for (int j = bmpCursor; j >= 0; j--)
+                {
                     stegoBmp[j] = bmpFile[j];
+                }
                 stegoBmp[bmpFileSize + 1] = '\0';
                 return stegoBmp;
             }
@@ -55,7 +58,7 @@ unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText)
             return NULL; // handle this
         }
 
-        stegoBmp[bmpCursor++] = newBmpByte;
+        stegoBmp[bmpCursor--] = newBmpByte;
     }
     stegoBmp[bmpFileSize + 1] = '\0';
 
