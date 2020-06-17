@@ -2,3 +2,4 @@
 .idea
 cmake-build-debug
 tests/cmake-build-debug
+tests/cmake-build-default
