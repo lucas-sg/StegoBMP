@@ -89,6 +89,56 @@ void flipFirstLSBOfAOneBitToZeroTest()
     printf("Last bit of 0b00001111 is now 0: 0b00001011\n\n");
 }
 
+// unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText);
+void lsb1WithAllOnesTest()
+{
+    printf(RUNNING_TEST, __func__);
+    const char bmpFile[9] = {0b00011110, 0b11111110, 0b00011000,
+                             0b00011000, 0b01010010, 0b11011110,
+                             0b11011110, 0b01011110, 0b00011110};
+    const char cipherText[1] = {0b11111111};
+
+    const char *newBmpFile = lsb1(bmpFile, cipherText);
+    for (int i = 0; i < strlen(newBmpFile); i++)
+    {
+        if (i < 8)
+        {
+            assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(cipherText[0], i));
+        }
+        else
+        {
+            assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(bmpFile[i], 0));
+        }
+    }
+    printf(TEST_PASSED);
+    printf("LSB1 on current bmp file with c = 1^8 has worked as expected\n");
+}
+
+// unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText);
+void lsb1WithAllZerosTest()
+{
+    printf(RUNNING_TEST, __func__);
+    const char bmpFile[9] = {0b00011111, 0b11111111, 0b00011001,
+                             0b00011001, 0b01010011, 0b11011111,
+                             0b11011111, 0b01011111, 0b00011110};
+    const char cipherText[1] = {0b00000000};
+
+    const char *newBmpFile = lsb1(bmpFile, cipherText);
+    for (int i = 0; i < strlen(newBmpFile); i++)
+    {
+        if (i < 8)
+        {
+            assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(cipherText[0], i));
+        }
+        else
+        {
+            assert(getCurrentBitOfChar(newBmpFile[i], 0) == getCurrentBitOfChar(bmpFile[i], 0));
+        }
+    }
+    printf(TEST_PASSED);
+    printf("LSB1 on current bmp file with c=0^8 has worked as expected\n");
+}
+
 int main()
 {
     byteCursorIsWithingRangeTest();
@@ -99,4 +149,6 @@ int main()
 
     flipFirstLSBOfAZeroBitToZeroTest();
     flipFirstLSBOfAOneBitToZeroTest();
+
+    lsb1WithAllOnesTest();
 }

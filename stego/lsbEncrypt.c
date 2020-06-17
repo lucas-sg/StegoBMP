@@ -40,16 +40,22 @@ unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText)
         {
             cCursor++;
             cBitCursor = 0;
+            if (cCursor >= strlen(cipherText))
+            {
+                for (int j = bmpCursor; j < strlen(bmpFile); j++)
+                    stegoBmp[j] = bmpFile[j];
+                stegoBmp[bmpFileSize + 1] = '\0';
+                return stegoBmp;
+            }
         }
-
-        unsigned char newBmpByte = replaceNthLSB(bmpFile[bmpCursor++], cipherText[cCursor++], cBitCursor, 0);
+        unsigned char newBmpByte = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor], cBitCursor++, 0);
 
         if (newBmpByte == NULL)
         {
             return NULL; // handle this
         }
 
-        stegoBmp[bmpCursor] = newBmpByte;
+        stegoBmp[bmpCursor++] = newBmpByte;
     }
     stegoBmp[bmpFileSize + 1] = '\0';
 
@@ -101,23 +107,15 @@ int isCursorWithinOneByteRange(unsigned int cursor)
  */
 unsigned char replaceNthLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace)
 {
-    printf("Printing cipherText bits\n");
-    printingBits(cipherTextByte);
-    printf("Printing bmp bits\n");
-    printingBits(bmpByte);
-
     // flipping nth bit of bmpByte to 0
     unsigned char bmpWithLSBToZero = flippingNthLSBToZero(bmpByte, bitToReplace);
     // changing nth bit of bmpByte to cipherTextByte[cbCursor]
     unsigned char newBmpByte = (getCurrentBitOfChar(cipherTextByte, cbCursor) << bitToReplace) | bmpWithLSBToZero;
-    printf("printing new bmp bits\n");
-    printingBits(newBmpByte);
-    printf("_______________________\n");
 
     return newBmpByte;
 }
 
-// TODO remove this
+// TODO remove this, for test purposes
 void printingBits(int number)
 {
     unsigned i;
