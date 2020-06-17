@@ -3,12 +3,13 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <stdint.h>
 
-unsigned char *lsb1(const unsigned char *bmpFile, const char *cipherText);
-unsigned char *lsb4(const unsigned char *bmpFile, const char *cipherText);
-unsigned char replaceNthLSB(const unsigned char bmpByte, const char cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace);
-unsigned char flippingNthLSBToZero(const unsigned char bytes, int bitToReplace);
-unsigned char getCurrentBitOfChar(const char cipherTextChar, unsigned int cbCursor);
+uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
+uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
+uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace);
+uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
+uint8_t getCurrentBitOfuint8_t(const uint8_t cipherTextuint8_t, unsigned int cbCursor);
 int isCursorWithinOneByteRange(unsigned int cursor);
 
 #endif
