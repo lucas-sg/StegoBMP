@@ -1,17 +1,11 @@
 #include <stdint.h>
 #include "../stego/lsbEncrypt.h"
-
-uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
-uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
-uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cBitCursor, unsigned int bitToReplace);
-uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
-uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor);
-int isCursorWithinOneByteRange(unsigned int cursor);
+#include "../stego/lsbDecrypt.h"
 
 static char *TEST_PASSED = "Test passed!!\n";
 static char *RUNNING_TEST = "Running test: ";
 
-void byteCursorIswithinRangeTest()
+void byteCursorIsWithinRangeTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
 
@@ -153,9 +147,29 @@ void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
     printf("LSB1 on current bmp file with c=0^8 has worked as expected\n\n");
 }
 
+void lsb1DecryptTest()
+{
+    printf("%s %s \n", RUNNING_TEST, __func__);
+    const uint8_t bmpFile[8] = {0b11111111, 0b00011000,
+                                0b00011001, 0b01010011, 0b11011111,
+                                0b11011110, 0b01011111, 0b00011110};
+
+    const uint8_t cipherText[1] = {0b01011101};
+
+    const uint8_t *extractedCiphertext = lsb1Decrypt(bmpFile, 1, 8);
+
+    for (int i = 7; i >= 0; i--)
+    {
+        assert(getCurrentBitOf(extractedCiphertext[0], i) == getCurrentBitOf(cipherText[0], i));
+    }
+
+    printf("%s ", TEST_PASSED);
+    printf("LSB1 extraction on current bmp file has worked as expected and it is equal to desire cipherText\n\n");
+}
+
 int main()
 {
-    byteCursorIswithinRangeTest();
+    byteCursorIsWithinRangeTest();
     byteCursorIsNotwithinRangeTest();
 
     getCurrentFirstBitOfByteWithValidCiphertextAndValidCursorTest();
@@ -167,4 +181,6 @@ int main()
     lsb1WithAllOnesAndSomeBytesWithoutStegoTest();
     lsb1WithAllZerosAndSomeBytesWithoutStegoTest();
     lsb1WithZerosAndOnesWithAllBytesInStegoTest();
+
+    lsb1DecryptTest();
 }

@@ -1,15 +1,8 @@
+#include "lsbEncrypt.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
-uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
-uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cBitCursor, unsigned int bitToReplace);
-uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
-uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor);
-int isCursorWithinOneByteRange(unsigned int cursor);
-size_t strlen(const char *s);
 
 /* 
 * REMEMBER THAT BMP FILES ARE READ FROM DOWNSIDE-UP AND FROM LEFT TO RIGHT
@@ -21,9 +14,8 @@ size_t strlen(const char *s);
  * This function inserts into the least significant bits of the bmp file, all the
  * bits of the cipherText. It assumes all the validations have already been made.
  * 
- * @dev sizeof(u uint8_t) = 1 byte (8 bits) 
+ * @dev sizeof(uint8_t) = 1 byte (8 bits) 
  * @dev sizeof(int) = 4 bytes (32 bits) 
- * @dev sizeof(pixel) = 1 byte (8 bits)
  * 
  * @param bmpFile: the bmpFile to do the stego-thing (a matrix of ints) 
  * @param cipherText: the cipherText to hide inside the bmpFile
