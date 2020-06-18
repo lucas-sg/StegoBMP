@@ -6,11 +6,12 @@
 
 void testOkRC4();
 
-
+// In order to test the RC4 function, you need to hardcode the some lines in rc4.c
+// You can find the rest of the instructions in rc4.c in calculateKey() and initVectorT()
 void
 testRC4()
 {
-    testOkRC4();
+//    testOkRC4();
 }
 
 void
@@ -21,7 +22,7 @@ testOkRC4()
     uint8_t *encrypted = RC4(msg, key, strlen(msg));
 
     FILE *fptr = fopen("./exampleTP.dat", "wb+");
-    fprintf(fptr, encrypted);
-
-//    printf("[PASSED] %s\n\n", encrypted);
+    fwrite(encrypted, sizeof(uint8_t), strlen(msg), fptr);
+    fclose(fptr);
+    // TODO: Add bitwise assertion
 }

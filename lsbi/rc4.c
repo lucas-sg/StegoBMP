@@ -34,13 +34,14 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, size_t msgSize)
 uint8_t *
 calculateKey(const uint8_t *bmpFile)
 {
-//    uint8_t *key = malloc(sizeof(*key) * KEY_SIZE);
+//    Uncomment the two lines from below and comment the other ones in order to test RC4.
+//    Also follow the instructions in the comment section of initVectorT
+//    uint8_t *key = malloc(sizeof(*key) * (strlen("Clave de 128 bit") + 1));
 //
-//    memcpy(key, bmpFile, KEY_SIZE);
-// TODO: Uncomment the two lines from above and delete the hardcoded version below
-    uint8_t *key = malloc(sizeof(*key) * (strlen("Clave de 128 bit") + 1));
+//    memcpy(key, "Clave de 128 bit", (strlen("Clave de 128 bit") + 1));
+    uint8_t *key = malloc(sizeof(*key) * KEY_SIZE);
 
-    memcpy(key, "Clave de 128 bit", (strlen("Clave de 128 bit") + 1));
+    memcpy(key, bmpFile, KEY_SIZE);
 
     return key;
 }
@@ -79,7 +80,7 @@ initVectorT(const uint8_t *key)
     uint8_t *t = malloc(sizeof(*t) * VECTOR_SIZE);
 
     for (int i = 0; i < VECTOR_SIZE; i++)
-        t[i] = key[i % 16];   // TODO: Remove hardcoded key size and use KEY_SIZE
+        t[i] = key[i % KEY_SIZE];   // Change KEY_SIZE for the actual hardcoded key if you want to test it
 
     return t;
 }
