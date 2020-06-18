@@ -36,9 +36,9 @@ calculateKey(const uint8_t *bmpFile)
 {
 //    Uncomment the two lines from below and comment the other ones in order to test RC4.
 //    Also follow the instructions in the comment section of initVectorT
-//    uint8_t *key = malloc(sizeof(*key) * (strlen("Clave de 128 bit") + 1));
+//    uint8_t *key = malloc(sizeof(*key) * 16);
 //
-//    memcpy(key, "Clave de 128 bit", (strlen("Clave de 128 bit") + 1));
+//    memcpy(key, "Clave de 128 bit", 16);
     uint8_t *key = malloc(sizeof(*key) * KEY_SIZE);
 
     memcpy(key, bmpFile, KEY_SIZE);
