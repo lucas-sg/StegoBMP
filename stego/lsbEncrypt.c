@@ -75,30 +75,39 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         int bmpCursor = bmpFileSize - 1 - currentFirstIndexHop;
         while (bmpCursor >= 0)
         {
-            if (cBitCursor == 8)
+            if (bmpCursor <= (bmpFileSize - 1) && bmpCursor > (bmpFileSize - 7))
             {
-                cCursor++;
-                cBitCursor = 0;
-                if (cCursor >= (cipherTextSize - 1))
-                {
-                    for (int j = bmpCursor; j >= 0; j--)
-                    {
-                        stegoBmp[j] = bmpFile[j];
-                    }
-                    stegoBmp[bmpFileSize + 1] = '\0';
-                    return stegoBmp;
-                }
+                stegoBmp[bmpCursor] = bmpFile[bmpCursor];
+                bmpCursor -= hop;
             }
-            uint8_t newBmpByte = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor], cBitCursor++, 0);
-
-            stegoBmp[bmpCursor] = newBmpByte;
-            bmpCursor -= hop;
+            else
+            {
+                uint8_t newBmpByte;
+                if (cBitCursor == 8)
+                {
+                    cCursor++;
+                    cBitCursor = 0;
+                    if (cCursor >= (cipherTextSize - 1))
+                    {
+                        newBmpByte = replaceNthLSB(bmpFile[bmpCursor], bmpFile[bmpCursor], 0, 0);
+                    }
+                    else
+                    {
+                        newBmpByte = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor], cBitCursor++, 0);
+                    }
+                }
+                else
+                {
+                    newBmpByte = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor], cBitCursor++, 0);
+                }
+                stegoBmp[bmpCursor] = newBmpByte;
+                bmpCursor -= hop;
+            }
         }
         currentFirstIndexHop++;
     }
 
     stegoBmp[bmpFileSize + 1] = '\0';
-
     return stegoBmp;
 }
 
@@ -162,7 +171,6 @@ void printingBits(int number)
     // Reverse loop
     for (i = 1 << 7; i > 0; i >>= 1)
         printf("%u", !!(number & i));
-    printf("\n");
 }
 
 uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace)
