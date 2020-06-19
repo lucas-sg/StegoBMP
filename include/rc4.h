@@ -1,6 +1,9 @@
 #ifndef RC4_H
 #define RC4_H
 
-char *RC4(const char *msg, const char *key);
+#include <stdlib.h>
+#include <stdint.h>
+
+uint8_t *RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize);
 
 #endif

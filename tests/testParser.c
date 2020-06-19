@@ -15,7 +15,8 @@ void testMissingOptionalParam();
 
 
 void
-testParser() {
+testParser()
+{
     printf("\nRunning parser tests:\n\n");
 
     testParsedOk();
@@ -29,7 +30,8 @@ testParser() {
 }
 
 void
-testParsedOk() {
+testParsedOk()
+{
     char *argvEmbed[]   = { "program", "-embed", "-in", "somefilePath", "-p", "somefilePath.bmp", "-out", "somefilePath.bmp", "-steg", "LSB1" };
     char *argvExtract[] = { "program", "-extract", "-in", "somefilePath", "-p", "somefilePath.bmp", "-out", "somefilePath.bmp", "-steg", "LSB1" };
     int argc = 10;
@@ -42,7 +44,8 @@ testParsedOk() {
 }
 
 void
-testMissingParameter() {
+testMissingParameter()
+{
     char *missingInput[]   = { "program", "-embed", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
     char *missingOutput[]  = { "program", "-embed", "-in", "someFilePath", "-p", "someFilePath.bmp", "-steg", "LSB1" };
     char *missingCarrier[] = { "program", "-embed", "-in", "someFilePath", "-out", "someFilePath.bmp", "-steg", "LSB1" };
@@ -59,7 +62,8 @@ testMissingParameter() {
 }
 
 void
-testMissingArgument() {
+testMissingArgument()
+{
     char *missingInput[]   = { "program", "-embed", "-in", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
     char *missingOutput[]  = { "program", "-embed", "-in", "someFilePath", "-p", "someFilePath.bmp", "-out", "-steg", "LSB1" };
     char *missingCarrier[] = { "program", "-embed", "-in", "someFilePath", "-p", "-out", "someFilePath.bmp", "-steg", "LSB1" };
@@ -76,7 +80,8 @@ testMissingArgument() {
 }
 
 void
-testMissingEmbedExtract() {
+testMissingEmbedExtract()
+{
     char *missingBothEmbedAndExtract[] = { "program", "-in", "someFilePath", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
     int argc = 9;
     UserInput *parsedInput = malloc(sizeOfUserInputStruct());
@@ -87,7 +92,8 @@ testMissingEmbedExtract() {
 }
 
 void
-testBothEmbedAndExtract() {
+testBothEmbedAndExtract()
+{
     char *tooManyActions[] = { "program", "-embed", "-extract", "someFilePath", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
     int argc = 10;
     UserInput *parsedInput = malloc(sizeOfUserInputStruct());
@@ -98,7 +104,8 @@ testBothEmbedAndExtract() {
 }
 
 void
-testCheckForBMPExtension() {
+testCheckForBMPExtension()
+{
     char *fileNameOk     = "./images/carriers/big_carrier.bmp";
     char *noExtension    = "./images/carriers/big_carrier";
     char *extensionTypo  = "./images/carriers/big_carrier.bmpp";
@@ -114,7 +121,8 @@ testCheckForBMPExtension() {
 }
 
 void
-testOptionalParamsOk() {
+testOptionalParamsOk()
+{
     char *embedWithOptParams[] = { "program",
                                    "-embed",
                                    "-in", "someFilePath",
@@ -143,7 +151,8 @@ testOptionalParamsOk() {
 }
 
 void
-testMissingOptionalParam() {
+testMissingOptionalParam()
+{
     char *missingEncAlgo[]   = { "program",
                                  "-embed",
                                  "-in", "somefilePath",
