@@ -1,8 +1,14 @@
 CC = gcc
 CFLAGS = -Wall
 
-test: parser.c ./tests/testSuite.c ./tests/testParser.c ./tests/testRC4.c
-	$(CC) -o test parser.c ./tests/testSuite.c ./tests/testParser.c ./tests/testRC4.c $(CFLAGS)
 
-clean:
-	rm -f *.o ./tests/*.o
+# We should fix this makefile
+
+# testsParser: parser.c ./tests/testParser.c ./tests/testSuite.c ./tests/testRC4.c
+# 	$(CC) -o parser parser.c ./tests/testParser.c ./tests/testSuite.c ./tests/testRC4.c $(CFLAGS)
+
+testsLSB: ./stego/lsbEncrypt.c ./tests/testLsb.c
+	$(CC) -o testLSB ./tests/testLsb.c ./stego/lsbEncrypt.c $(CFLAGS)
+
+clean: 
+	rm f *.o ./tests/*.o
