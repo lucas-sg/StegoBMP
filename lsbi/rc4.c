@@ -14,7 +14,7 @@ static size_t VECTOR_SIZE = 256;
 
 
 uint8_t *
-RC4(const uint8_t *msg, const uint8_t *bmpFile, size_t msgSize)
+RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
 {
     uint8_t *key          = calculateKey(bmpFile);
     uint8_t *s            = KSA(key);
@@ -34,11 +34,6 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, size_t msgSize)
 uint8_t *
 calculateKey(const uint8_t *bmpFile)
 {
-//    Uncomment the two lines from below and comment the other ones in order to test RC4.
-//    Also follow the instructions in the comment section of initVectorT
-//    uint8_t *key = malloc(sizeof(*key) * 16);
-//
-//    memcpy(key, "Clave de 128 bit", 16);
     uint8_t *key = malloc(sizeof(*key) * KEY_SIZE);
 
     memcpy(key, bmpFile, KEY_SIZE);
@@ -80,15 +75,15 @@ initVectorT(const uint8_t *key)
     uint8_t *t = malloc(sizeof(*t) * VECTOR_SIZE);
 
     for (int i = 0; i < VECTOR_SIZE; i++)
-        t[i] = key[i % KEY_SIZE];   // Change KEY_SIZE for the actual hardcoded key if you want to test it
+        t[i] = key[i % KEY_SIZE];
 
     return t;
 }
 
 uint8_t *
-PRGA(uint8_t *s, size_t len)
+PRGA(uint8_t *s, const size_t len)
 {
-    uint32_t i = 0, j = 0, k = 0, t = 0;
+    uint32_t i = 0, j = 0, k = 0, t;
     uint8_t *keyStream = malloc(sizeof(*keyStream) * len);
 
     while (k < len)
@@ -104,7 +99,7 @@ PRGA(uint8_t *s, size_t len)
 }
 
 void
-swap(uint8_t *s, uint32_t i, uint32_t j)
+swap(uint8_t *s, const uint32_t i, const uint32_t j)
 {
     uint8_t aux;
     aux  = s[i];
