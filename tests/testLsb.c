@@ -7,6 +7,7 @@ uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsig
 uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
 uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor);
 int isCursorWithinOneByteRange(unsigned int cursor);
+void printingBits(const uint8_t byte);
 
 static char *TEST_PASSED = "Test passed!!\n";
 static char *RUNNING_TEST = "Running test: ";
@@ -153,6 +154,82 @@ void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
     printf("LSB1 on current bmp file with c=0^8 has worked as expected\n\n");
 }
 
+void lsbiFirstSixBytesUntouchedTest()
+{
+    printf("%s %s \n", RUNNING_TEST, __func__);
+
+    const uint8_t bmpFile[19] = {
+        0b00011111,
+        0b11111111,
+        0b00011001,
+        0b00011001,
+        0b01010011,
+        0b11011111,
+        0b11011111,
+        0b01011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111
+    };
+
+    const uint8_t cipherText[1] = {0b00000000};
+
+    const uint8_t *newBmpFile = lsbi(bmpFile, cipherText, 19, 1, 2);
+
+    for (int i = 18 ; i > 12 ; i--) {
+        assert(newBmpFile[i] == bmpFile[i]);
+    }
+    printf("%s ", TEST_PASSED);
+    printf("Last 6 bytes of bmp file are intact (outside of lsbi range)\n\n");
+}
+
+void lsbiExtractionOkTest()
+{
+    printf("%s %s \n", RUNNING_TEST, __func__);
+
+    const uint8_t bmpFile[19] = {
+        0b00011111,
+        0b11111111,
+        0b00011001,
+        0b00011001,
+        0b01010011,
+        0b11011111,
+        0b11011111,
+        0b01011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111,
+        0b00011111
+    };
+
+    const uint8_t cipherText[1] = {0b00000000};
+
+    const uint8_t *newBmpFile = lsbi(bmpFile, cipherText, 19, 1, 2);
+
+    int indexesOfStego[8] = {12,10,8,6,4,2,0,11};
+
+    for (int i = 0 ; i<= 7 ; i++) {
+        assert(newBmpFile[indexesOfStego[i]] != bmpFile[indexesOfStego[i]]);
+    }
+    printf("%s ", TEST_PASSED);
+    printf("Last 6 bytes of bmp file are intact (outside of lsbi range)\n\n");
+}
+
 int main()
 {
     byteCursorIswithinRangeTest();
@@ -167,4 +244,7 @@ int main()
     lsb1WithAllOnesAndSomeBytesWithoutStegoTest();
     lsb1WithAllZerosAndSomeBytesWithoutStegoTest();
     lsb1WithZerosAndOnesWithAllBytesInStegoTest();
+
+    lsbiFirstSixBytesUntouchedTest();
+    lsbiExtractionOkTest();
 }
