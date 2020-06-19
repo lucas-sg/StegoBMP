@@ -12,6 +12,7 @@ uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
 uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cBitCursor, unsigned int bitToReplace);
 uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
 uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor);
+void embedRC4KeyOnBmpFile(uint8_t *bmpFile, const size_t bmpFileSize, const uint8_t *rc4Key);
 int isCursorWithinOneByteRange(unsigned int cursor);
 
 #endif

@@ -52,6 +52,14 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     return stegoBmp;
 }
 
+void embedRC4KeyOnBmpFile(uint8_t *bmpFile, const size_t bmpFileSize, const uint8_t *rc4Key)
+{
+    for (int i = bmpFileSize - 1, j = 0; i > bmpFileSize - 7 && j <= 5; i--, j++)
+    {
+        memcpy(bmpFile + i, rc4Key + j, 1);
+    }
+}
+
 uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize,
               const size_t cipherTextSize, const size_t hop)
 {
@@ -65,6 +73,7 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         int bmpCursor = bmpFileSize - 1 - currentFirstIndexHop;
         while (bmpCursor >= 0)
         {
+            // Keep last 6 bytes as is since in those 6 bytes we hide the rc4 key
             if (bmpCursor <= (bmpFileSize - 1) && bmpCursor > (bmpFileSize - 7))
             {
                 stegoBmp[bmpCursor] = bmpFile[bmpCursor];
@@ -79,7 +88,7 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
                     cBitCursor = 0;
                     if (cCursor >= (cipherTextSize - 1))
                     {
-                        newBmpByte = replaceNthLSB(bmpFile[bmpCursor], bmpFile[bmpCursor], 0, 0);
+                        newBmpByte = bmpFile[bmpCursor];
                     }
                     else
                     {
