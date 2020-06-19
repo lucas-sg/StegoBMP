@@ -1,15 +1,16 @@
 //
 // Created by andres on 6/18/20.
 //
-
+#include <stdarg.h>
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 #include "bmpParser.h"
 
 #define BITS_PER_PIXEL 24
+void freeAll(int num, ...);
 
-ulong bytesNeededForMessage(char* messagePath, STEGO_ALGO method) {
+ulong bytesNeeded(char* messagePath, STEGO_ALGO method) {
     FILE *message;
     if ((message = fopen(messagePath,"r")) == NULL) {
         fprintf(stderr,"Unable to open message file \"%s\"\n", messagePath);
@@ -38,35 +39,52 @@ ulong bytesNeededForMessage(char* messagePath, STEGO_ALGO method) {
     return sizeNeeded;
 }
 
-uint bmpSize(char* bmpPath) {
-    HEADER header;
-    INFO_HEADER infoHeader;
-
+BMP_HEADER * parseBmp(char* bmpPath) {
     FILE *bmp;
 
     if ((bmp = fopen(bmpPath,"r")) == NULL) {
         fprintf(stderr,"Unable to open BMP file \"%s\"\n", bmpPath);
-        return -1;
+        return NULL;
     }
 
-    if(fread(&header, sizeof(HEADER), 1, bmp) != 1) {
+    HEADER* header = malloc(sizeof(HEADER));
+    INFO_HEADER* infoHeader = malloc(sizeof(INFO_HEADER));
+    BMP_HEADER* bmpHeader = malloc(sizeof(BMP_HEADER));
+
+    bmpHeader->header = header;
+    bmpHeader->infoHeader = infoHeader;
+
+    if(fread(header, sizeof(HEADER), 1, bmp) != 1) {
         perror("Error reading HEADER.\n");
-        return -1;
+        freeAll(3, header, infoHeader, bmpHeader);
+        return NULL;
     }
 
-    if(fread(&infoHeader, sizeof(INFO_HEADER), 1, bmp) != 1) {
+    if(fread(infoHeader, sizeof(INFO_HEADER), 1, bmp) != 1) {
         perror("Error reading INFOHEADER.\n");
-        return -1;
+        freeAll(3, header, infoHeader, bmpHeader);
+        return NULL;
     }
 
-    if(infoHeader.bits != BITS_PER_PIXEL) {
-        fprintf(stderr, "Bits per pixel is %d. Expected %d.", infoHeader.bits, BITS_PER_PIXEL);
-        return -1;
+    if(infoHeader->bits != BITS_PER_PIXEL) {
+        fprintf(stderr, "Bits per pixel is %d. Expected %d.", infoHeader->bits, BITS_PER_PIXEL);
+        freeAll(3, header, infoHeader, bmpHeader);
+        return NULL;
     }
 
-    return infoHeader.imageSize;
+    return bmpHeader;
 }
 
 ulong getExtensionSize(char *fileName) {
     return strlen(strrchr(fileName, '.'));
+}
+
+void freeAll(int num, ...) {
+    va_list vaList;
+
+    va_start(vaList, num);
+    for (int i = 0; i < num; i++) {
+        free(va_arg(vaList, void*));
+    }
+    va_end(vaList);
 }

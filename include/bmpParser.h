@@ -7,27 +7,32 @@
 
 #include "parser.h"
 
-typedef struct {
-    unsigned short int type;                 /* Magic identifier            */
-    unsigned int size;                       /* File size in bytes          */
-    unsigned short int reserved1, reserved2;
-    unsigned int offset;                     /* Offset to image data, bytes */
+typedef struct __attribute__ ((packed)) {
+    char type[2];                 /* Magic identifier            */
+    u_int32_t size;                       /* File size in bytes          */
+    u_int16_t reserved1, reserved2;
+    u_int32_t offset;                     /* Offset to image data, bytes */
 } HEADER;
 
-typedef struct {
-    unsigned int size;               /* Header size in bytes      */
-    int width, height;                /* Width and height of image */
-    unsigned short int planes;       /* Number of colour planes   */
-    unsigned short int bits;         /* Bits per pixel            */
-    unsigned int compression;        /* Compression type          */
-    unsigned int imageSize;          /* Image size in bytes       */
-    int xResolution, yResolution;     /* Pixels per meter          */
-    unsigned int nColors;           /* Number of colours         */
-    unsigned int importantColors;   /* Important colours         */
+typedef struct __attribute__ ((packed)) {
+    u_int32_t size;               /* Header size in bytes      */
+    int32_t width, height;                /* Width and height of image */
+    u_int16_t planes;       /* Number of colour planes   */
+    u_int16_t bits;         /* Bits per pixel            */
+    u_int32_t compression;        /* Compression type          */
+    u_int32_t imageSize;          /* Image size in bytes       */
+    u_int32_t xResolution, yResolution;     /* Pixels per meter          */
+    u_int32_t nColors;           /* Number of colours         */
+    u_int32_t importantColors;   /* Important colours         */
 } INFO_HEADER;
+
+typedef struct {
+    HEADER *header;
+    INFO_HEADER *infoHeader;
+} BMP_HEADER;
 
 ulong getExtensionSize(char *fileName);
 ulong bytesNeeded(char* messagePath, STEGO_ALGO method);
-uint bmpSize(char* bmpPath);
+BMP_HEADER* parseBmp(char* bmpPath);
 
 #endif //STEGOBMP_BMPPARSER_H
