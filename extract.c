@@ -1,6 +1,6 @@
 #include "extract.h"
 
-uint8_t *decrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password);
+uint8_t *decrypt(const uint8_t *encryptedBytes, ENCRYPTION encryption, ENC_MODE mode, const char *password);
 
 uint8_t *
 extract(uint8_t *carrierBmp, size_t carrierSize, UserInput userInput)
