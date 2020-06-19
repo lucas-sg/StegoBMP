@@ -52,6 +52,46 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     return stegoBmp;
 }
 
+uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize,
+              const size_t cipherTextSize, const size_t hop)
+{
+    size_t cCursor = 0;
+    size_t cBitCursor = 0;
+    uint8_t *stegoBmp = malloc(bmpFileSize);
+    int currentFirstIndexHop = 0;
+
+    while (currentFirstIndexHop < hop)
+    {
+        int bmpCursor = bmpFileSize - 1 - currentFirstIndexHop;
+        while (bmpCursor >= 0)
+        {
+            if (cBitCursor == 8)
+            {
+                cCursor++;
+                cBitCursor = 0;
+                if (cCursor >= (cipherTextSize - 1))
+                {
+                    for (int j = bmpCursor; j >= 0; j--)
+                    {
+                        stegoBmp[j] = bmpFile[j];
+                    }
+                    stegoBmp[bmpFileSize + 1] = '\0';
+                    return stegoBmp;
+                }
+            }
+            uint8_t newBmpByte = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor], cBitCursor++, 0);
+
+            stegoBmp[bmpCursor] = newBmpByte;
+            bmpCursor -= hop;
+        }
+        currentFirstIndexHop++;
+    }
+
+    stegoBmp[bmpFileSize + 1] = '\0';
+
+    return stegoBmp;
+}
+
 // FIXME, this is kinda broken
 // HANDLE CASE WHERE CIPHER TEXT IS BIGGER TAN BMP FILE --> I THINK THIS SHOULD BE IN ANOTHER PLACE
 uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize)
