@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.13)
+project(StegoBMP)
+set(CMAKE_CXX_STANDARD 14)
+add_executable(main main.c parser.c embed.c include/types.h include/embed.h extract.c include/extract.h)
+include_directories(include)
