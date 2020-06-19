@@ -5,9 +5,9 @@
 
 uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
 uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
-uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace);
+uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cBitCursor, unsigned int bitToReplace);
 uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
-uint8_t getCurrentBitOfuint8_t(const uint8_t cipherTextuint8_t, unsigned int cbCursor);
+uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor);
 int isCursorWithinOneByteRange(unsigned int cursor);
 size_t strlen(const char *s);
 
@@ -101,14 +101,14 @@ int isCursorWithinOneByteRange(unsigned int cursor)
  *
  * @param bmpByte: the current bmp byte (pixel) to replace the LSB
  * @param cipherTextByte: the current ciphertext byte 
- * @param cbCursor: represents the cipher text byte cursor (0 <= cbCursor <= 7)
+ * @param cBitCursor: represents the cipher text byte cursor (0 <= cBitCursor <= 7)
  */
-uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace)
+uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cBitCursor, unsigned int bitToReplace)
 {
     // flipping nth bit of bmpByte to 0
     uint8_t bmpWithLSBToZero = flippingNthLSBToZero(bmpByte, bitToReplace);
-    // changing nth bit of bmpByte to cipherTextByte[cbCursor]
-    uint8_t newBmpByte = (getCurrentBitOfuint8_t(cipherTextByte, cbCursor) << bitToReplace) | bmpWithLSBToZero;
+    // changing nth bit of bmpByte to cipherTextByte[cBitCursor]
+    uint8_t newBmpByte = (getCurrentBitOf(cipherTextByte, cBitCursor) << bitToReplace) | bmpWithLSBToZero;
 
     return newBmpByte;
 }
@@ -131,7 +131,7 @@ uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace)
 /**
  * Bits are count starting from LSB
  */
-uint8_t getCurrentBitOfuint8_t(const uint8_t cipherTextuint8_t, unsigned int cbCursor)
+uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor)
 {
-    return ((cipherTextuint8_t >> cbCursor) & 1);
+    return ((cipherTextuint8_t >> cBitCursor) & 1);
 }

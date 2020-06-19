@@ -3,15 +3,15 @@
 
 uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
 uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize);
-uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cbCursor, unsigned int bitToReplace);
+uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cBitCursor, unsigned int bitToReplace);
 uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
-uint8_t getCurrentBitOfuint8_t(const uint8_t cipherTextuint8_t, unsigned int cbCursor);
+uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor);
 int isCursorWithinOneByteRange(unsigned int cursor);
 
 static char *TEST_PASSED = "Test passed!!\n";
 static char *RUNNING_TEST = "Running test: ";
 
-void byteCursorIsWithingRangeTest()
+void byteCursorIswithinRangeTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
 
@@ -23,7 +23,7 @@ void byteCursorIsWithingRangeTest()
     printf("Cursor %d is whithin the valid range of a byte cursor\n\n", cursor);
 }
 
-void byteCursorIsNotWithingRangeTest()
+void byteCursorIsNotwithinRangeTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
 
@@ -35,35 +35,33 @@ void byteCursorIsNotWithingRangeTest()
     printf("Cursor %d is not whithin the valid range of a byte cursor\n\n", cursor);
 }
 
-// uint8_t getCurrentBitOfuint8_t(const uint8_t cipherTextuint8_t, unsigned int cbCursor);
-void getCurrentBitOfuint8_tWithValidCipherTextAndValidCursorTest()
+void getCurrentFirstBitOfByteWithValidCiphertextAndValidCursorTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
 
-    unsigned int cbCursor = 0;
+    unsigned int cBitCursor = 0;
     const uint8_t cipherTextByte = 0b0100001;
 
-    assert(getCurrentBitOfuint8_t(cipherTextByte, cbCursor) == 0b00000001);
+    assert(getCurrentBitOf(cipherTextByte, cBitCursor) == 0b00000001);
 
     printf("%s ", TEST_PASSED);
     printf("First LSB from cipherTextByte 0b0100001 is 1\n\n");
 }
 
-void getCurrentBitOfuint8_tWithValidCipherTextAndValidCursorTest2()
+void getSecondBitOfByteWithValidCiphertextAndValidCursorTest()
 {
 
     printf("%s %s \n", RUNNING_TEST, __func__);
 
-    unsigned int cbCursor = 1;
+    unsigned int cBitCursor = 1;
     const uint8_t cipherTextByte = 0b0100001;
 
-    assert(getCurrentBitOfuint8_t(cipherTextByte, cbCursor) == 0b00000000);
+    assert(getCurrentBitOf(cipherTextByte, cBitCursor) == 0b00000000);
 
     printf("%s ", TEST_PASSED);
     printf("First LSB from cipherTextByte 0b0100001 is 0\n\n");
 }
 
-// uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
 void flipFirstLSBOfAZeroBitToZeroTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
@@ -90,7 +88,6 @@ void flipFirstLSBOfAOneBitToZeroTest()
     printf("Last bit of 0b00001111 is now 0: 0b00001011\n\n");
 }
 
-// uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText);
 void lsb1WithAllOnesAndSomeBytesWithoutStegoTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
@@ -104,11 +101,11 @@ void lsb1WithAllOnesAndSomeBytesWithoutStegoTest()
     {
         if (i <= 8 && i >= 1)
         {
-            assert(getCurrentBitOfuint8_t(newBmpFile[i], 0) == getCurrentBitOfuint8_t(cipherText[0], 8 - i));
+            assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(cipherText[0], 8 - i));
         }
         else
         {
-            assert(getCurrentBitOfuint8_t(newBmpFile[i], 0) == getCurrentBitOfuint8_t(bmpFile[i], 0));
+            assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(bmpFile[i], 0));
         }
     }
     printf("%s ", TEST_PASSED);
@@ -126,13 +123,12 @@ void lsb1WithZerosAndOnesWithAllBytesInStegoTest()
     const uint8_t *newBmpFile = lsb1(bmpFile, cipherText, 8, 1);
     for (int i = 7; i >= 0; i--)
     {
-        assert(getCurrentBitOfuint8_t(newBmpFile[i], 0) == getCurrentBitOfuint8_t(cipherText[0], 7 - i));
+        assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(cipherText[0], 7 - i));
     }
     printf("%s ", TEST_PASSED);
     printf("LSB1 on current bmp file with c = (01)^4 has worked as expected\n\n");
 }
 
-// uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText);
 void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
@@ -146,11 +142,11 @@ void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
     {
         if (i <= 8 && i >= 1)
         {
-            assert(getCurrentBitOfuint8_t(newBmpFile[i], 0) == getCurrentBitOfuint8_t(cipherText[0], 8 - i));
+            assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(cipherText[0], 8 - i));
         }
         else
         {
-            assert(getCurrentBitOfuint8_t(newBmpFile[i], 0) == getCurrentBitOfuint8_t(bmpFile[i], 0));
+            assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(bmpFile[i], 0));
         }
     }
     printf("%s ", TEST_PASSED);
@@ -159,11 +155,11 @@ void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
 
 int main()
 {
-    byteCursorIsWithingRangeTest();
-    byteCursorIsNotWithingRangeTest();
+    byteCursorIswithinRangeTest();
+    byteCursorIsNotwithinRangeTest();
 
-    getCurrentBitOfuint8_tWithValidCipherTextAndValidCursorTest();
-    getCurrentBitOfuint8_tWithValidCipherTextAndValidCursorTest2();
+    getCurrentFirstBitOfByteWithValidCiphertextAndValidCursorTest();
+    getSecondBitOfByteWithValidCiphertextAndValidCursorTest();
 
     flipFirstLSBOfAZeroBitToZeroTest();
     flipFirstLSBOfAOneBitToZeroTest();
