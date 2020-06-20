@@ -33,10 +33,11 @@ typedef struct
 {
     HEADER *header;
     INFO_HEADER *infoHeader;
-} BMP_HEADER;
+    uint8_t *data;
+} BMP;
 
 ulong getExtensionSize(const char *fileName);
 ulong getBytesNeededToStego(const char *messagePath, STEGO_ALGO method);
-BMP_HEADER *parseBmp(char *bmpPath);
+BMP *parseBmp(char *bmpPath);
 
 #endif //STEGOBMP_BMPPARSER_H
