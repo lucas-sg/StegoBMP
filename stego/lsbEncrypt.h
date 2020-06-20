@@ -1,5 +1,5 @@
-#ifndef LSB1_H
-#define LSB1_H
+#ifndef LSBENCRYPT_H
+#define LSBENCRYPT_H
 
 #include <stdio.h>
 #include <assert.h>
