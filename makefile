@@ -12,5 +12,9 @@ CFLAGS = -Wall
 main: 
 	$(CC) -o main main.c ./stego/lsbEncrypt.c ./stego/lsbDecrypt.c parser.c bmpParser.c extract.c embed.c $(CFLAGS)
 
+# bmpParserTest: 
+# 	$(CC) -o main ./tests/bmpParser.c ./stego/lsbEncrypt.c ./stego/lsbDecrypt.c parser.c bmpParser.c extract.c embed.c $(CFLAGS)
+
+
 clean: 
 	rm f *.o ./tests/*.o
