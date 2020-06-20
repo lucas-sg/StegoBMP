@@ -42,9 +42,10 @@ ulong getBytesNeededToStego(const char *messagePath, STEGO_ALGO method)
     return sizeNeeded;
 }
 
-BMP_HEADER *parseBmp(char *bmpPath, const uint8_t *bmpFile)
+BMP_HEADER *parseBmp(char *bmpPath)
 {
     FILE *bmp;
+
     if ((bmp = fopen(bmpPath, "r")) == NULL)
     {
         fprintf(stderr, "Unable to open BMP file \"%s\"\n", bmpPath);
@@ -55,15 +56,11 @@ BMP_HEADER *parseBmp(char *bmpPath, const uint8_t *bmpFile)
     INFO_HEADER *infoHeader = malloc(sizeof(INFO_HEADER));
     BMP_HEADER *bmpHeader = malloc(sizeof(BMP_HEADER));
 
-    printf("LINEA 57\n");
     bmpHeader->header = header;
-    printf("LINEA 59\n");
     bmpHeader->infoHeader = infoHeader;
-    printf("LINEA 61\n");
 
     if (fread(header, sizeof(HEADER), 1, bmp) != 1)
     {
-        printf("PINCHA 1\n");
         perror("Error reading HEADER.\n");
         freeAll(3, header, infoHeader, bmpHeader);
         return NULL;
@@ -71,7 +68,6 @@ BMP_HEADER *parseBmp(char *bmpPath, const uint8_t *bmpFile)
 
     if (fread(infoHeader, sizeof(INFO_HEADER), 1, bmp) != 1)
     {
-        printf("PINCHA 2\n");
         perror("Error reading INFOHEADER.\n");
         freeAll(3, header, infoHeader, bmpHeader);
         return NULL;
@@ -79,14 +75,10 @@ BMP_HEADER *parseBmp(char *bmpPath, const uint8_t *bmpFile)
 
     if (infoHeader->bits != BITS_PER_PIXEL)
     {
-        printf("PINCHA 3\n");
         fprintf(stderr, "Bits per pixel is %d. Expected %d.", infoHeader->bits, BITS_PER_PIXEL);
         freeAll(3, header, infoHeader, bmpHeader);
         return NULL;
     }
-
-    bmpHeader->imgBytes = malloc(infoHeader->imageSize);
-    memcpy(bmpHeader->imgBytes, bmpFile + (header->offset), infoHeader->imageSize);
 
     return bmpHeader;
 }
