@@ -16,10 +16,10 @@ void testParseSampleImage() {
     assert(header->infoHeader->height == 480);
 }
 
-void testBytesNeededForMessage() {
+void testgetBytesNeededToStegoForMessage() {
     char* path = "../tests/resources/message.txt";
 
-    ulong result = bytesNeeded(path, LSB1);
+    ulong result = getBytesNeededToStego(path, LSB1);
 
     // message.txt is 17 bytes. 4 bytes for size + 17 message + ".txt\0" (5) = 26 bytes to hide
     // LSB1 uses 1 byte per bit to hide. Answer should be 26 * 8 = 208
@@ -28,6 +28,6 @@ void testBytesNeededForMessage() {
 
 int main() {
     testParseSampleImage();
-    testBytesNeededForMessage();
+    testgetBytesNeededToStegoForMessage();
     printf("Tests passed!\n");
 }

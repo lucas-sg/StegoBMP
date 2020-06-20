@@ -1,4 +1,4 @@
-#include "extract.h"
+#include "include/extract.h"
 
 uint8_t *decrypt(const uint8_t *encryptedBytes, ENCRYPTION encryption, ENC_MODE mode, const char *password);
 
