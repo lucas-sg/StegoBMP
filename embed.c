@@ -44,15 +44,15 @@ uint8_t *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t
     printf("msgPath %s. BmpPath %s\n", msgPath, bmpPath);
     ulong bytesNeeded = getBytesNeededToStego(msgPath, LSB1);
     printf("Despues de bytes needed\n");
-    BMP_HEADER *bmpHeader = parseBmp(msgPath);
+    BMP *bmpHeader = parseBmp(bmpPath);
     printf("bytes needed %ld\n", bytesNeeded);
     u_int32_t headerSize = bmpHeader->infoHeader->size;
     printf("Header size %d\n", headerSize);
     u_int32_t imgSize = bmpHeader->infoHeader->imageSize;
-    printf("Img size %d\n", headerSize);
+    printf("Img size %d\n", imgSize);
     u_int32_t offset = bmpHeader->header->offset;
     printf("Offset %d\n", headerSize);
-    uint8_t *bmpFile = carrierBmp + offset;
+    uint8_t *bmpFile = bmpHeader->data + offset;
 
     /**
      * this 19 should be unharcoded, the msg to stego should be of such format (see github issues)

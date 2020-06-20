@@ -27,6 +27,7 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     size_t cBitCursor = 0;
     uint8_t *stegoBmp = malloc(bmpFileSize);
     int bmpCursor = bmpFileSize - 1;
+
     while (bmpCursor >= 0)
     {
         if (cBitCursor == 8)
