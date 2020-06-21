@@ -51,13 +51,13 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     printf("Img size %d\n", imgSize);
     u_int32_t offset = bmpHeader->header->offset;
     printf("Offset %d\n", headerSize);
-    uint8_t *bmpFile = bmpHeader->data + offset;
+    uint8_t *bmpFile = bmpHeader->data;
 
     /**
      * this 19 should be unharcoded, the msg to stego should be of such format (see github issues)
      */
     printf("A punto de hacer lsb1 \n");
-    uint8_t *bmpWithoutHeader = lsb1(bmpFile, msg, imgSize, 19);
+    uint8_t *bmpWithoutHeader = lsb1(bmpFile, msg, imgSize, 102);
 
     uint8_t *fullBmp = malloc(bmpHeader->header->size);
 
@@ -73,7 +73,7 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     output->data = fullBmp;
     output->size = bmpHeader->header->size;
 
-    compareBothBmps(aux, fullBmp, bmpHeader->header->size);
+    // compareBothBmps(aux, fullBmp, bmpHeader->header->size);
 
     free(bmpWithoutHeader);
     return output;
