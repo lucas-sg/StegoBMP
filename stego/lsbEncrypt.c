@@ -36,6 +36,7 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
             cBitCursor = 0;
             if (cCursor >= (cipherTextSize - 1))
             {
+                // printf("YA ESTAMOS TODOS IGUALES %d bmp %d\n", bmpFileSize - bmpCursor, bmpCursor);
                 for (int j = bmpCursor; j >= 0; j--)
                 {
                     stegoBmp[j] = bmpFile[j];

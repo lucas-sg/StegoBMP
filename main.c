@@ -32,13 +32,12 @@ int main(int argc, char *argv[])
     {
         output = embed(carrierBmp, outputFile, parsedInput.inputFileName, msgSize,
                             parsedInput, msg, parsedInput.carrierFileName);
-        printf("A punto de escribir %d\n", output->size);
         fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
     else
     {
-        // OUTPUT_BMP*= extract(carrierBmp, carrierBmpSize, parsedInput);
-        fwrite(output->data, sizeof(uint8_t), msgSize, outputFile);
+        output = extract(parsedInput.inputFileName, carrierBmpSize, parsedInput);
+        fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
 
     closeFiles();

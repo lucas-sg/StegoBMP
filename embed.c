@@ -60,12 +60,18 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     uint8_t *bmpWithoutHeader = lsb1(bmpFile, msg, imgSize, 19);
 
     uint8_t *fullBmp = malloc(bmpHeader->header->size);
-    memcpy(fullBmp, bmpHeader->header, headerSize);
-    memcpy(fullBmp + headerSize + 1, bmpWithoutHeader, imgSize);
+
+    // fix this
+    FILE *bmpFd = fopen(bmpPath, "r");
+    fread(fullBmp, 54, 1, bmpFd);
+
+    memcpy(fullBmp + 55, bmpWithoutHeader, imgSize);
 
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT));
     output->data = fullBmp;
     output->size = bmpHeader->header->size;
+
+    compareBothBmps(bmpFile, fullBmp, bmpHeader->header->size);
 
     return output;
 }
@@ -74,4 +80,32 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
 uint8_t *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password)
 {
     // TODO: Encrypt with OpenSSL API
+}
+
+void compareBothBmps(uint8_t *orig, uint8_t *stegoBmp, size_t size)
+{
+    int iguales = 0;
+    int distintos = 0;
+    int primeros40Iguales = 0;
+    for (int i = 0; i < size; i++)
+    {
+        if (i >= 0 && i <= 39)
+        {
+            if (orig[i] == stegoBmp[i])
+                primeros40Iguales++;
+        }
+        else
+        {
+            if (orig[i] == stegoBmp[i])
+            {
+                iguales++;
+            }
+            else
+            {
+                distintos++;
+            }
+        }
+    }
+    printf("Iguales %d, disitntos %d, primeros40Iguales %d\n", iguales, distintos, primeros40Iguales);
+    printf("Total %d, size: %d\n\n", iguales + distintos + primeros40Iguales, size);
 }
