@@ -3,11 +3,11 @@
 
 uint8_t *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password);
 
-uint8_t *
+OUTPUT_BMP *
 embed(uint8_t *carrierBmp, size_t carrierSize, const char *msgPath, size_t msgSize,
       UserInput userInput, const uint8_t *msg, const char *bmpPath)
 {
-    uint8_t *outputBmp = NULL;
+    OUTPUT_BMP *output = NULL;
 
     uint8_t *msgToEmbed;
 
@@ -24,8 +24,7 @@ embed(uint8_t *carrierBmp, size_t carrierSize, const char *msgPath, size_t msgSi
     {
     case LSB1:
         // TODO: Merge call to LSB1 implementation
-        outputBmp = lsb1Embed(carrierBmp, bmpPath, msgToEmbed, msgPath);
-        break;
+        return lsb1Embed(carrierBmp, bmpPath, msgToEmbed, msgPath);
     case LSB4:
         // TODO: Merge call to LSB4 implementation
         //            outputBmp = lsb4Embed(carrierBmp, msg);
@@ -36,10 +35,10 @@ embed(uint8_t *carrierBmp, size_t carrierSize, const char *msgPath, size_t msgSi
         break;
     }
 
-    return outputBmp;
+    return output;
 }
 
-uint8_t *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath)
+OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath)
 {
     printf("msgPath %s. BmpPath %s\n", msgPath, bmpPath);
     ulong bytesNeeded = getBytesNeededToStego(msgPath, LSB1);
@@ -64,7 +63,11 @@ uint8_t *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t
     memcpy(fullBmp, bmpHeader->header, headerSize);
     memcpy(fullBmp + headerSize + 1, bmpWithoutHeader, imgSize);
 
-    return fullBmp;
+    OUTPUT_BMP *output = malloc(sizeof(OUTPUT));
+    output->data = fullBmp;
+    output->size = bmpHeader->header->size;
+
+    return output;
 }
 // uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize)
 

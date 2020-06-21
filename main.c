@@ -12,7 +12,7 @@ void closeFiles();
 
 static UserInput parsedInput;
 FILE *carrierBmpFile, *msgFile, *outputFile;
-static uint8_t *carrierBmp, *msg, *output;
+static uint8_t *carrierBmp, *msg;
 // TODO: Calculate/read each file size
 static uint32_t carrierBmpSize = 0, msgSize = 0;
 
@@ -27,17 +27,18 @@ int main(int argc, char *argv[])
     }
 
     openFiles(parsedInput, &carrierBmp, &msg);
-
+    OUTPUT_BMP *output;
     if (parsedInput.action == EMBED)
     {
-        output = embed(carrierBmp, carrierBmpSize, parsedInput.inputFileName, msgSize,
-                       parsedInput, msg, parsedInput.carrierFileName);
-        fwrite(output, sizeof(*output), carrierBmpSize, outputFile);
+        output = embed(carrierBmp, outputFile, parsedInput.inputFileName, msgSize,
+                            parsedInput, msg, parsedInput.carrierFileName);
+        printf("A punto de escribir %d\n", output->size);
+        fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
     else
     {
-        output = extract(carrierBmp, carrierBmpSize, parsedInput);
-        fwrite(output, sizeof(*output), msgSize, outputFile);
+        // OUTPUT_BMP*= extract(carrierBmp, carrierBmpSize, parsedInput);
+        fwrite(output->data, sizeof(uint8_t), msgSize, outputFile);
     }
 
     closeFiles();
