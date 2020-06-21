@@ -11,5 +11,6 @@ uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsig
 uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace);
 uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor);
 int isCursorWithinOneByteRange(unsigned int cursor);
+void printingBits(int number);
 
 #endif

@@ -45,7 +45,10 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
                 return stegoBmp;
             }
         }
+        // printingBits(bmpFile[bmpCursor]);
         uint8_t newBmpByte = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor], cBitCursor++, 0);
+        // printingBits(newBmpByte);
+        // printf("\n");
 
         stegoBmp[bmpCursor--] = newBmpByte;
     }

@@ -62,17 +62,20 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     uint8_t *fullBmp = malloc(bmpHeader->header->size);
 
     // fix this
+    uint8_t *aux = malloc(bmpHeader->header->size);
     FILE *bmpFd = fopen(bmpPath, "r");
-    fread(fullBmp, 54, 1, bmpFd);
+    fread(aux, 1, bmpHeader->header->size, bmpFd);
 
-    memcpy(fullBmp + 55, bmpWithoutHeader, imgSize);
+    memcpy(fullBmp, aux, 54);
+    memcpy(fullBmp + 54, bmpWithoutHeader, imgSize);
 
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT));
     output->data = fullBmp;
     output->size = bmpHeader->header->size;
 
-    compareBothBmps(bmpFile, fullBmp, bmpHeader->header->size);
+    compareBothBmps(aux, fullBmp, bmpHeader->header->size);
 
+    free(bmpWithoutHeader);
     return output;
 }
 // uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize)
@@ -87,7 +90,7 @@ void compareBothBmps(uint8_t *orig, uint8_t *stegoBmp, size_t size)
     int iguales = 0;
     int distintos = 0;
     int primeros40Iguales = 0;
-    for (int i = 0; i < size; i++)
+    for (int i = size - 1; i >= size - 145; i--)
     {
         if (i >= 0 && i <= 39)
         {
