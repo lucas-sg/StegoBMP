@@ -96,11 +96,17 @@ parseMandatoryParam(int opt, UserInput *parsedInput) {
     switch (opt) {
         case 'c':
         case 'o':
-            if (checkForBMPExtension(optarg) != BMP_OK) {
+            if (parsedInput->action == EMBED && checkForBMPExtension(optarg) != BMP_OK) {
                 parsedInput->status = NOT_BMP_FILE_ERROR;
                 return;
             }
+            parseFileName(opt, parsedInput);
+            break;
         case 'i':
+            if (parsedInput->action == EXTRACT && checkForBMPExtension(optarg) != BMP_OK) {
+                parsedInput->status = NOT_BMP_FILE_ERROR;
+                return;
+            }
             parseFileName(opt, parsedInput);
             break;
         case 's':
@@ -215,16 +221,17 @@ parseEncryptionMode(UserInput *parsedInput) {
 
 int
 missingMandatoryParam() {
-    int missingInput = flags[EMBD] != 0 && flags[INPUT] == 0;
+    int hasEmbedParams   = flags[INPUT] && flags[OUTPUT] && flags[CARRIER] && flags[STEG];
+    int hasExtractParams = flags[INPUT] && flags[OUTPUT] && flags[STEG];
 
-    return missingInput || flags[OUTPUT] == 0 || flags[CARRIER] == 0 || flags[STEG] == 0;
+    return (flags[EMBD] && !hasEmbedParams) || (flags[EXTR] && !hasExtractParams);
 }
 
 int
 missingOptionalParam() {
-    int onlyAlgo = flags[ALGO] != 0 && (flags[MODE] == 0 || flags[PASS] == 0);
-    int onlyMode = flags[MODE] != 0 && (flags[ALGO] == 0 || flags[PASS] == 0);
-    int onlyPass = flags[PASS] != 0 && (flags[ALGO] == 0 || flags[MODE] == 0);
+    int onlyAlgo = flags[ALGO] && (flags[MODE] == 0 || flags[PASS] == 0);
+    int onlyMode = flags[MODE] && (flags[ALGO] == 0 || flags[PASS] == 0);
+    int onlyPass = flags[PASS] && (flags[ALGO] == 0 || flags[MODE] == 0);
 
     return onlyAlgo || onlyMode || onlyPass;
 }
