@@ -90,18 +90,21 @@ void lsb1WithAllOnesAndSomeBytesWithoutStegoTest()
                                 0b11011110, 0b01011110, 0b00011110};
     const uint8_t cipherText[1] = {0b11111111};
 
-    const uint8_t *newBmpFile = lsb1(bmpFile, cipherText, 9, 1);
-    for (int i = 8; i >= 0; i--)
+    const uint8_t *newBmpFile = lsb1(bmpFile, cipherText, 9, 1, 3);
+
+    const int bitsIndexThatShouldBeEqualToCipherBit[8] = {8, 7, 6, 5, 4, 3, 1, 0};
+    const int bitsThatShouldBeEqualToOrigBmp[1] = {2};
+
+    for (int i = 0; i <= 7; i++)
     {
-        if (i <= 8 && i >= 1)
-        {
-            assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(cipherText[0], 8 - i));
-        }
-        else
-        {
-            assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(bmpFile[i], 0));
-        }
+        assert(getCurrentBitOf(cipherText[0], i) == getCurrentBitOf(newBmpFile[bitsIndexThatShouldBeEqualToCipherBit[i]], 0));
     }
+
+    for (int i = 0; i <= 0; i++)
+    {
+        assert(getCurrentBitOf(bmpFile[bitsThatShouldBeEqualToOrigBmp[i]], 0) == getCurrentBitOf(newBmpFile[bitsThatShouldBeEqualToOrigBmp[i]], 0));
+    }
+
     printf("%s ", TEST_PASSED);
     printf("LSB1 on current bmp file with c = 1^8 has worked as expected\n\n");
 }
@@ -109,15 +112,24 @@ void lsb1WithAllOnesAndSomeBytesWithoutStegoTest()
 void lsb1WithZerosAndOnesWithAllBytesInStegoTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
-    const uint8_t bmpFile[9] = {0b00011111, 0b11111110, 0b00011001,
-                                0b00011000, 0b01010011, 0b11011110,
-                                0b11011111, 0b01011110};
+    const uint8_t bmpFile[9] = {0b00011111, 0b00011111, 0b11111110,
+                                0b00011001, 0b00011000, 0b01010011,
+                                0b11011110, 0b11011111, 0b01011110};
     const uint8_t cipherText[1] = {0b01010101};
 
-    const uint8_t *newBmpFile = lsb1(bmpFile, cipherText, 8, 1);
-    for (int i = 7; i >= 0; i--)
+    const uint8_t *newBmpFile = lsb1(bmpFile, cipherText, 8, 1, 3);
+
+    const int bitsIndexThatShouldBeEqualToCipherBit[8] = {8, 7, 6, 5, 4, 3, 1, 0};
+    const int bitsThatShouldBeEqualToOrigBmp[1] = {2};
+
+    for (int i = 8; i <= 0; i++)
     {
-        assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(cipherText[0], 7 - i));
+        assert(getCurrentBitOf(cipherText[0], i) == getCurrentBitOf(newBmpFile[bitsIndexThatShouldBeEqualToCipherBit[i]], 0));
+    }
+
+    for (int i = 0; i <= 0; i++)
+    {
+        assert(getCurrentBitOf(bmpFile[bitsThatShouldBeEqualToOrigBmp[i]], 0) == getCurrentBitOf(newBmpFile[bitsThatShouldBeEqualToOrigBmp[i]], 0));
     }
     printf("%s ", TEST_PASSED);
     printf("LSB1 on current bmp file with c = (01)^4 has worked as expected\n\n");
@@ -131,7 +143,7 @@ void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
                                 0b11011111, 0b01011111, 0b00011110};
     const uint8_t cipherText[1] = {0b00000000};
 
-    const uint8_t *newBmpFile = lsb1(bmpFile, cipherText, 9, 1);
+    const uint8_t *newBmpFile = lsb1(bmpFile, cipherText, 9, 1, 1);
     for (int i = 8; i >= 0; i--)
     {
         if (i <= 8 && i >= 1)
@@ -147,18 +159,18 @@ void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
     printf("LSB1 on current bmp file with c=0^8 has worked as expected\n\n");
 }
 
-void lsb1DecryptTest()
+void lsb1ExtractTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
-    const uint8_t bmpFile[8] = {0b11111111, 0b00011000,
+    const uint8_t bmpFile[9] = {0b11011111, 0b11111111, 0b00011000,
                                 0b00011001, 0b01010011, 0b11011111,
                                 0b11011110, 0b01011111, 0b00011110};
 
     const uint8_t cipherText[1] = {0b01011101};
 
-    const uint8_t *extractedCiphertext = lsb1Decrypt(bmpFile, 1, 8);
+    const uint8_t *extractedCiphertext = lsb1Extract(bmpFile, 1, 8, 1);
 
-    for (int i = 7; i >= 0; i--)
+    for (int i = 8; i >= 0; i--)
     {
         assert(getCurrentBitOf(extractedCiphertext[0], i) == getCurrentBitOf(cipherText[0], i));
     }
@@ -182,5 +194,5 @@ int main()
     lsb1WithAllZerosAndSomeBytesWithoutStegoTest();
     lsb1WithZerosAndOnesWithAllBytesInStegoTest();
 
-    lsb1DecryptTest();
+    lsb1ExtractTest();
 }

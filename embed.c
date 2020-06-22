@@ -52,12 +52,14 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     u_int32_t offset = bmpHeader->header->offset;
     printf("Offset %d\n", headerSize);
     uint8_t *bmpFile = bmpHeader->data;
+    u_int32_t widthInBytes = bmpHeader->infoHeader->width * 3;
+    printf("Width in pixels %d\n", widthInBytes);
 
     /**
      * this 19 should be unharcoded, the msg to stego should be of such format (see github issues)
      */
     printf("A punto de hacer lsb1 \n");
-    uint8_t *bmpWithoutHeader = lsb1(bmpFile, msg, imgSize, 102);
+    uint8_t *bmpWithoutHeader = lsb1(bmpFile, msg, imgSize, 102, widthInBytes);
 
     uint8_t *fullBmp = malloc(bmpHeader->header->size);
 
@@ -73,8 +75,6 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     output->data = fullBmp;
     output->size = bmpHeader->header->size;
 
-    // compareBothBmps(aux, fullBmp, bmpHeader->header->size);
-
     free(bmpWithoutHeader);
     return output;
 }
@@ -83,32 +83,4 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
 uint8_t *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password)
 {
     // TODO: Encrypt with OpenSSL API
-}
-
-void compareBothBmps(uint8_t *orig, uint8_t *stegoBmp, size_t size)
-{
-    int iguales = 0;
-    int distintos = 0;
-    int primeros40Iguales = 0;
-    for (int i = size - 1; i >= size - 145; i--)
-    {
-        if (i >= 0 && i <= 39)
-        {
-            if (orig[i] == stegoBmp[i])
-                primeros40Iguales++;
-        }
-        else
-        {
-            if (orig[i] == stegoBmp[i])
-            {
-                iguales++;
-            }
-            else
-            {
-                distintos++;
-            }
-        }
-    }
-    printf("Iguales %d, disitntos %d, primeros40Iguales %d\n", iguales, distintos, primeros40Iguales);
-    printf("Total %d, size: %d\n\n", iguales + distintos + primeros40Iguales, size);
 }

@@ -21,12 +21,13 @@
  * @param cipherText: the cipherText to hide inside the bmpFile
  */
 
-uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize)
+uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize, const size_t widthInBytes)
 {
     size_t cCursor = 0;
     size_t cBitCursor = 0;
     uint8_t *stegoBmp = malloc(bmpFileSize);
     int bmpCursor = bmpFileSize - 1;
+    size_t rowCursor = widthInBytes - 1;
 
     while (bmpCursor >= 0)
     {
@@ -34,24 +35,33 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         {
             cCursor++;
             cBitCursor = 0;
-            if (cCursor >= (cipherTextSize - 1))
-            {
-                // printf("YA ESTAMOS TODOS IGUALES %d bmp %d\n", bmpFileSize - bmpCursor, bmpCursor);
-                for (int j = bmpCursor; j >= 0; j--)
-                {
-                    stegoBmp[j] = bmpFile[j];
-                }
-                stegoBmp[bmpFileSize + 1] = '\0';
-                return stegoBmp;
-            }
         }
-        // printingBits(bmpFile[bmpCursor]);
-        uint8_t newBmpByte = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor], cBitCursor++, 0);
-        // printingBits(newBmpByte);
-        // printf("\n");
 
-        stegoBmp[bmpCursor--] = newBmpByte;
+        uint8_t newBmpByte;
+
+        if (cCursor >= cipherTextSize)
+        {
+            newBmpByte = bmpFile[bmpCursor - rowCursor];
+        }
+        else
+        {
+            newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor++, 0);
+        }
+
+        stegoBmp[bmpCursor - rowCursor] = newBmpByte;
+
+        if (rowCursor == 0)
+        {
+            rowCursor = widthInBytes - 1;
+            bmpCursor -= widthInBytes;
+        }
+        else
+        {
+
+            rowCursor--;
+        }
     }
+
     stegoBmp[bmpFileSize + 1] = '\0';
 
     return stegoBmp;
