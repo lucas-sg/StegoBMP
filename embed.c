@@ -40,9 +40,10 @@ embed(uint8_t *carrierBmp, size_t carrierSize, const char *msgPath, size_t msgSi
 
 OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath)
 {
-    // for (int i = 0; i < 102; i++)
-    //     printingBits(msg[i]);
-
+    printf("El mensajito\n");
+    for (int i = 0; i < 102; i++)
+        printingBits(msg[i]);
+    printf("\n\n");
     // printf("msgPath %s. BmpPath %s\n", msgPath, bmpPath);
     ulong bytesNeeded = getBytesNeededToStego(msgPath, LSB1);
     // printf("Despues de bytes needed\n");

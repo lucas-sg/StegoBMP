@@ -23,18 +23,22 @@
 
 uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize, const size_t widthInBytes)
 {
+    printf("En lsb1 %d\n", cipherTextSize);
     size_t cCursor = 0;
-    size_t cBitCursor = 0;
+    int cBitCursor = 7;
     uint8_t *stegoBmp = malloc(bmpFileSize);
     int bmpCursor = bmpFileSize - 1;
     size_t rowCursor = widthInBytes - 1;
     int i = 0;
     while (bmpCursor >= 0)
     {
-        if (cBitCursor == 8)
+        if (cBitCursor == -1)
         {
+            // printf("\ncCursor %d ", cCursor);
             cCursor++;
-            cBitCursor = 0;
+            // printf(" cCursor %d\n", cCursor);
+            // printingBits(cipherText[cCursor]);
+            cBitCursor = 7;
         }
 
         uint8_t newBmpByte;
@@ -49,14 +53,14 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
             // printf("%d\n", bmpCursor - rowCursor);
             // printingBits(cipherText[cCursor]);
             // printf(" Bit a printear: %d. Anterior: ", cBitCursor);
+            // printingBits(cipherText[cCursor]);
 
-            newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor++, 0);
+            newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor--, 0);
+            // printf("\n%d --> cBitCursor%d\n", newBmpByte & 0x1, cBitCursor);
             printf("%d", newBmpByte & 0x1);
-
             // printingBits(newBmpByte);
             // printf(".Actual : ");
             // printf("\n\n");
-
         }
 
         stegoBmp[bmpCursor - rowCursor] = newBmpByte;
@@ -140,7 +144,7 @@ void printingBits(int number)
     for (i = 1 << 7; i > 0; i >>= 1)
         printf("%u", !!(number & i));
 
-    printf("\n");
+    // printf("\n");
 }
 
 uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace)
