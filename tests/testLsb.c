@@ -1,6 +1,8 @@
 #include <stdint.h>
+#include <stdio.h>
 #include "../stego/lsbEncrypt.h"
 #include "../stego/lsbDecrypt.h"
+#include "../include/bmpParser.h"
 
 static char *TEST_PASSED = "Test passed!!\n";
 static char *RUNNING_TEST = "Running test: ";
@@ -159,6 +161,41 @@ void lsb1WithAllZerosAndSomeBytesWithoutStegoTest()
     printf("LSB1 on current bmp file with c=0^8 has worked as expected\n\n");
 }
 
+void lsb1EmbedFullTest()
+{
+    BMP *bmpHeader = parseBmp("/home/tomas/workspace/StegoBMP/tests/resources/sample.bmp");
+    FILE *msgFile = fopen("/home/tomas/workspace/StegoBMP/tests/resources/newMessage.txt", "r");
+    uint8_t *msg = malloc(102);
+    read(msg, sizeof(*msg), 102, msgFile);
+
+    for (int i = 0 ; i < 102 ; i++) {
+        printingBits(msg[i]);
+    }
+
+    const uint8_t *newBmpFile = lsb1(bmpHeader->data, msg, bmpHeader->infoHeader->imageSize, 102, bmpHeader->infoHeader->width * 3);
+    int a = 0;
+    for (int i = bmpHeader->infoHeader->imageSize - 1, j = 0; i >= 0; i--)
+    {
+        printf("EN EL FOR i= %d. j=%d\n", i, j);
+        printingBits(newBmpFile[i]);
+        printingBits(msg[j]);
+        if (a == 8)
+        {
+            a = 0;
+            j++;
+        }
+        if (i <= bmpHeader->infoHeader->imageSize - 1 && i >= bmpHeader->infoHeader->imageSize - 988)
+        {
+            assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(msg[j], a));
+            a++;
+        }
+        else
+        {
+            assert(getCurrentBitOf(newBmpFile[i], 0) == getCurrentBitOf(bmpHeader->data[i], 0));
+        }
+    }
+}
+
 void lsb1ExtractTest()
 {
     printf("%s %s \n", RUNNING_TEST, __func__);
@@ -166,33 +203,31 @@ void lsb1ExtractTest()
                                 0b00011001, 0b01010011, 0b11011111,
                                 0b11011110, 0b01011111, 0b00011110};
 
-    const uint8_t cipherText[1] = {0b01011101};
+    const uint8_t cipherText[1] = {0b01011111};
 
-    const uint8_t *extractedCiphertext = lsb1Extract(bmpFile, 1, 8, 1);
+    const uint8_t *extractedCiphertext = lsb1Extract(bmpFile, 1, 9, 3);
 
-    for (int i = 8; i >= 0; i--)
-    {
-        assert(getCurrentBitOf(extractedCiphertext[0], i) == getCurrentBitOf(cipherText[0], i));
-    }
+    assert(extractedCiphertext[0] == cipherText[0]);
 
-    printf("%s ", TEST_PASSED);
+    printf("%s", TEST_PASSED);
     printf("LSB1 extraction on current bmp file has worked as expected and it is equal to desire cipherText\n\n");
 }
-
 int main()
 {
-    byteCursorIsWithinRangeTest();
-    byteCursorIsNotwithinRangeTest();
+    // byteCursorIsWithinRangeTest();
+    // byteCursorIsNotwithinRangeTest();
 
-    getCurrentFirstBitOfByteWithValidCiphertextAndValidCursorTest();
-    getSecondBitOfByteWithValidCiphertextAndValidCursorTest();
+    // getCurrentFirstBitOfByteWithValidCiphertextAndValidCursorTest();
+    // getSecondBitOfByteWithValidCiphertextAndValidCursorTest();
 
-    flipFirstLSBOfAZeroBitToZeroTest();
-    flipFirstLSBOfAOneBitToZeroTest();
+    // flipFirstLSBOfAZeroBitToZeroTest();
+    // flipFirstLSBOfAOneBitToZeroTest();
 
-    lsb1WithAllOnesAndSomeBytesWithoutStegoTest();
-    lsb1WithAllZerosAndSomeBytesWithoutStegoTest();
-    lsb1WithZerosAndOnesWithAllBytesInStegoTest();
+    // lsb1WithAllOnesAndSomeBytesWithoutStegoTest();
+    // lsb1WithAllZerosAndSomeBytesWithoutStegoTest();
+    // lsb1WithZerosAndOnesWithAllBytesInStegoTest();
 
-    lsb1ExtractTest();
+    // lsb1ExtractTest();
+
+    lsb1EmbedFullTest();
 }

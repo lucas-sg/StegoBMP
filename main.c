@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     if (parsedInput.action == EMBED)
     {
         output = embed(carrierBmp, outputFile, parsedInput.inputFileName, msgSize,
-                            parsedInput, msg, parsedInput.carrierFileName);
+                       parsedInput, msg, parsedInput.carrierFileName);
         fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
     else

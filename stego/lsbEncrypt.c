@@ -28,7 +28,7 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     uint8_t *stegoBmp = malloc(bmpFileSize);
     int bmpCursor = bmpFileSize - 1;
     size_t rowCursor = widthInBytes - 1;
-
+    int i = 0;
     while (bmpCursor >= 0)
     {
         if (cBitCursor == 8)
@@ -38,14 +38,25 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         }
 
         uint8_t newBmpByte;
-
+        // printf("cCursor %d\n", cCursor);
         if (cCursor >= cipherTextSize)
         {
             newBmpByte = bmpFile[bmpCursor - rowCursor];
         }
         else
         {
+            i++;
+            // printf("%d\n", bmpCursor - rowCursor);
+            // printingBits(cipherText[cCursor]);
+            // printf(" Bit a printear: %d. Anterior: ", cBitCursor);
+
             newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor++, 0);
+            printf("%d", newBmpByte & 0x1);
+
+            // printingBits(newBmpByte);
+            // printf(".Actual : ");
+            // printf("\n\n");
+
         }
 
         stegoBmp[bmpCursor - rowCursor] = newBmpByte;
@@ -57,12 +68,11 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         }
         else
         {
-
             rowCursor--;
         }
     }
 
-    stegoBmp[bmpFileSize + 1] = '\0';
+    printf("\n");
 
     return stegoBmp;
 }
@@ -125,8 +135,11 @@ void printingBits(int number)
 {
     unsigned i;
     // Reverse loop
+    // printf("%u", !!(number & (1 << 0)));
+
     for (i = 1 << 7; i > 0; i >>= 1)
         printf("%u", !!(number & i));
+
     printf("\n");
 }
 

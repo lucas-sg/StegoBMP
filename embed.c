@@ -40,25 +40,28 @@ embed(uint8_t *carrierBmp, size_t carrierSize, const char *msgPath, size_t msgSi
 
 OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath)
 {
-    printf("msgPath %s. BmpPath %s\n", msgPath, bmpPath);
+    // for (int i = 0; i < 102; i++)
+    //     printingBits(msg[i]);
+
+    // printf("msgPath %s. BmpPath %s\n", msgPath, bmpPath);
     ulong bytesNeeded = getBytesNeededToStego(msgPath, LSB1);
-    printf("Despues de bytes needed\n");
+    // printf("Despues de bytes needed\n");
     BMP *bmpHeader = parseBmp(bmpPath);
-    printf("bytes needed %ld\n", bytesNeeded);
+    // printf("bytes needed %ld\n", bytesNeeded);
     u_int32_t headerSize = bmpHeader->infoHeader->size;
-    printf("Header size %d\n", headerSize);
+    // printf("Header size %d\n", headerSize);
     u_int32_t imgSize = bmpHeader->infoHeader->imageSize;
-    printf("Img size %d\n", imgSize);
+    // printf("Img size %d\n", imgSize);
     u_int32_t offset = bmpHeader->header->offset;
-    printf("Offset %d\n", headerSize);
+    // printf("Offset %d\n", headerSize);
     uint8_t *bmpFile = bmpHeader->data;
     u_int32_t widthInBytes = bmpHeader->infoHeader->width * 3;
-    printf("Width in pixels %d\n", widthInBytes);
+    // printf("Width in pixels %d\n", widthInBytes);
 
     /**
      * this 19 should be unharcoded, the msg to stego should be of such format (see github issues)
      */
-    printf("A punto de hacer lsb1 \n");
+    // printf("A punto de hacer lsb1 \n");
     uint8_t *bmpWithoutHeader = lsb1(bmpFile, msg, imgSize, 102, widthInBytes);
 
     uint8_t *fullBmp = malloc(bmpHeader->header->size);
