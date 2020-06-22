@@ -39,6 +39,8 @@ int main(int argc, char *argv[])
     {
         output = extract(parsedInput.inputFileName, carrierBmpSize, parsedInput);
         printf("\n\n");
+        for (int i = 0; i < 102; i++)
+            printf("%X", output->data[i]);
         // printf("%d ", output->data[i]);
         // printingBits(output->data[i]);
         printf("\n");
@@ -61,7 +63,8 @@ void openFiles()
     msg = malloc(sizeof(*msg) * msgSize);
 
     fread(carrierBmp, sizeof(*carrierBmp), carrierBmpSize, carrierBmpFile);
-    fread(msg, sizeof(*msg), msgSize, msgFile);
+    printf("\nMESSAGE SIZE%d\n", msgSize);
+    fread(msg, sizeof(*msg), 102, msgFile);
 }
 
 void closeFiles()
