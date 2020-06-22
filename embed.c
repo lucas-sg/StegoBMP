@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <openssl/evp.h>
 #include "embed.h"
 
 uint8_t *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password);
