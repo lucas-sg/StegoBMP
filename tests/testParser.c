@@ -5,10 +5,10 @@
 
 
 void testParsedOk();
-void testMissingEmbedExtract();
 void testMissingParameter();
 void testMissingArgument();
-void testBothEmbedAndExtract();
+void testMissingEmbedAndExtract();
+void testTooManyActions();
 void testCheckForBMPExtension();
 void testOptionalParamsOk();
 void testMissingOptionalParam();
@@ -20,10 +20,10 @@ testParser()
     printf("\nRunning parser tests:\n\n");
 
     testParsedOk();
-    testMissingEmbedExtract();
+    testMissingArgument();
     testMissingParameter();
-//    testMissingArgument();    // TODO: Check why this test is broken on MacOS
-    testBothEmbedAndExtract();
+    testMissingEmbedAndExtract();
+    testTooManyActions();
     testCheckForBMPExtension();
     testOptionalParamsOk();
     testMissingOptionalParam();
@@ -33,31 +33,13 @@ void
 testParsedOk()
 {
     char *argvEmbed[]   = { "program", "-embed", "-in", "somefilePath", "-p", "somefilePath.bmp", "-out", "somefilePath.bmp", "-steg", "LSB1" };
-    char *argvExtract[] = { "program", "-extract", "-in", "somefilePath", "-p", "somefilePath.bmp", "-out", "somefilePath.bmp", "-steg", "LSB1" };
-    int argc = 10;
+    char *argvExtract[] = { "program", "-extract", "-in", "somefilePath.bmp", "-out", "somefilePath", "-steg", "LSB1" };
+    int argcEmbed = 10, argcExtract = 8;
     UserInput *parsedInput = malloc(sizeOfUserInputStruct());
 
-    assert(parseInput(argc, argvEmbed, parsedInput) == PARSED_OK);
-    assert(parseInput(argc, argvExtract, parsedInput) == PARSED_OK);
+    assert(parseInput(argcEmbed, argvEmbed, parsedInput) == PARSED_OK);
+    assert(parseInput(argcExtract, argvExtract, parsedInput) == PARSED_OK);
     printf("[PASSED] Parsing embedding and extraction\n\n");
-    free(parsedInput);
-}
-
-void
-testMissingParameter()
-{
-    char *missingInput[]   = { "program", "-embed", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
-    char *missingOutput[]  = { "program", "-embed", "-in", "someFilePath", "-p", "someFilePath.bmp", "-steg", "LSB1" };
-    char *missingCarrier[] = { "program", "-embed", "-in", "someFilePath", "-out", "someFilePath.bmp", "-steg", "LSB1" };
-    char *missingSteg[]    = { "program", "-embed", "-in", "someFilePath", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp"};
-    int argc = 8;
-    UserInput *parsedInput = malloc(sizeOfUserInputStruct());
-
-    assert(parseInput(argc, missingInput, parsedInput)   == MISSING_PARAMETER);
-    assert(parseInput(argc, missingOutput, parsedInput)  == MISSING_PARAMETER);
-    assert(parseInput(argc, missingCarrier, parsedInput) == MISSING_PARAMETER);
-    assert(parseInput(argc, missingSteg, parsedInput)    == MISSING_PARAMETER);
-    printf("[PASSED] Will fail when missing mandatory parameters\n\n");
     free(parsedInput);
 }
 
@@ -80,19 +62,37 @@ testMissingArgument()
 }
 
 void
-testMissingEmbedExtract()
+testMissingParameter()
 {
-    char *missingBothEmbedAndExtract[] = { "program", "-in", "someFilePath", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
+    char *missingInput[]   = { "program", "-embed", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
+    char *missingOutput[]  = { "program", "-embed", "-in", "someFilePath", "-p", "someFilePath.bmp", "-steg", "LSB1" };
+    char *missingCarrier[] = { "program", "-embed", "-in", "someFilePath", "-out", "someFilePath.bmp", "-steg", "LSB1" };
+    char *missingSteg[]    = { "program", "-embed", "-in", "someFilePath", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp"};
+    int argc = 8;
+    UserInput *parsedInput = malloc(sizeOfUserInputStruct());
+
+    assert(parseInput(argc, missingInput, parsedInput)   == MISSING_PARAMETER);
+    assert(parseInput(argc, missingOutput, parsedInput)  == MISSING_PARAMETER);
+    assert(parseInput(argc, missingCarrier, parsedInput) == MISSING_PARAMETER);
+    assert(parseInput(argc, missingSteg, parsedInput)    == MISSING_PARAMETER);
+    printf("[PASSED] Will fail when missing mandatory parameters\n\n");
+    free(parsedInput);
+}
+
+void
+testMissingEmbedAndExtract()
+{
+    char *missingEmbedAndExtract[] = { "program", "-in", "someFilePath", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
     int argc = 9;
     UserInput *parsedInput = malloc(sizeOfUserInputStruct());
 
-    assert(parseInput(argc, missingBothEmbedAndExtract, parsedInput) == MISSING_ACTION);
+    assert(parseInput(argc, missingEmbedAndExtract, parsedInput) == MISSING_ACTION);
     printf("[PASSED] Will fail when there is no action (embed or extract) present\n\n");
     free(parsedInput);
 }
 
 void
-testBothEmbedAndExtract()
+testTooManyActions()
 {
     char *tooManyActions[] = { "program", "-embed", "-extract", "someFilePath", "-p", "someFilePath.bmp", "-out", "someFilePath.bmp", "-steg", "LSB1" };
     int argc = 10;
@@ -134,8 +134,8 @@ testOptionalParamsOk()
                                    "-pass", "dummyPassword" };
     char *extractWithOptParams[] = { "program",
                                      "-extract",
-                                     "-p", "someFilePath.bmp",
-                                     "-out", "someFilePath.bmp",
+                                     "-in", "someFilePath.bmp",
+                                     "-out", "someFilePath",
                                      "-steg", "LSB1",
                                      "-a", "aes128",
                                      "-m", "cbc",

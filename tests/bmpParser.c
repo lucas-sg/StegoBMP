@@ -9,25 +9,25 @@
 void testParseSampleImage() {
     char* path = "../tests/resources/sample.bmp";
 
-    BMP_HEADER * header = parseBmp(path);
+    BMP * bmp = parseBmp(path);
 
-    assert(header->infoHeader->bits == 24);
-    assert(header->infoHeader->width == 640);
-    assert(header->infoHeader->height == 480);
+    assert(bmp->infoHeader->bits == 24);
+    assert(bmp->infoHeader->width == 640);
+    assert(bmp->infoHeader->height == 480);
 }
 
-void testBytesNeededForMessage() {
+void testgetBytesNeededToStegoForMessage() {
     char* path = "../tests/resources/message.txt";
 
-    ulong result = bytesNeeded(path, LSB1);
+    ulong result = getBytesNeededToStego(path, LSB1);
 
-    // message.txt is 17 bytes. 4 bytes for size + 17 message + ".txt\0" (5) = 26 bytes to hide
+    // message.txt is 19 bytes. 4 bytes for size + 17 message + ".txt\0" (5) = 26 bytes to hide
     // LSB1 uses 1 byte per bit to hide. Answer should be 26 * 8 = 208
     assert(result == 208);
 }
 
 int main() {
     testParseSampleImage();
-    testBytesNeededForMessage();
+    testgetBytesNeededToStegoForMessage();
     printf("Tests passed!\n");
 }

@@ -2,7 +2,7 @@
 #define TYPES_H
 
 typedef enum PARSE_RET {
-    PARSED_OK,
+    PARSED_OK = 0,
     EMBED_AND_EXTRACT_ERROR,
     MISSING_PARAMETER,
     MISSING_ARGUMENT,

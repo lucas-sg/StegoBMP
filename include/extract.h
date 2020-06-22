@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "embed.h"
 #include "types.h"
 
-uint8_t *extract(uint8_t *carrierBmp, size_t carrierSize, UserInput userInput);
+OUTPUT_BMP *
+extract(char *bmpPath, size_t bmpSize, UserInput userInput);
 
 #endif

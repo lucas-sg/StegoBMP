@@ -27,6 +27,7 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     size_t cBitCursor = 0;
     uint8_t *stegoBmp = malloc(bmpFileSize);
     int bmpCursor = bmpFileSize - 1;
+
     while (bmpCursor >= 0)
     {
         if (cBitCursor == 8)
@@ -35,6 +36,7 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
             cBitCursor = 0;
             if (cCursor >= (cipherTextSize - 1))
             {
+                // printf("YA ESTAMOS TODOS IGUALES %d bmp %d\n", bmpFileSize - bmpCursor, bmpCursor);
                 for (int j = bmpCursor; j >= 0; j--)
                 {
                     stegoBmp[j] = bmpFile[j];
@@ -43,7 +45,10 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
                 return stegoBmp;
             }
         }
+        // printingBits(bmpFile[bmpCursor]);
         uint8_t newBmpByte = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor], cBitCursor++, 0);
+        // printingBits(newBmpByte);
+        // printf("\n");
 
         stegoBmp[bmpCursor--] = newBmpByte;
     }
