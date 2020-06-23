@@ -115,7 +115,7 @@ OUTPUT_BMP *lsbiEmbed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     /**
      * this size should be unharcoded, the msg to stego should be of such format (see github issues)
      */
-    uint8_t *bmpWithoutHeader = lsbi(bmpFile, msg, imgSize, 102, 2, widthInBytes, "RC4KEY");
+    uint8_t *bmpWithoutHeader = lsbi(bmpFile, msg, imgSize, 102, 256, widthInBytes, "RC4KEY");
     printf("SALIO DE LSBI\n");
     uint8_t *fullBmp = malloc(bmpHeader->header->size);
 
