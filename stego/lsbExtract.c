@@ -1,5 +1,5 @@
-#include "lsbDecrypt.h"
-#include "lsbEncrypt.h"
+#include "lsbExtract.h"
+#include "lsbEmbed.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>

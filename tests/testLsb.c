@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "../stego/lsbEncrypt.h"
-#include "../stego/lsbDecrypt.h"
+#include "../stego/lsbEmbed.h"
+#include "../stego/lsbExtract.h"
 #include "../include/bmpParser.h"
 
 static char *TEST_PASSED = "Test passed!!\n";

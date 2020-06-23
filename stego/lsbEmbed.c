@@ -1,4 +1,4 @@
-#include "lsbEncrypt.h"
+#include "lsbEmbed.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -65,11 +65,12 @@ uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
 
 // FIXME, this is kinda broken
 // HANDLE CASE WHERE CIPHER TEXT IS BIGGER TAN BMP FILE --> I THINK THIS SHOULD BE IN ANOTHER PLACE
-uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize)
+uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize, const size_t widthInBytes)
 {
     size_t cCursor = 0;
     size_t cBitCursor = 0;
     uint8_t *stegoBmp = malloc(bmpFileSize);
+    int rowCursor = widthInBytes - 1;
     for (size_t bmpCursor = 0; bmpCursor < bmpFileSize - 1;)
     {
         if (cBitCursor == 8)
@@ -79,17 +80,23 @@ uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         }
 
         // handle error here, bmpFile's length could be lower than cipherText's length and viceversa
-        uint8_t lsb1 = replaceNthLSB(bmpFile[bmpCursor], cipherText[cCursor++], cBitCursor, 0);
+        uint8_t lsb1 = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor++], cBitCursor, 0);
         uint8_t lsb2 = replaceNthLSB(lsb1, cipherText[cCursor++], cBitCursor, 1);
         uint8_t lsb3 = replaceNthLSB(lsb2, cipherText[cCursor++], cBitCursor, 2);
         uint8_t lsb4 = replaceNthLSB(lsb3, cipherText[cCursor++], cBitCursor, 3);
 
         stegoBmp[bmpCursor] = lsb4;
 
-        bmpCursor += 4;
+        if (rowCursor == 0)
+        {
+            rowCursor = widthInBytes - 1;
+            bmpCursor -= widthInBytes;
+        }
+        else
+        {
+            rowCursor--;
+        }
     }
-    stegoBmp[bmpFileSize + 1] = '\0';
-
     return stegoBmp;
 }
 
