@@ -120,7 +120,7 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     int noMorehops = 0;
     int i = 0, j = 0;
     int bmpCursor = bmpFileSize - 1;
-    // Copy rc4Key
+    // // Copy rc4Key
     for (int i = 0; i <= 5; i++)
     {
         stegoBmp[bmpCursor - rowCursor] = rc4Key[i];
@@ -159,6 +159,7 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
             }
             else
             {
+                printf("%d", bmpCursor - rowCursor);
                 i++;
                 newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor--, 0);
             }
@@ -177,6 +178,15 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         }
         currentFirstIndexHop++;
     }
+    rowCursor = widthInBytes - 1;
+    printf("%d\n", i);
+    // for (int i = 0; i <= 5; i++)
+    // {
+    //     printf("%c", stegoBmp[bmpFileSize - 1 - rowCursor]);
+    //     rowCursor--;
+    // }
+    // printf("\n");
+
     return stegoBmp;
 }
 

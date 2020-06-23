@@ -57,6 +57,7 @@ OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize)
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
     output->data = decryption;
     output->size = 102;
+    printf("VOY A RETORNAR\n");
     return output;
 }
 

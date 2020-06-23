@@ -37,6 +37,13 @@ int main(int argc, char *argv[])
     else
     {
         output = extract(parsedInput.inputFileName, carrierBmpSize, parsedInput);
+        printf("TAMOS ACAAAAAA %d\n", output->size);
+        for (int i = 0 ; i < 102 ;i++) {
+            printf("%c", output->data[i]);
+        }
+        printf("\n");
+        printf("TAMOS ACA2\n");
+
         fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
 
