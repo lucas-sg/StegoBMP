@@ -17,20 +17,13 @@ uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_
     uint8_t *stego = malloc(stegoSize + 1);
     int rowCursor = widthInBytes - 1;
     int stegoCount = stegoSize - 1;
-    int i = 0;
     while (bmpIndex >= 0 && stegoCount >= 0)
     {
         uint8_t auxByte;
         while (stegoBitCursor >= 0 && bmpIndex >= 0 && stegoCount >= 0)
         {
-            // printf("%d\n", bmpIndex - rowCursor);
-            // printingBits(bmpFile[bmpIndex - rowCursor]);
-
             uint8_t bitToReplace = getCurrentBitOf(bmpFile[bmpIndex - rowCursor], 0);
-            printf("%d", bitToReplace & 0x1);
-            // printingBits(bitToReplace);
             auxByte = replaceNthLSB(auxByte, bitToReplace, 0, stegoBitCursor--);
-            i++;
             rowCursor--;
             if (rowCursor == -1)
             {

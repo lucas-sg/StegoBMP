@@ -32,26 +32,12 @@ extract(char *bmpPath, size_t bmpSize, UserInput userInput)
 
 OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize)
 {
-    printf("LEVANTANDO EL ARCHIVITO\n");
     BMP *bmpHeader = parseBmp(bmpPath);
     uint8_t *bmp = malloc(bmpHeader->header->size);
-    printf("antes de extraer\n");
     uint8_t *decryption = lsb1Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
-    printf("\n");
-    // printf("Despues de extraer\n");
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
     output->data = decryption;
     output->size = 102;
-
-    // for (int i = 0; i < 102; i++)
-    // {
-        // printf("%d | ", i);
-        // printingBits(decryption[i]);
-        // printf("%c ", decryption[i]);
-    // }
-
-    // printf("VA A RETORNAR\n");
-
     return output;
 }
 
