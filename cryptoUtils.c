@@ -7,6 +7,7 @@ const EVP_CIPHER *determineModeForAES256(ENC_MODE mode);
 const EVP_CIPHER *determineModeForDES(ENC_MODE mode);
 const uint8_t *generateKey(const char *password);
 const uint8_t *generateIV(const char *password);
+void failedTo(const char *errorMsg);
 
 
 const EVP_CIPHER *
@@ -111,4 +112,47 @@ const uint8_t *
 generateIV(const char *password)
 {
     // TODO: Implementar como se obtiene la key en base a la password
+}
+
+void
+failedToCreateCipherContext()
+{
+    failedTo("create cipher context");
+}
+
+void
+failedToInitCipherContext()
+{
+    failedTo("initialize cipher context");
+}
+
+void
+failedToEncrypt()
+{
+    failedTo("encrypt the provided plaintext");
+}
+
+void
+failedToFinalizeEnc()
+{
+    failedTo("finalize the encryption process");
+}
+
+void
+failedToDecrypt()
+{
+    failedTo("decrypt the provided ciphertext");
+}
+
+void
+failedToFinalizeDec()
+{
+    failedTo("finalize the encryption process");
+}
+
+void
+failedTo(const char *errorMsg)
+{
+    fprintf(stderr, "Failed to %s\n", errorMsg);
+    exit(0);
 }
