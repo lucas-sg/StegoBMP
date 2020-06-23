@@ -45,7 +45,6 @@ uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_
 
 uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
 {
-    printf("ENTRO\n");
     int bmpIndex = bmpSize - 1;
     int stegoIndex = 0;
     int stegoBitCursor = 7;
@@ -57,7 +56,6 @@ uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_
         uint8_t auxByte;
         while (stegoBitCursor >= 0 && bmpIndex >= 0 && stegoCount >= 0)
         {
-            printf("%d\n", bmpIndex - rowCursor);
             // FIRST LSB
             uint8_t firstBitToReplace = getCurrentBitOf(bmpFile[bmpIndex - rowCursor], 0);
             auxByte = replaceNthLSB(auxByte, firstBitToReplace, 0, stegoBitCursor--);
@@ -70,8 +68,6 @@ uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_
             // FOURTH LSB
             uint8_t fourthBitToReplace = getCurrentBitOf(bmpFile[bmpIndex - rowCursor], 3);
             auxByte = replaceNthLSB(auxByte, fourthBitToReplace, 0, stegoBitCursor--);
-
-            // printingBits(auxByte);
 
             rowCursor--;
             if (rowCursor == -1)
@@ -88,6 +84,5 @@ uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_
     }
 
     stego[stegoSize] = 0;
-    printf("RETORNA\n");
     return stego;
 }

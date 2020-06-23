@@ -88,7 +88,6 @@ uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         }
         else
         {
-            printf("%d\n", bmpCursor - rowCursor);
             newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor--, 0);
             newBmpByte = replaceNthLSB(newBmpByte, cipherText[cCursor], cBitCursor--, 1);
             newBmpByte = replaceNthLSB(newBmpByte, cipherText[cCursor], cBitCursor--, 2);
@@ -107,6 +106,65 @@ uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
             rowCursor--;
         }
     }
+    return stegoBmp;
+}
+
+uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize,
+              const size_t cipherTextSize, const size_t hop, const size_t widthInBytes, const uint8_t *rc4Key)
+{
+    printf("En lsbi\n");
+    size_t cCursor = 0;
+    size_t cBitCursor = 7;
+    uint8_t *stegoBmp = malloc(bmpFileSize + 6);
+    int currentFirstIndexHop = 0;
+    int rowCursor = widthInBytes - 1;
+
+    int bmpCursor = bmpFileSize - 1;
+    // Copy rc4Key
+    for (int i = 0; i < 5; i++)
+    {
+        stegoBmp[bmpCursor - rowCursor] = rc4Key[i];
+        rowCursor--;
+    }
+
+    while (currentFirstIndexHop < hop)
+    {
+        while (bmpCursor >= 0)
+        {
+            uint8_t newBmpByte;
+            if (cBitCursor == 8)
+            {
+                cCursor++;
+                cBitCursor = 7;
+                if (cCursor >= cipherTextSize)
+                {
+                    newBmpByte = bmpFile[bmpCursor - rowCursor];
+                }
+                else
+                {
+                    newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor--, 0);
+                }
+            }
+            else
+            {
+                newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor--, 0);
+            }
+
+            stegoBmp[bmpCursor] = newBmpByte;
+
+            if (rowCursor <= 0)
+            {
+                rowCursor = widthInBytes - 1;
+                bmpCursor -= widthInBytes;
+            }
+            else
+            {
+                rowCursor -= hop;
+            }
+        }
+        currentFirstIndexHop++;
+    }
+
     return stegoBmp;
 }
 
