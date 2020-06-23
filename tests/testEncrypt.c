@@ -1,6 +1,6 @@
 #include "include/testEncrypt.h"
-#include "../include/encrypt.h"
-#include "../include/decrypt.h"
+#include "../include/embed.h"
+#include "../include/extract.h"
 #include <stdio.h>
 #include <string.h>
 

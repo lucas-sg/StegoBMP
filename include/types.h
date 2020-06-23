@@ -1,6 +1,9 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <stdint.h>
+#include <stddef.h>
+
 typedef enum PARSE_RET {
     PARSED_OK,
     EMBED_AND_EXTRACT_ERROR,
