@@ -232,6 +232,108 @@ void inputSequenceTest() {
     assert(strcmp((char*) buffer + 4, (char*) message) == 0);
 }
 
+void lsb1EmbedNBytesTest() {
+    uint8_t bytesToEmbed[2] = {1, 255};
+
+    uint8_t *dst = calloc(0, 16);
+    // Assign 8 1s at the beginning.
+    dst[0] = 255;
+
+    lsb1EmbedBytes(bytesToEmbed, dst, 2);
+
+    // First byte was 255 so it should have only the last bit set to 0.
+    assert(dst[0] == 254);
+    // Remaining bytes were all 0.
+    for(int i = 1; i < 7; i++ ){
+        assert(dst[i] == 0);
+    }
+    assert(dst[7] == 1);
+    for(int i = 8; i < 16; i++ ){
+        assert(dst[i] == 1);
+    }
+
+    free(dst);
+}
+
+void lsb4EmbedNBytesTest() {
+    uint8_t bytesToEmbed[2] = {0x01, 0xFF};
+
+    uint8_t *dst = calloc(0, 4);
+    // Assign 8 1s at the beginning.
+    dst[0] = 255;
+
+    lsb4EmbedBytes(bytesToEmbed, dst, 2);
+
+    // First byte was 255 so it should have only the first 4 bits set to 1.
+    assert(dst[0] == 0b11110000);
+
+    // Second byte was 0 so it should have the last bit set to 1.
+    assert(dst[1] == 1);
+
+    // Last 2 bytes were 0 so they should have the last 4 bits set to 1.
+    assert(dst[2] == 0x0F);
+    assert(dst[3] == 0x0F);
+
+    free(dst);
+}
+
+void lsb1ExtractNBytesTest() {
+    uint8_t src[8] = {0, 0, 0, 0, 7, 7, 0, 0};
+    uint8_t dst;
+
+    lsb1ExtractBytes(src, &dst, 1);
+
+    assert(dst == 0b00001100);
+}
+
+void lsb4ExtractNBytesTest() {
+    uint8_t src[2] = {0xFE, 0x73};
+    uint8_t dst;
+
+    lsb4ExtractBytes(src, &dst, 1);
+
+    assert(dst == 0xE3);
+}
+
+void lsbiEmbedTest()
+{
+    uint8_t dst[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    const uint8_t byte = 0xF0;
+
+    lsbiEmbedBytes(&byte, 1, dst, 8, 2);
+
+    for(int i = 0; i < 8; i++) {
+        if(i%2 == 0) {
+            assert(dst[i] == 1);
+        } else {
+            assert(dst[i] == 0);
+        }
+    }
+}
+
+void lsb1EmbedAndExtractTest() {
+    uint8_t byte = 0b10011100;
+    uint8_t *carrier = malloc(8);
+
+    lsb1EmbedBytes(&byte, carrier, 1);
+
+    uint8_t result;
+    lsb1ExtractBytes(carrier, &result, 1);
+
+    assert(result == byte);
+}
+
+void lsb4EmbedAndExtractTest() {
+    uint8_t byte = 0b10011101;
+    uint8_t *carrier = malloc(2);
+
+    lsb4EmbedBytes(&byte, carrier, 1);
+
+    uint8_t result;
+    lsb4ExtractBytes(carrier, &result, 1);
+
+    assert(result == byte);
+}
 
 int main()
 {
@@ -252,5 +354,13 @@ int main()
 
     //lsb1EmbedFullTest();
 
+    lsb1EmbedNBytesTest();
+    lsb4EmbedNBytesTest();
+    lsbiEmbedTest();
+    lsb1ExtractNBytesTest();
+    lsb4ExtractNBytesTest();
+
+    lsb1EmbedAndExtractTest();
+    lsb4EmbedAndExtractTest();
     inputSequenceTest();
 }

@@ -1,5 +1,6 @@
 #include "../include/lsbExtract.h"
 #include "../include/lsbEmbed.h"
+#include "rc4.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -11,6 +12,46 @@ unsigned int extractDecimalFromBinary(uint8_t binary);
 /**
  * Keep in mind these functions could be abstracted a lot
  */
+
+// Extract N bytes from dst
+void lsb1ExtractBytes(const uint8_t* src, uint8_t* dst, size_t size) {
+    for (int i = 0; i < size; i++) {
+        uint8_t byte = 0;
+
+        for (uint8_t j = 0; j < 7; j++) {
+            uint8_t sourceByte = src[i*8 + j] & 1;
+            byte |= (sourceByte & 1) << (7 - j);
+        }
+        dst[i] = byte;
+    }
+}
+
+void lsb4ExtractBytes(const uint8_t* source, uint8_t* dst, size_t N) {
+    for (int i = 0; i < N; i++) {
+        uint8_t byte = 0;
+
+        uint8_t firstSourceByte = source[i*8] & 0x0F;
+        uint8_t secondSourceByte = source[i*8 + 1] & 0x0F;
+
+        byte |= firstSourceByte << 4;
+        byte |= secondSourceByte;
+
+        dst[i] = byte;
+    }
+}
+
+void lsbiExtractBytes(const uint8_t* source, size_t sourceSize, uint8_t* dst) {
+
+}
+
+void lsbiPostExtract(const uint8_t* source, uint8_t* dst, size_t N) {
+    int hop = source[0];
+    uint8_t* decryptedSrc = RC4()
+
+}
+
+
+
 
 uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
 {
