@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
-#include "parser.h"
-#include "embed.h"
-#include "extract.h"
-
+#include "include/parser.h"
+#include "include/embed.h"
+#include "include/extract.h"
 
 void openFiles();
 void closeFiles();
@@ -13,61 +14,61 @@ void getFileExtensionFrom(const char* fileName, char *fileExtension);
 
 static UserInput parsedInput;
 FILE *carrierBmpFile, *msgFile, *outputFile;
-static uint8_t *carrierBmp, *msg, *output;
-// TODO: Calculate/read each file size
-static uint32_t carrierBmpSize = 0, msgSize = 0;
-
 
 int main(int argc, char *argv[])
 {
-    size_t maxFileExtensionLen = 16;    // TODO: Handle this if the file extension is bigger (should be a rare case)
-    size_t maxFileNameLen      = 64;    // TODO: Handle this if the file name is bigger (should be a rare case)
-    char *fileExtension        = calloc(maxFileExtensionLen, sizeof(*fileExtension));
-    char *fileName             = calloc(maxFileNameLen + maxFileExtensionLen, sizeof(*fileName));
+    MESSAGE *msg;
+    BMP *carrierBmp;
+    OUTPUT_BMP *output;
+    PARSE_RET ret = parseInput(argc, argv, &parsedInput);
 
-    if (parseInput(argc, argv, &parsedInput) != PARSED_OK)
+    if (ret != PARSED_OK)
     {
         // TODO: Print some error code and exit
+        printf("ERROR %d\n", ret);
         return EXIT_FAILURE;
     }
 
-    openFiles(parsedInput, &carrierBmp, &msg);
-
     if (parsedInput.action == EMBED)
     {
-        getFileExtensionFrom(parsedInput.outputFileName, fileExtension);
-        output     = embed(carrierBmp, carrierBmpSize, msg, msgSize, fileExtension, parsedInput);
-        outputFile = fopen(parsedInput.outputFileName, "w+");
-        fwrite(output, sizeof(*output), carrierBmpSize, outputFile);
+        if ((msg = parseMessage(parsedInput.inputFileName)) == NULL)
+            return EXIT_FAILURE;
+
+        if ((carrierBmp = parseBmp(parsedInput.carrierFileName)) == NULL)
+            return EXIT_FAILURE;
+
+        if ((output = embed(parsedInput, carrierBmp, msg)) == NULL)
+            return EXIT_FAILURE;
+
+        fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
     else
     {
-        output     = extract(carrierBmp, carrierBmpSize, fileExtension, parsedInput);
-        strcpy(fileName, parsedInput.outputFileName);
-        strcat(fileName, fileExtension);
-        outputFile = fopen(fileName, "w+");
-        fwrite(output, sizeof(*output), msgSize, outputFile);
+        output = extract(parsedInput.inputFileName, carrierBmpSize, parsedInput);
+        if ((output = extract(parsedInput, carrierBmp, msg)) == NULL)
+            return EXIT_FAILURE;
+
+        fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
 
-    closeFiles();
+     closeFiles();
 
     return EXIT_SUCCESS;
 }
 
-void
-openFiles()
-{
-    carrierBmpFile = fopen(parsedInput.carrierFileName, "r+");
-    msgFile        = fopen(parsedInput.inputFileName, "r");
-    carrierBmp     = malloc(sizeof(*carrierBmp) * carrierBmpSize);
-    msg            = malloc(sizeof(*msg) * msgSize);
+//void openFiles()
+//{
+//    carrierBmpFile = fopen(parsedInput.carrierFileName, "r+");
+//    msgFile = fopen(parsedInput.inputFileName, "r");
+//    outputFile = fopen(parsedInput.outputFileName, "w+");
+//    carrierBmp = malloc(sizeof(*carrierBmp) * carrierBmpSize);
+//    msg = malloc(sizeof(*msg) * msgSize);
+//
+//    fread(carrierBmp, sizeof(*carrierBmp), carrierBmpSize, carrierBmpFile);
+//    fread(msg, sizeof(*msg), 102, msgFile); // FIX THIS
+//}
 
-    fread(carrierBmp, sizeof(*carrierBmp), carrierBmpSize, carrierBmpFile);
-    fread(msg,        sizeof(*msg),        msgSize, msgFile);
-}
-
-void
-closeFiles()
+void closeFiles()
 {
     fclose(carrierBmpFile);
     fclose(msgFile);

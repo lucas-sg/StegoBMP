@@ -1,11 +1,13 @@
 #include "extract.h"
 #include "cryptoUtils.h"
-#include "stego/lsbDecrypt.h"
 #include <string.h>
 
+OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize);
+OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize);
+OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize);
 
-uint8_t *
-extract(uint8_t *carrierBmp, size_t carrierSize, char *fileExtension, UserInput userInput)
+OUTPUT_BMP *
+extract(char *bmpPath, size_t bmpSize, UserInput userInput)
 {
     uint8_t *embeddedData, *plaintext, *originalMsg;
     size_t embeddedSize, originalMsgSize;
@@ -41,9 +43,44 @@ extract(uint8_t *carrierBmp, size_t carrierSize, char *fileExtension, UserInput 
     memcpy(&originalMsgSize, plaintext, 4);
     originalMsg = malloc(sizeof(*originalMsg) * originalMsgSize);
     memcpy(originalMsg, plaintext + 4, originalMsgSize);
-    strcpy(fileExtension, (char *)(plaintext + 4 + originalMsgSize));
+    // TODO: Fix this file extension thing
+    // strcpy(fileExtension, (char *)(plaintext + 4 + originalMsgSize));
 
     return originalMsg;
+}
+
+
+OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize)
+{
+    BMP *bmpHeader = parseBmp(bmpPath);
+    uint8_t *bmp = malloc(bmpHeader->header->size);
+    uint8_t *decryption = lsb1Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
+    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
+    output->data = decryption;
+    output->size = 102;
+    return output;
+}
+
+OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize)
+{
+    BMP *bmpHeader = parseBmp(bmpPath);
+    uint8_t *bmp = malloc(bmpHeader->header->size);
+    uint8_t *decryption = lsb4Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
+    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
+    output->data = decryption;
+    output->size = 102;
+    return output;
+}
+
+OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize)
+{
+    BMP *bmpHeader = parseBmp(bmpPath);
+    uint8_t *bmp = malloc(bmpHeader->header->size);
+    uint8_t *decryption = lsbiExtract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
+    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
+    output->data = decryption;
+    output->size = 102;
+    return output;
 }
 
 int
