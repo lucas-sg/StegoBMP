@@ -138,3 +138,20 @@ uint8_t *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const
 {
     // TODO: Encrypt with OpenSSL API
 }
+
+size_t
+buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer)
+{
+    // First 4 bytes for size
+    ((int32_t *) inputSequenceBuffer)[0] = (int) size;
+    size_t cursor = 4;
+
+    memcpy(inputSequenceBuffer + cursor, data, size);
+    cursor += size;
+
+    sprintf((char*) inputSequenceBuffer + cursor, "%s", fileExtension);
+    cursor += strlen(fileExtension) + 1;
+
+    // Total file size minus first 4 bytes used for file size :)
+    return cursor;
+}

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include "../include/embed.h"
 #include "../include/lsbEmbed.h"
 #include "../include/lsbExtract.h"
 #include "../include/bmpParser.h"
@@ -213,6 +214,25 @@ void lsb1ExtractTest()
     printf("%s", TEST_PASSED);
     printf("LSB1 extraction on current bmp file has worked as expected and it is equal to desire cipherText\n\n");
 }
+
+void inputSequenceTest() {
+    char* messagePath = "../tests/resources/message.txt";
+    FILE* fp = fopen(messagePath, "r");
+
+    uint8_t *message = malloc(100);
+    fread(message, 18, 1, fp);
+
+    size_t len = strlen((char*) message);
+
+    uint8_t *buffer = malloc(100);
+    size_t result = buildInputSequence(message, len, ".txt", buffer);
+
+    assert(result == 4 + len + 5);
+    strcat((char*) message, ".txt");
+    assert(strcmp((char*) buffer + 4, (char*) message) == 0);
+}
+
+
 int main()
 {
     // byteCursorIsWithinRangeTest();
@@ -230,5 +250,7 @@ int main()
 
     // lsb1ExtractTest();
 
-    lsb1EmbedFullTest();
+    //lsb1EmbedFullTest();
+
+    inputSequenceTest();
 }
