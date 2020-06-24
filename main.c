@@ -21,7 +21,7 @@ static uint32_t carrierBmpSize = 0, msgSize = 0;
 int main(int argc, char *argv[])
 {
     size_t maxFileExtensionLen = 16;    // TODO: Handle this if the file extension is bigger (should be a rare case)
-    size_t maxFileNameLen      = 64;
+    size_t maxFileNameLen      = 64;    // TODO: Handle this if the file name is bigger (should be a rare case)
     char *fileExtension        = calloc(maxFileExtensionLen, sizeof(*fileExtension));
     char *fileName             = calloc(maxFileNameLen + maxFileExtensionLen, sizeof(*fileName));
 
@@ -42,8 +42,10 @@ int main(int argc, char *argv[])
     }
     else
     {
-        output = extract(carrierBmp, carrierBmpSize, fileExtension, parsedInput);
-        outputFile = fopen(strcat(), );
+        output     = extract(carrierBmp, carrierBmpSize, fileExtension, parsedInput);
+        strcpy(fileName, parsedInput.outputFileName);
+        strcat(fileName, fileExtension);
+        outputFile = fopen(fileName, "w+");
         fwrite(output, sizeof(*output), msgSize, outputFile);
     }
 
@@ -79,6 +81,6 @@ getFileExtensionFrom(const char* fileName, char *fileExtension)
 
     for (i = 0; fileName[i] != '.'; i++);
 
-    for (int j = 0; i < strlen(fileName); i++, j++)
+    for (int j = 0; i < (int)strlen(fileName); i++, j++)
         fileExtension[0] = fileName[i];
 }

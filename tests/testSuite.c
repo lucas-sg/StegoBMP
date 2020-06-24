@@ -5,7 +5,7 @@
 int
 main(int argc, char *argv[])
 {
-    testEncrypt();
+    testEncryptDecrypt();
     testParser();
     testRC4();
 }

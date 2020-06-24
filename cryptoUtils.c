@@ -1,5 +1,5 @@
 #include "cryptoUtils.h"
-
+#include <string.h>
 
 const EVP_CIPHER *determineModeForAES128(ENC_MODE mode);
 const EVP_CIPHER *determineModeForAES192(ENC_MODE mode);
@@ -44,6 +44,8 @@ determineModeForAES128(ENC_MODE mode)
         default:
             break;
     }
+
+    return NULL;
 }
 
 const EVP_CIPHER *
@@ -62,6 +64,8 @@ determineModeForAES192(ENC_MODE mode)
         default:
             break;
     }
+
+    return NULL;
 }
 
 const EVP_CIPHER *
@@ -80,6 +84,8 @@ determineModeForAES256(ENC_MODE mode)
         default:
             break;
     }
+
+    return NULL;
 }
 
 const EVP_CIPHER *
@@ -98,18 +104,27 @@ determineModeForDES(ENC_MODE mode)
         default:
             break;
     }
+
+    return NULL;
 }
 
-const uint8_t *
-generateKey(const char *password)
+size_t
+determineKeyLength(ENCRYPTION encryption)
 {
-    // TODO: Implementar como se obtiene la key en base a la password
-}
-
-const uint8_t *
-generateIV(const char *password)
-{
-    // TODO: Implementar como se obtiene la key en base a la password
+    switch (encryption)
+    {
+        case AES_128:
+            return 16;
+        case AES_192:
+            return 24;
+        case AES_256:
+            return 32;
+        case DES:
+            return 8;
+        case NONE:
+        default:
+            return 0;
+    }
 }
 
 void

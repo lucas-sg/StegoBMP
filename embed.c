@@ -1,6 +1,7 @@
 #include "embed.h"
 #include "cryptoUtils.h"
 #include "stego/lsbEncrypt.h"
+#include <string.h>
 
 
 size_t buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer);
@@ -47,16 +48,16 @@ embed(uint8_t *carrierBmp, size_t carrierLen, const uint8_t *plaintext, size_t p
 }
 
 int
-encrypt(const uint8_t *plaintext, int ptextLen, uint8_t *ciphertext, ENCRYPTION encryption, ENC_MODE mode, const char *password)
+encrypt(const uint8_t *plaintext, int ptextLen, uint8_t *ciphertext, ENCRYPTION encryption, ENC_MODE mode,
+        const uint8_t *password)
 {
     EVP_CIPHER_CTX *ctx;
     int auxLen, ciphertextLen;
-//    const uint8_t *key = generateKey(password);
-//    const uint8_t *iv  = generateIV(password);
-// TODO: Delete the hardcoded key and IV and replace them for the real generator
-    const uint8_t *key = (uint8_t *)"01234567890123456789012345678901";
-    const uint8_t *iv  = (uint8_t *)"0123456789012345";
     const EVP_CIPHER *cipher = determineCipherAndMode(encryption, mode);
+    size_t keyLen = determineKeyLength(encryption);
+    uint8_t *key  = malloc(keyLen);
+    uint8_t *iv   = malloc(keyLen);
+    EVP_BytesToKey(cipher, EVP_sha256(), NULL, password, (int)strlen((char *)password), 1, key, iv);
 
     if (!(ctx = EVP_CIPHER_CTX_new()))
         failedToCreateCipherContext();

@@ -63,7 +63,7 @@ struct UserInput {
     STEGO_ALGO stegoAlgorithm;
     ENCRYPTION encryption;
     ENC_MODE mode;
-    char *password;
+    uint8_t *password;
     PARSE_RET status;
 };
 typedef struct UserInput UserInput;

@@ -1,12 +1,11 @@
-#ifndef CRYPTO_UTILS_H
+#ifndef CRYPTO_UTILS_Hextension
 #define CRYPTO_UTILS_H
 
 #include <openssl/evp.h>
 #include "types.h"
 
 const EVP_CIPHER *determineCipherAndMode(ENCRYPTION encryption, ENC_MODE mode);
-const uint8_t *generateKey(const char *password);
-const uint8_t *generateIV(const char *password);
+size_t determineKeyLength(ENCRYPTION encryption);
 void failedToCreateCipherContext();
 void failedToInitCipherContext();
 void failedToEncrypt();
