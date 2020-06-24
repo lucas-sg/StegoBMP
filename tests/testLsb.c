@@ -198,23 +198,6 @@ void lsb1EmbedFullTest()
     }
 }
 
-void lsb1ExtractTest()
-{
-    printf("%s %s \n", RUNNING_TEST, __func__);
-    const uint8_t bmpFile[9] = {0b11011111, 0b11111111, 0b00011000,
-                                0b00011001, 0b01010011, 0b11011111,
-                                0b11011110, 0b01011111, 0b00011110};
-
-    const uint8_t cipherText[1] = {0b01011111};
-
-    const uint8_t *extractedCiphertext = lsb1Extract(bmpFile, 1, 3);
-
-    assert(extractedCiphertext[0] == cipherText[0]);
-
-    printf("%s", TEST_PASSED);
-    printf("LSB1 extraction on current bmp file has worked as expected and it is equal to desire cipherText\n\n");
-}
-
 void inputSequenceTest() {
     char* messagePath = "../tests/resources/message.txt";
     FILE* fp = fopen(messagePath, "r");
@@ -259,15 +242,6 @@ void extractStegoSizeFromLittleEndianTest()
     printf("Extracted stego size from [0xDE, 0x42, 0x00, 0x00] is NOT 17118\n\n");
 }
 
-void lsb1ExtractTest()
-{
-    printf("%s %s \n", RUNNING_TEST, __func__);
-
-    const int withInBytes = 6;
-
-    printf("%s", TEST_PASSED);
-}
-
 int main()
 {
     byteCursorIsWithinRangeTest();
@@ -281,10 +255,6 @@ int main()
 
     extractStegoSizeFromBigEndianTest();
     extractStegoSizeFromLittleEndianTest();
-
-    lsb1ExtractTest();
-    lsb4ExtractTest();
-    lsbiExtractTest();
 
     // FIX ALL OF THESE TESTS
     // lsb1WithAllOnesAndSomeBytesWithoutStegoTest();
