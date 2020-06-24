@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
-project(StegoBMP)
+project(StegoBMPTests)
 set(CMAKE_CXX_STANDARD 14)
+include_directories(include)
 add_executable(test testSuite.c testParser.c ../parser.c testRC4.c ../lsbi/rc4.c)
+add_executable(testLsb testLsb.c ../embed.c ../lsbi/rc4.c)
 target_include_directories(test PRIVATE include ../include)
