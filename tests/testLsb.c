@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "../stego/lsbEmbed.h"
-#include "../stego/lsbExtract.h"
+#include "../include/lsbEmbed.h"
+#include "../include/lsbExtract.h"
 #include "../include/bmpParser.h"
 
 static char *TEST_PASSED = "Test passed!!\n";
@@ -168,7 +168,8 @@ void lsb1EmbedFullTest()
     uint8_t *msg = malloc(102);
     read(msg, sizeof(*msg), 102, msgFile);
 
-    for (int i = 0 ; i < 102 ; i++) {
+    for (int i = 0; i < 102; i++)
+    {
         printingBits(msg[i]);
     }
 

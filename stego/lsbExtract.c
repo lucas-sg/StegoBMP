@@ -1,5 +1,5 @@
-#include "lsbExtract.h"
-#include "lsbEmbed.h"
+#include "../include/lsbExtract.h"
+#include "../include/lsbEmbed.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -98,7 +98,7 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_
     int stegoBitCursor = 7;
     int currentHopIndex = 0;
     int rowCursor = widthInBytes - 1;
-    int hop =256;
+    int hop = 256;
     const uint8_t *rc4Key = extractRC4Key(bmpFile, bmpSize, widthInBytes);
     uint8_t *stego = malloc(stegoSize + 1);
     int stegoCount = stegoSize - 1;

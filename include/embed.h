@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "../stego/lsbExtract.h"
-#include "../stego/lsbEmbed.h"
+#include "lsbExtract.h"
+#include "lsbEmbed.h"
 #include "./bmpParser.h"
 #include "types.h"
 

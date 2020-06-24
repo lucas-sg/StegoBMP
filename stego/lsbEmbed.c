@@ -1,4 +1,4 @@
-#include "lsbEmbed.h"
+#include "../include/lsbEmbed.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
