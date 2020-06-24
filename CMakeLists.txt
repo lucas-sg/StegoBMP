@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(StegoBMP)
 set(CMAKE_CXX_STANDARD 14)
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 include_directories(include)
 find_package(OpenSSL REQUIRED)
 add_executable(bmpParserTest tests/bmpParser.c bmpParser.c)

@@ -5,8 +5,6 @@ const EVP_CIPHER *determineModeForAES128(ENC_MODE mode);
 const EVP_CIPHER *determineModeForAES192(ENC_MODE mode);
 const EVP_CIPHER *determineModeForAES256(ENC_MODE mode);
 const EVP_CIPHER *determineModeForDES(ENC_MODE mode);
-const uint8_t *generateKey(const char *password);
-const uint8_t *generateIV(const char *password);
 void failedTo(const char *errorMsg);
 
 
@@ -38,7 +36,7 @@ determineModeForAES128(ENC_MODE mode)
         case ECB:
             return EVP_aes_128_ecb();
         case CFB:
-            return EVP_aes_128_cfb128();
+            return EVP_aes_128_cfb1();
         case OFB:
             return EVP_aes_128_ofb();
         case CBC:
@@ -56,7 +54,7 @@ determineModeForAES192(ENC_MODE mode)
         case ECB:
             return EVP_aes_192_ecb();
         case CFB:
-            return EVP_aes_192_cfb128();
+            return EVP_aes_192_cfb1();
         case OFB:
             return EVP_aes_192_ofb();
         case CBC:
@@ -74,7 +72,7 @@ determineModeForAES256(ENC_MODE mode)
         case ECB:
             return EVP_aes_256_ecb();
         case CFB:
-            return EVP_aes_256_cfb128();
+            return EVP_aes_256_cfb1();
         case OFB:
             return EVP_aes_256_ofb();
         case CBC:
@@ -92,7 +90,7 @@ determineModeForDES(ENC_MODE mode)
         case ECB:
             return EVP_des_ecb();
         case CFB:
-            return EVP_des_cfb64();
+            return EVP_des_cfb1();
         case OFB:
             return EVP_des_ofb();
         case CBC:

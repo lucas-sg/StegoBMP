@@ -1,28 +1,44 @@
 #include "embed.h"
 #include "cryptoUtils.h"
+#include "stego/lsbEncrypt.h"
+
+
+size_t buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer);
 
 
 uint8_t *
-embed(uint8_t *carrierBmp, size_t carrierSize, const uint8_t *msg, size_t msgSize, UserInput userInput)
+embed(uint8_t *carrierBmp, size_t carrierLen, const uint8_t *plaintext, size_t ptextLen, const char *fileExtension,
+      UserInput userInput)
 {
-    uint8_t *outputBmp = NULL;
-//    uint8_t *encryptedMsg = createEncBuffer();
+    uint8_t *outputBmp     = NULL;
+    // TODO: Change this to allocate size for ptextLen + plaintext + fileExtension
+    uint8_t *inputSequence = NULL;
+    size_t inputSeqLen     = buildInputSequence(plaintext, ptextLen, fileExtension, inputSequence);
+    uint8_t *dataToEmbed;
+    size_t dataLen;
 
     if (userInput.encryption != NONE)
-        encrypt(msg, msgSize, outputBmp, userInput.encryption, userInput.mode, userInput.password);
+    {
+        dataToEmbed = malloc((ptextLen/16 + 1) * 16);
+        dataLen     = encrypt(inputSequence, inputSeqLen, dataToEmbed, userInput.encryption, userInput.mode,
+                              userInput.password);
+    }
+    else
+    {
+        dataLen     = inputSeqLen;
+        dataToEmbed = inputSequence;
+    }
 
     switch (userInput.stegoAlgorithm)
     {
         case LSB1:
-            // TODO: Merge call to LSB1 implementation
-//            outputBmp = lsb1Embed(carrierBmp, msg);
+//            outputBmp = lsb1(carrierBmp, dataToEmbed, carrierLen, dataLen);
             break;
         case LSB4:
-            // TODO: Merge call to LSB4 implementation
-//            outputBmp = lsb4Embed(carrierBmp, msg);
+//            outputBmp = lsb4(carrierBmp, dataToEmbed, carrierLen, dataLen);
             break;
         case LSBI:
-            // TODO: Merge call to LSB1 implementation
+            // TODO: Merge call to LSBI implementation
 //            outputBmp = lsbiEmbed(carrierBmp, msg);
             break;
     }
@@ -31,7 +47,7 @@ embed(uint8_t *carrierBmp, size_t carrierSize, const uint8_t *msg, size_t msgSiz
 }
 
 int
-encrypt(const uint8_t *plaintext, int plaintextLen, uint8_t *ciphertext, ENCRYPTION encryption, ENC_MODE mode, const char *password)
+encrypt(const uint8_t *plaintext, int ptextLen, uint8_t *ciphertext, ENCRYPTION encryption, ENC_MODE mode, const char *password)
 {
     EVP_CIPHER_CTX *ctx;
     int auxLen, ciphertextLen;
@@ -48,7 +64,7 @@ encrypt(const uint8_t *plaintext, int plaintextLen, uint8_t *ciphertext, ENCRYPT
     if (EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv) != 1)
         failedToInitCipherContext();
 
-    if (EVP_EncryptUpdate(ctx, ciphertext, &auxLen, plaintext, plaintextLen) != 1)
+    if (EVP_EncryptUpdate(ctx, ciphertext, &auxLen, plaintext, ptextLen) != 1)
         failedToEncrypt();
 
     ciphertextLen = auxLen;
@@ -60,4 +76,10 @@ encrypt(const uint8_t *plaintext, int plaintextLen, uint8_t *ciphertext, ENCRYPT
     EVP_CIPHER_CTX_free(ctx);
 
     return ciphertextLen;
+}
+
+size_t
+buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer)
+{
+    // TODO: @Stu
 }

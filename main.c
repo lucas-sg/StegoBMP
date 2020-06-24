@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include "parser.h"
 #include "embed.h"
 #include "extract.h"
@@ -8,6 +9,7 @@
 
 void openFiles();
 void closeFiles();
+void getFileExtensionFrom(const char* fileName, char *fileExtension);
 
 static UserInput parsedInput;
 FILE *carrierBmpFile, *msgFile, *outputFile;
@@ -18,6 +20,11 @@ static uint32_t carrierBmpSize = 0, msgSize = 0;
 
 int main(int argc, char *argv[])
 {
+    size_t maxFileExtensionLen = 16;    // TODO: Handle this if the file extension is bigger (should be a rare case)
+    size_t maxFileNameLen      = 64;
+    char *fileExtension        = calloc(maxFileExtensionLen, sizeof(*fileExtension));
+    char *fileName             = calloc(maxFileNameLen + maxFileExtensionLen, sizeof(*fileName));
+
     if (parseInput(argc, argv, &parsedInput) != PARSED_OK)
     {
         // TODO: Print some error code and exit
@@ -28,12 +35,15 @@ int main(int argc, char *argv[])
 
     if (parsedInput.action == EMBED)
     {
-        output = embed(carrierBmp, carrierBmpSize, msg, msgSize, parsedInput);
+        getFileExtensionFrom(parsedInput.outputFileName, fileExtension);
+        output     = embed(carrierBmp, carrierBmpSize, msg, msgSize, fileExtension, parsedInput);
+        outputFile = fopen(parsedInput.outputFileName, "w+");
         fwrite(output, sizeof(*output), carrierBmpSize, outputFile);
     }
     else
     {
-        output = extract(carrierBmp, carrierBmpSize, parsedInput);
+        output = extract(carrierBmp, carrierBmpSize, fileExtension, parsedInput);
+        outputFile = fopen(strcat(), );
         fwrite(output, sizeof(*output), msgSize, outputFile);
     }
 
@@ -47,7 +57,6 @@ openFiles()
 {
     carrierBmpFile = fopen(parsedInput.carrierFileName, "r+");
     msgFile        = fopen(parsedInput.inputFileName, "r");
-    outputFile     = fopen(parsedInput.outputFileName, "w+");
     carrierBmp     = malloc(sizeof(*carrierBmp) * carrierBmpSize);
     msg            = malloc(sizeof(*msg) * msgSize);
 
@@ -61,4 +70,15 @@ closeFiles()
     fclose(carrierBmpFile);
     fclose(msgFile);
     fclose(outputFile);
+}
+
+void
+getFileExtensionFrom(const char* fileName, char *fileExtension)
+{
+    int i;
+
+    for (i = 0; fileName[i] != '.'; i++);
+
+    for (int j = 0; i < strlen(fileName); i++, j++)
+        fileExtension[0] = fileName[i];
 }
