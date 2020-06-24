@@ -2,7 +2,7 @@
 #include "include/embed.h"
 
 uint8_t *decrypt(const uint8_t *encryptedBytes, ENCRYPTION encryption, ENC_MODE mode, const char *password);
-OUTPUT_BMP *lsb1Extract(char *bmpPath, size_t bmpSize);
+OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize);
 
 OUTPUT_BMP *
 extract(char *bmpPath, size_t bmpSize, UserInput userInput)
@@ -13,7 +13,7 @@ extract(char *bmpPath, size_t bmpSize, UserInput userInput)
     {
     case LSB1:
         // TODO: Merge call to LSB1 implementation
-        return lsb1Extract(bmpPath, bmpSize);
+        return lsb1ExtractForPath(bmpPath, bmpSize);
     case LSB4:
         // TODO: Merge call to LSB4 implementation
         //            embeddedBytes = lsb4Extract(carrierBmp, msg);
@@ -30,18 +30,14 @@ extract(char *bmpPath, size_t bmpSize, UserInput userInput)
     return output;
 }
 
-OUTPUT_BMP *lsb1Extract(char *bmpPath, size_t bmpSize)
+OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize)
 {
-    FILE *bmpFd = fopen(bmpPath, "r");
-    uint8_t *bmp = malloc(bmpSize);
-    fread(bmp, bmpSize, 1, bmpFd);
-
-    uint8_t decryption = lsb1Decrypt(bmp, 19, bmpSize);
-
+    BMP *bmpHeader = parseBmp(bmpPath);
+    uint8_t *bmp = malloc(bmpHeader->header->size);
+    uint8_t *decryption = lsb1Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
     output->data = decryption;
-    output->size = 19;
-
+    output->size = 102;
     return output;
 }
 

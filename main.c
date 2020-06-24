@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     if (parsedInput.action == EMBED)
     {
         output = embed(carrierBmp, outputFile, parsedInput.inputFileName, msgSize,
-                            parsedInput, msg, parsedInput.carrierFileName);
+                       parsedInput, msg, parsedInput.carrierFileName);
         fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
     else
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
         fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
 
-    closeFiles();
+    // closeFiles();
 
     return EXIT_SUCCESS;
 }
@@ -54,7 +54,7 @@ void openFiles()
     msg = malloc(sizeof(*msg) * msgSize);
 
     fread(carrierBmp, sizeof(*carrierBmp), carrierBmpSize, carrierBmpFile);
-    fread(msg, sizeof(*msg), msgSize, msgFile);
+    fread(msg, sizeof(*msg), 102, msgFile); // FIX THIS
 }
 
 void closeFiles()
