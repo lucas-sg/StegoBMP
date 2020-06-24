@@ -1,9 +1,9 @@
 #include "../include/lsbHelper.h"
 
 // We assume always big endian
-int extractCipherTextSizeFrom(const uint8_t *bytes)
+int extractStegoSizeFrom(const uint8_t *bytes)
 {
-    return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | (bytes[3]);
+    return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | (bytes[3] << 0);
 }
 
 int isCursorWithinOneByteRange(unsigned int cursor)
@@ -37,7 +37,7 @@ void printingBits(int number)
     for (i = 1 << 7; i > 0; i >>= 1)
         printf("%u", !!(number & i));
 
-    // printf("\n");
+    printf("\n");
 }
 
 uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace)

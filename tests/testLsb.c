@@ -233,17 +233,47 @@ void inputSequenceTest() {
 }
 
 
+void extractStegoSizeFromBigEndianTest()
+{
+    printf("%s %s \n", RUNNING_TEST, __func__);
+    const uint8_t stegoSize[4] = {0x00, 0x00, 0x42, 0xDE};
+    const int extractedStegoSize = extractStegoSizeFrom(stegoSize);
+    assert(extractedStegoSize == 17118);
+    printf("%s", TEST_PASSED);
+    printf("Extracted stego size from [0x00, 0x00, 0x42, 0xDE] is 17118\n\n");
+}
+
+void extractStegoSizeFromLittleEndianTest()
+{
+
+    printf("%s %s \n", RUNNING_TEST, __func__);
+    const uint8_t stegoSize[4] = {
+        0xDE,
+        0x42,
+        0x00,
+        0x00,
+    };
+    const int extractedStegoSize = extractStegoSizeFrom(stegoSize);
+    assert(extractedStegoSize != 17118);
+    printf("%s", TEST_PASSED);
+    printf("Extracted stego size from [0xDE, 0x42, 0x00, 0x00] is NOT 17118\n\n");
+}
+
 int main()
 {
-    // byteCursorIsWithinRangeTest();
-    // byteCursorIsNotwithinRangeTest();
+    byteCursorIsWithinRangeTest();
+    byteCursorIsNotwithinRangeTest();
 
-    // getCurrentFirstBitOfByteWithValidCiphertextAndValidCursorTest();
-    // getSecondBitOfByteWithValidCiphertextAndValidCursorTest();
+    getCurrentFirstBitOfByteWithValidCiphertextAndValidCursorTest();
+    getSecondBitOfByteWithValidCiphertextAndValidCursorTest();
 
-    // flipFirstLSBOfAZeroBitToZeroTest();
-    // flipFirstLSBOfAOneBitToZeroTest();
+    flipFirstLSBOfAZeroBitToZeroTest();
+    flipFirstLSBOfAOneBitToZeroTest();
 
+    extractStegoSizeFromBigEndianTest();
+    extractStegoSizeFromLittleEndianTest();
+
+    // FIX ALL OF THESE TESTS
     // lsb1WithAllOnesAndSomeBytesWithoutStegoTest();
     // lsb1WithAllZerosAndSomeBytesWithoutStegoTest();
     // lsb1WithZerosAndOnesWithAllBytesInStegoTest();
@@ -253,4 +283,5 @@ int main()
     //lsb1EmbedFullTest();
 
     inputSequenceTest();
+    // lsb1EmbedFullTest();
 }

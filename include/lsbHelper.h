@@ -10,7 +10,7 @@
 #define PIXEL_SIZE_IN_BYTES 3
 #define SIZE_BYTES 4
 
-int extractCipherTextSizeFrom(const uint8_t *bytes);
+int extractStegoSizeFrom(const uint8_t *bytes);
 int isCursorWithinOneByteRange(unsigned int cursor);
 uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cBitCursor, unsigned int bitToReplace);
 void printingBits(int number);
