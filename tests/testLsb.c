@@ -207,7 +207,7 @@ void lsb1ExtractTest()
 
     const uint8_t cipherText[1] = {0b01011111};
 
-    const uint8_t *extractedCiphertext = lsb1Extract(bmpFile, 1, 9, 3);
+    const uint8_t *extractedCiphertext = lsb1Extract(bmpFile, 1, 3);
 
     assert(extractedCiphertext[0] == cipherText[0]);
 

@@ -12,17 +12,27 @@ unsigned int extractDecimalFromBinary(uint8_t binary);
  * Keep in mind these functions could be abstracted a lot
  */
 
-uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
+uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
 {
     int bmpCursor = bmpSize - 1;
     int stegoIndex = 0;
     int stegoBitCursor = 7;
-    uint8_t *stego = malloc(stegoSize + 1);
+    int stegoSize = -1;
     int rowCursor = widthInBytes - 1;
     int stegoCount = stegoSize - 1;
+    uint8_t *stego = malloc(4);
+    uint8_t auxByte;
+
     while (bmpCursor >= 0 && stegoCount >= 0)
     {
-        uint8_t auxByte;
+        if (stegoCount == 0 && stegoSize == -1)
+        {
+            stegoSize = extractStegoSizeFrom(stego);
+            printf("Stego size %d\n", stegoSize);
+            stegoCount = stegoSize - 5;
+            stego = realloc(stego, stegoSize);
+        }
+
         while (stegoBitCursor >= 0 && bmpCursor >= 0 && stegoCount >= 0)
         {
             uint8_t bitToReplace = getCurrentBitOf(bmpFile[bmpCursor - rowCursor], 0);
@@ -46,17 +56,26 @@ uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_
     return stego;
 }
 
-uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
+uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
 {
     int bmpCursor = bmpSize - 1;
     int stegoIndex = 0;
     int stegoBitCursor = 7;
-    uint8_t *stego = malloc(stegoSize + 1);
+    int stegoSize = -1;
     int rowCursor = widthInBytes - 1;
-    int stegoCount = stegoSize - 1;
+    int stegoCount = 4;
+    uint8_t auxByte;
+    uint8_t *stego = malloc(4);
+
     while (bmpCursor >= 0 && stegoCount >= 0)
     {
-        uint8_t auxByte;
+        if (stegoCount == 0 && stegoSize == -1)
+        {
+            stegoSize = extractStegoSizeFrom(stego);
+            printf("Stego size %d\n", stegoSize);
+            stegoCount = stegoSize - 5;
+            stego = realloc(stego, stegoSize);
+        }
         while (stegoBitCursor >= 0 && bmpCursor >= 0 && stegoCount >= 0)
         {
             // FIRST LSB
@@ -91,17 +110,19 @@ uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_
 }
 
 // THIS FUNCTION SHOULD BE FIXED TO SUPPORT RC4 ENCRYPTION, SO KEY MUST BE EXTRACTED FROM LAST 6 BYTES OF BMP
-uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
+uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
 {
     int bmpCursor = bmpSize - 1;
     int stegoIndex = 0;
+    int stegoSize = -1;
     int stegoBitCursor = 7;
     int currentHopIndex = 0;
     int rowCursor = widthInBytes - 1;
     int hop = 256;
-    const uint8_t *rc4Key = extractRC4Key(bmpFile, bmpSize, widthInBytes);
-    uint8_t *stego = malloc(stegoSize + 1);
     int stegoCount = stegoSize - 1;
+    const uint8_t *rc4Key = extractRC4Key(bmpFile, bmpSize, widthInBytes);
+    uint8_t *stego = malloc(4);
+    uint8_t auxByte;
 
     while (currentHopIndex < hop && stegoCount >= 0)
     {
@@ -109,9 +130,16 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_
         rowCursor = widthInBytes - 7 - currentHopIndex;
         while (bmpCursor >= 0 && stegoCount >= 0)
         {
-            uint8_t auxByte;
+            if (stegoCount == 0 && stegoSize == -1)
+            {
+                stegoSize = extractStegoSizeFrom(stego);
+                printf("Stego size %d\n", stegoSize);
+                stegoCount = stegoSize - 5;
+                stego = realloc(stego, stegoSize);
+            }
             while (stegoBitCursor >= 0 && bmpCursor >= 0 && stegoCount >= 0)
             {
+
                 if (rowCursor < 0)
                 {
                     int diff = hop + rowCursor;
