@@ -4,6 +4,7 @@
 uint8_t *decrypt(const uint8_t *encryptedBytes, ENCRYPTION encryption, ENC_MODE mode, const char *password);
 OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize);
 OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize);
+OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize);
 
 OUTPUT_BMP *
 extract(char *bmpPath, size_t bmpSize, UserInput userInput)
@@ -13,14 +14,11 @@ extract(char *bmpPath, size_t bmpSize, UserInput userInput)
     switch (userInput.stegoAlgorithm)
     {
     case LSB1:
-        // TODO: Merge call to LSB1 implementation
         return lsb1ExtractForPath(bmpPath, bmpSize);
     case LSB4:
         return lsb4ExtractForPath(bmpPath, bmpSize);
     case LSBI:
-        // TODO: Merge call to LSB1 implementation
-        //            embeddedBytes = lsbiExtract(carrierBmp, msg);
-        break;
+        return lsbiExtractForPath(bmpPath, bmpSize);
     }
 
     if (userInput.encryption != NONE)
@@ -45,6 +43,17 @@ OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize)
     BMP *bmpHeader = parseBmp(bmpPath);
     uint8_t *bmp = malloc(bmpHeader->header->size);
     uint8_t *decryption = lsb4Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
+    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
+    output->data = decryption;
+    output->size = 102;
+    return output;
+}
+
+OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize)
+{
+    BMP *bmpHeader = parseBmp(bmpPath);
+    uint8_t *bmp = malloc(bmpHeader->header->size);
+    uint8_t *decryption = lsbiExtract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
     output->data = decryption;
     output->size = 102;
