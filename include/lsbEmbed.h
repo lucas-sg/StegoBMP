@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdint.h>
+#include "rc4.h"
 
 uint8_t *lsb1(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize, const size_t widthInBytes);
 uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize, const size_t cipherTextSize, const size_t widthInBytes);

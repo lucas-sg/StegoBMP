@@ -1,6 +1,5 @@
 #include "../include/lsbExtract.h"
 #include "../include/lsbEmbed.h"
-#include "rc4.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
