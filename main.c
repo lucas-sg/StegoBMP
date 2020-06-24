@@ -51,10 +51,10 @@ void openFiles()
     msgFile = fopen(parsedInput.inputFileName, "r");
     outputFile = fopen(parsedInput.outputFileName, "w+");
     carrierBmp = malloc(sizeof(*carrierBmp) * carrierBmpSize);
-    msg = malloc(sizeof(*msg) * msgSize);
+    msg = malloc(sizeof(*msg) * 1250);
 
     fread(carrierBmp, sizeof(*carrierBmp), carrierBmpSize, carrierBmpFile);
-    fread(msg, sizeof(*msg), 102, msgFile); // FIX THIS
+    fread(msg, sizeof(*msg), 1250, msgFile); // FIX THIS
 }
 
 void closeFiles()

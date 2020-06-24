@@ -1,26 +1,24 @@
-#include "../include/lsbExtract.h"
-#include "../include/lsbEmbed.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../include/lsbExtract.h"
 
-uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t stegoSize, const size_t widthInBytes);
-int getHopFromBmpFile(const uint8_t *bmpFile, const size_t stegoSize, const size_t widthInBytes);
-unsigned int extractDecimalFromBinary(uint8_t binary);
 /**
  * Keep in mind these functions could be abstracted a lot
  */
 
 uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
 {
+    printf("EN LSB1 EXTRACT\n");
     int bmpCursor = bmpSize - 1;
     int stegoIndex = 0;
     int stegoBitCursor = 7;
     int stegoSize = -1;
     int rowCursor = widthInBytes - 1;
-    int stegoCount = stegoSize - 1;
-    uint8_t *stego = malloc(4);
+    int stegoCount = 4;
+    uint8_t *stego = malloc(5);
     uint8_t auxByte;
 
     while (bmpCursor >= 0 && stegoCount >= 0)
@@ -28,7 +26,6 @@ uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t bmpSize, const size_t 
         if (stegoCount == 0 && stegoSize == -1)
         {
             stegoSize = extractStegoSizeFrom(stego);
-            printf("Stego size %d\n", stegoSize);
             stegoCount = stegoSize - 5;
             stego = realloc(stego, stegoSize);
         }
@@ -65,14 +62,13 @@ uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t bmpSize, const size_t 
     int rowCursor = widthInBytes - 1;
     int stegoCount = 4;
     uint8_t auxByte;
-    uint8_t *stego = malloc(4);
+    uint8_t *stego = malloc(5);
 
     while (bmpCursor >= 0 && stegoCount >= 0)
     {
         if (stegoCount == 0 && stegoSize == -1)
         {
             stegoSize = extractStegoSizeFrom(stego);
-            printf("Stego size %d\n", stegoSize);
             stegoCount = stegoSize - 5;
             stego = realloc(stego, stegoSize);
         }
@@ -118,7 +114,8 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t bmpSize, const size_t 
     int stegoBitCursor = 7;
     int currentHopIndex = 0;
     int rowCursor = widthInBytes - 1;
-    int hop = 256;
+    int hop = getHopFromBmpFile(bmpFile, bmpSize, widthInBytes);
+    printf("HOP %d\n", hop);
     int stegoCount = stegoSize - 1;
     const uint8_t *rc4Key = extractRC4Key(bmpFile, bmpSize, widthInBytes);
     uint8_t *stego = malloc(4);
@@ -133,7 +130,6 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t bmpSize, const size_t 
             if (stegoCount == 0 && stegoSize == -1)
             {
                 stegoSize = extractStegoSizeFrom(stego);
-                printf("Stego size %d\n", stegoSize);
                 stegoCount = stegoSize - 5;
                 stego = realloc(stego, stegoSize);
             }
@@ -173,46 +169,4 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t bmpSize, const size_t 
     stego[stegoSize] = 0;
 
     return stego;
-}
-
-uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
-{
-    uint8_t *rc4Key = malloc(6 * sizeof(uint8_t));           // extract 6 to another constant
-    size_t firstPixelIndex = bmpSize - 1 - widthInBytes - 1; // extract 3 to another constant
-    memcpy(rc4Key, bmpFile - firstPixelIndex, 6);
-    return rc4Key;
-}
-
-int getHopFromBmpFile(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
-{
-    uint8_t hopByte = bmpFile[bmpSize - 1 - widthInBytes - 1];
-    printingBits(hopByte);
-    if (hopByte == 0b00000000)
-    {
-        return 256;
-    }
-    return extractDecimalFromBinary(hopByte);
-}
-
-//FIXME THIS IS BROKEN
-unsigned int extractDecimalFromBinary(uint8_t binary)
-{
-    int decimal = 0, i = 0, rem;
-    while (binary != 0)
-    {
-        rem = binary % 10;
-        binary /= 10;
-        decimal += rem * pow(2, i);
-        ++i;
-    }
-    return decimal;
-}
-
-unsigned int pow(int num, int times)
-{
-    if (times == 0)
-    {
-        return num;
-    }
-    return num * pow(num, times - 1);
 }

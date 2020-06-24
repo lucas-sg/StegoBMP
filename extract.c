@@ -31,10 +31,10 @@ OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize)
 {
     BMP *bmpHeader = parseBmp(bmpPath);
     uint8_t *bmp = malloc(bmpHeader->header->size);
-    uint8_t *decryption = lsb1Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
+    uint8_t *decryption = lsb1Extract(bmpHeader->data, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
     output->data = decryption;
-    output->size = 102;
+    output->size = 1247;
     return output;
 }
 
@@ -42,7 +42,7 @@ OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize)
 {
     BMP *bmpHeader = parseBmp(bmpPath);
     uint8_t *bmp = malloc(bmpHeader->header->size);
-    uint8_t *decryption = lsb4Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
+    uint8_t *decryption = lsb4Extract(bmpHeader->data, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
     output->data = decryption;
     output->size = 102;
@@ -53,7 +53,7 @@ OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize)
 {
     BMP *bmpHeader = parseBmp(bmpPath);
     uint8_t *bmp = malloc(bmpHeader->header->size);
-    uint8_t *decryption = lsbiExtract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
+    uint8_t *decryption = lsbiExtract(bmpHeader->data, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
     OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
     output->data = decryption;
     output->size = 102;

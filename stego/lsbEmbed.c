@@ -6,6 +6,8 @@
 * then the order to read will be [4 -> 5 -> 7] -> [0 -> 2 -> 3] 
 */
 
+// FIXME STILL NEED TO EXTRACT EXTENSION
+
 /*
  * This function inserts into the least significant bits of the bmp file, all the
  * bits of the cipherText. It assumes all the validations have already been made.
@@ -105,7 +107,7 @@ uint8_t *lsb4(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
 }
 
 uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bmpFileSize,
-              const size_t cipherTextSize, const size_t hop, const size_t widthInBytes, const uint8_t *rc4Key)
+              const size_t cipherTextSize, const size_t widthInBytes, const uint8_t *rc4Key)
 {
     printf("En lsbi\n");
     size_t cCursor = 0;
@@ -114,8 +116,9 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     int currentFirstIndexHop = 0;
     int rowCursor = widthInBytes - 1;
     int noMorehops = 0;
+    const int hop = getHopFromBmpFile(bmpFile, bmpFileSize, widthInBytes);
     int bmpCursor = bmpFileSize - 1;
-    // // Copy rc4Key
+    // Copy rc4Key
     for (int i = 0; i <= 5; i++)
     {
         stegoBmp[bmpCursor - rowCursor] = rc4Key[i];

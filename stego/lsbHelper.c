@@ -52,3 +52,21 @@ uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor
 {
     return ((cipherTextuint8_t >> cBitCursor) & 1);
 }
+
+uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
+{
+    uint8_t *rc4Key = malloc(6 * sizeof(uint8_t));
+    size_t firstPixelIndex = bmpSize - 1 - widthInBytes - 1;
+    memcpy(rc4Key, bmpFile - firstPixelIndex, 6);
+    return rc4Key;
+}
+
+int getHopFromBmpFile(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
+{
+    uint8_t hopByte = bmpFile[bmpSize - 1 - widthInBytes - 1];
+    if (hopByte == 0b00000000)
+    {
+        return 256;
+    }
+    return (int) hopByte;
+}

@@ -259,6 +259,15 @@ void extractStegoSizeFromLittleEndianTest()
     printf("Extracted stego size from [0xDE, 0x42, 0x00, 0x00] is NOT 17118\n\n");
 }
 
+void lsb1ExtractTest()
+{
+    printf("%s %s \n", RUNNING_TEST, __func__);
+
+    const int withInBytes = 6;
+
+    printf("%s", TEST_PASSED);
+}
+
 int main()
 {
     byteCursorIsWithinRangeTest();
@@ -273,14 +282,16 @@ int main()
     extractStegoSizeFromBigEndianTest();
     extractStegoSizeFromLittleEndianTest();
 
+    lsb1ExtractTest();
+    lsb4ExtractTest();
+    lsbiExtractTest();
+
     // FIX ALL OF THESE TESTS
     // lsb1WithAllOnesAndSomeBytesWithoutStegoTest();
     // lsb1WithAllZerosAndSomeBytesWithoutStegoTest();
     // lsb1WithZerosAndOnesWithAllBytesInStegoTest();
 
     // lsb1ExtractTest();
-
-    //lsb1EmbedFullTest();
 
     inputSequenceTest();
     // lsb1EmbedFullTest();
