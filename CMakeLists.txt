@@ -3,7 +3,7 @@ project(StegoBMP)
 set(CMAKE_CXX_STANDARD 14)
 include_directories(include)
 
-file(GLOB stego_SRC "enc/rc4.c" "stego/*.c" "*.c")
+file(GLOB stego_SRC "lsbi/rc4.c" "stego/*.c" "*.c")
 
 add_executable(bmpParserTest tests/bmpParser.c bmpParser.c)
 add_executable(main ${stego_SRC})

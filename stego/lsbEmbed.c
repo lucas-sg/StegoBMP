@@ -118,7 +118,6 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     int currentFirstIndexHop = 0;
     int rowCursor = widthInBytes - 1;
     int noMorehops = 0;
-    int i = 0, j = 0;
     int bmpCursor = bmpFileSize - 1;
     // // Copy rc4Key
     for (int i = 0; i <= 5; i++)
@@ -154,13 +153,10 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
             uint8_t newBmpByte;
             if (cCursor >= cipherTextSize)
             {
-                j++;
                 newBmpByte = bmpFile[bmpCursor - rowCursor];
             }
             else
             {
-                printf("%d", bmpCursor - rowCursor);
-                i++;
                 newBmpByte = replaceNthLSB(bmpFile[bmpCursor - rowCursor], cipherText[cCursor], cBitCursor--, 0);
             }
 
@@ -179,14 +175,6 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
         currentFirstIndexHop++;
     }
     rowCursor = widthInBytes - 1;
-    printf("%d\n", i);
-    // for (int i = 0; i <= 5; i++)
-    // {
-    //     printf("%c", stegoBmp[bmpFileSize - 1 - rowCursor]);
-    //     rowCursor--;
-    // }
-    // printf("\n");
-
     return stegoBmp;
 }
 
@@ -218,8 +206,6 @@ void printingBits(int number)
 {
     unsigned i;
     // Reverse loop
-    // printf("%u", !!(number & (1 << 0)));
-
     for (i = 1 << 7; i > 0; i >>= 1)
         printf("%u", !!(number & i));
 

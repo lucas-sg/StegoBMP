@@ -93,7 +93,6 @@ uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_
 // THIS FUNCTION SHOULD BE FIXED TO SUPPORT RC4 ENCRYPTION, SO KEY MUST BE EXTRACTED FROM LAST 6 BYTES OF BMP
 uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
 {
-    printf("En lsbi extract, stegoSize %d \n", stegoSize);
     int bmpCursor = bmpSize - 1;
     int stegoIndex = 0;
     int stegoBitCursor = 7;
@@ -108,13 +107,11 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_
     {
         bmpCursor = bmpSize - 1;
         rowCursor = widthInBytes - 7 - currentHopIndex;
-        // printf("%d\n", currentHopIndex);
         while (bmpCursor >= 0 && stegoCount >= 0)
         {
             uint8_t auxByte;
             while (stegoBitCursor >= 0 && bmpCursor >= 0 && stegoCount >= 0)
             {
-                // printf("Stego count %d\n", stegoCount);
                 if (rowCursor < 0)
                 {
                     int diff = hop + rowCursor;
@@ -126,7 +123,6 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_
                         break;
                     }
                 }
-                // printf("%d", bmpCursor - rowCursor);
                 uint8_t bitToReplace = getCurrentBitOf(bmpFile[bmpCursor - rowCursor], 0);
                 auxByte = replaceNthLSB(auxByte, bitToReplace, 0, stegoBitCursor--);
 
@@ -140,7 +136,6 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_
                     rowCursor -= hop;
                 }
             }
-            // printf("%c", auxByte);
             stego[stegoIndex++] = auxByte;
             stegoBitCursor = 7;
             stegoCount--;
@@ -149,10 +144,6 @@ uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_
     }
     stego[stegoSize] = 0;
 
-    printf("AWDASDASD\n");
-    for (int i = 0; i < 102; i++)
-        printf("%c", stego[i]);
-    printf("\n");
     return stego;
 }
 
