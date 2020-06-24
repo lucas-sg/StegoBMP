@@ -1,4 +1,3 @@
-#include <stddef.h>
 #include "include/embed.h"
 
 uint8_t *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password);
@@ -42,7 +41,7 @@ OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     u_int32_t imgSize = bmpHeader->infoHeader->imageSize;
     u_int32_t offset = bmpHeader->header->offset;
     uint8_t *bmpFile = bmpHeader->data;
-    u_int32_t widthInBytes = bmpHeader->infoHeader->width * 3; // The *3 is because we asume pixels of 3 bytes
+    u_int32_t widthInBytes = bmpHeader->infoHeader->width * PIXEL_SIZE_IN_BYTES; // The *3 is because we asume pixels of 3 bytes
 
     /**
      * this size should be unharcoded, the msg to stego should be of such format (see github issues)
@@ -76,7 +75,7 @@ OUTPUT_BMP *lsb4Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     u_int32_t imgSize = bmpHeader->infoHeader->imageSize;
     u_int32_t offset = bmpHeader->header->offset;
     uint8_t *bmpFile = bmpHeader->data;
-    u_int32_t widthInBytes = bmpHeader->infoHeader->width * 3; // The *3 is because we asume pixels of 3 bytes
+    u_int32_t widthInBytes = bmpHeader->infoHeader->width * PIXEL_SIZE_IN_BYTES; // The *3 is because we asume pixels of 3 bytes
 
     /**
      * this size should be unharcoded, the msg to stego should be of such format (see github issues)
@@ -110,10 +109,10 @@ OUTPUT_BMP *lsbiEmbed(const uint8_t *carrierBmp, const char *bmpPath, const uint
     u_int32_t imgSize = bmpHeader->infoHeader->imageSize;
     u_int32_t offset = bmpHeader->header->offset;
     uint8_t *bmpFile = bmpHeader->data;
-    u_int32_t widthInBytes = bmpHeader->infoHeader->width * 3; // The *3 is because we asume pixels of 3 bytes
+    u_int32_t widthInBytes = bmpHeader->infoHeader->width * PIXEL_SIZE_IN_BYTES; // The *3 is because we asume pixels of 3 bytes
 
     /**
-     * this size should be unharcoded, the msg to stego should be of such format (see github issues)
+     * this size should be unharcoded, the msg to stego should be of such format (see github issues) also HOP and KEY
      */
     uint8_t *bmpWithoutHeader = lsbi(bmpFile, msg, imgSize, 102, 256, widthInBytes, "RC4KEY");
     uint8_t *fullBmp = malloc(bmpHeader->header->size);

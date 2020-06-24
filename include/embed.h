@@ -2,9 +2,11 @@
 #define EMBED_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include <string.h>
 #include "lsbExtract.h"
 #include "lsbEmbed.h"
+#include "lsbHelper.h"
 #include "./bmpParser.h"
 #include "types.h"
 
