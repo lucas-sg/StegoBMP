@@ -32,6 +32,18 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
 }
 
 uint8_t *
+RC4decrypt(const uint8_t *encryptedBmp, const size_t msgSize)
+{
+    uint8_t *key          = calculateKey(encryptedBmp);
+    uint8_t *decryptedMsg = malloc(sizeof(*encryptedBmp) * msgSize);
+
+    for (size_t i = 0; i < msgSize; i++)
+        decryptedMsg[i] = encryptedBmp[i] ^ key[i];
+
+    return decryptedMsg;
+}
+
+uint8_t *
 calculateKey(const uint8_t *bmpFile)
 {
     uint8_t *key = malloc(sizeof(*key) * KEY_SIZE);
