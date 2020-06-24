@@ -1,14 +1,14 @@
 #include <stddef.h>
 #include "include/embed.h"
 
-uint8_t *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password);
+uint8_t    *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password);
+OUTPUT_BMP *lsbEmbed(STEGO_ALGO stegoAlgo, BMP *carrierBmp, MESSAGE *msg);
+OUTPUT_BMP *mergeBmpWithHeader(const uint8_t *bmpWithoutHeader, BMP *bmp);
 
 OUTPUT_BMP *
-embed(uint8_t *carrierBmp, size_t carrierSize, const char *msgPath, size_t msgSize,
-      UserInput userInput, const uint8_t *msg, const char *bmpPath)
+embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
 {
     OUTPUT_BMP *output = NULL;
-
     uint8_t *msgToEmbed;
 
     if (userInput.encryption != NONE)
@@ -22,115 +22,54 @@ embed(uint8_t *carrierBmp, size_t carrierSize, const char *msgPath, size_t msgSi
 
     switch (userInput.stegoAlgorithm)
     {
-    case LSB1:
-        return lsb1Embed(carrierBmp, bmpPath, msgToEmbed, msgPath);
-    case LSB4:
-        return lsb4Embed(carrierBmp, bmpPath, msgToEmbed, msgPath);
-    case LSBI:
-        return lsbiEmbed(carrierBmp, bmpPath, msgToEmbed, msgPath);
+        case LSB1:
+            return lsbEmbed(LSB1, carrierBmp, msgToEmbed);
+        case LSB4:
+            return lsbEmbed(LSB4, carrierBmp, msgToEmbed);
+        case LSBI:
+            return lsbEmbed(LSBI, carrierBmp, msgToEmbed);
     }
 
     return output;
 }
 
-// FIXME extract magic numbers to structs
-OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath)
+OUTPUT_BMP *
+lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg)
 {
-    ulong bytesNeeded = getBytesNeededToStego(msgPath, LSB1);
-    BMP *bmpHeader = parseBmp(bmpPath);
-    u_int32_t headerSize = bmpHeader->infoHeader->size;
-    u_int32_t imgSize = bmpHeader->infoHeader->imageSize;
-    u_int32_t offset = bmpHeader->header->offset;
-    uint8_t *bmpFile = bmpHeader->data;
-    u_int32_t widthInBytes = bmpHeader->infoHeader->width * 3; // The *3 is because we asume pixels of 3 bytes
+    if (getBytesNeededToStego(msg, stegoAlgo) > bmp->header->size)
+    {
+        printf("The message you are trying to embed is too large for the .bmp carrier image (%d KB). "
+               "Please choose a larger image or try to embed a smaller message.\n", (int) (bmp->header->size/1024));
+        return NULL;
+    }
 
-    /**
-     * this size should be unharcoded, the msg to stego should be of such format (see github issues)
-     */
-    uint8_t *bmpWithoutHeader = lsb1(bmpFile, msg, imgSize, 102, widthInBytes);
+    uint8_t *bmpWithoutHeader;
 
-    uint8_t *fullBmp = malloc(bmpHeader->header->size);
+    switch (stegoAlgo)
+    {
+        // TODO: Change LSB1, LSB4 and LSBI prototype to lsbX(BMP *bmp, MESSAGE *msg);
+        case LSB1:
+//            bmpWithoutHeader = lsb1(bmp, msg);
+        case LSB4:
+//            bmpWithoutHeader = lsb4(bmp, msg);
+        case LSBI:
+//            bmpWithoutHeader = lsbi(bmp, msg);
+        default:
+            break;
+    }
 
-    // fix this
-    uint8_t *aux = malloc(bmpHeader->header->size);
-    FILE *bmpFd = fopen(bmpPath, "r");
-    fread(aux, 1, bmpHeader->header->size, bmpFd);
-
-    memcpy(fullBmp, aux, 54);
-    memcpy(fullBmp + 54, bmpWithoutHeader, imgSize);
-
-    OUTPUT_BMP *output = malloc(sizeof(OUTPUT));
-    output->data = fullBmp;
-    output->size = bmpHeader->header->size;
-
-    free(bmpWithoutHeader);
-    return output;
+    return mergeBmpWithHeader(bmpWithoutHeader, bmp);
 }
 
-// FIXME extract magic numbers to structs, try to refactor so we have no duplicate code (function pointer)
-OUTPUT_BMP *lsb4Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath)
+OUTPUT_BMP *
+mergeBmpWithHeader(const uint8_t *bmpWithoutHeader, BMP *bmp)
 {
-    ulong bytesNeeded = getBytesNeededToStego(msgPath, LSB4);
-    BMP *bmpHeader = parseBmp(bmpPath);
-    u_int32_t headerSize = bmpHeader->infoHeader->size;
-    u_int32_t imgSize = bmpHeader->infoHeader->imageSize;
-    u_int32_t offset = bmpHeader->header->offset;
-    uint8_t *bmpFile = bmpHeader->data;
-    u_int32_t widthInBytes = bmpHeader->infoHeader->width * 3; // The *3 is because we asume pixels of 3 bytes
+    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
+    output->data       = malloc(bmp->header->size);
+    memcpy(output->data, bmp->header, HEADER_SIZE);
+    memcpy(output->data + HEADER_SIZE, bmpWithoutHeader, bmp->infoHeader->imageSize);
+    output->size       = bmp->header->size;
 
-    /**
-     * this size should be unharcoded, the msg to stego should be of such format (see github issues)
-     */
-    uint8_t *bmpWithoutHeader = lsb4(bmpFile, msg, imgSize, 102, widthInBytes);
-
-    uint8_t *fullBmp = malloc(bmpHeader->header->size);
-
-    // fix this
-    uint8_t *aux = malloc(bmpHeader->header->size);
-    FILE *bmpFd = fopen(bmpPath, "r");
-    fread(aux, 1, bmpHeader->header->size, bmpFd);
-
-    memcpy(fullBmp, aux, 54);
-    memcpy(fullBmp + 54, bmpWithoutHeader, imgSize);
-
-    OUTPUT_BMP *output = malloc(sizeof(OUTPUT));
-    output->data = fullBmp;
-    output->size = bmpHeader->header->size;
-
-    free(bmpWithoutHeader);
-    return output;
-}
-
-// Obtain hop
-OUTPUT_BMP *lsbiEmbed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath)
-{
-    ulong bytesNeeded = getBytesNeededToStego(msgPath, LSBI);
-    BMP *bmpHeader = parseBmp(bmpPath);
-    u_int32_t headerSize = bmpHeader->infoHeader->size;
-    u_int32_t imgSize = bmpHeader->infoHeader->imageSize;
-    u_int32_t offset = bmpHeader->header->offset;
-    uint8_t *bmpFile = bmpHeader->data;
-    u_int32_t widthInBytes = bmpHeader->infoHeader->width * 3; // The *3 is because we asume pixels of 3 bytes
-
-    /**
-     * this size should be unharcoded, the msg to stego should be of such format (see github issues)
-     */
-    uint8_t *bmpWithoutHeader = lsbi(bmpFile, msg, imgSize, 102, 256, widthInBytes, "RC4KEY");
-    uint8_t *fullBmp = malloc(bmpHeader->header->size);
-
-    // fix this
-    uint8_t *aux = malloc(bmpHeader->header->size);
-    FILE *bmpFd = fopen(bmpPath, "r");
-    fread(aux, 1, bmpHeader->header->size, bmpFd);
-
-    memcpy(fullBmp, aux, 54);
-    memcpy(fullBmp + 54, bmpWithoutHeader, imgSize);
-
-    OUTPUT_BMP *output = malloc(sizeof(OUTPUT));
-    output->data = fullBmp;
-    output->size = bmpHeader->header->size;
-
-    free(bmpWithoutHeader);
     return output;
 }
 
@@ -143,13 +82,13 @@ size_t
 buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer)
 {
     // First 4 bytes for size
-    ((int32_t *) inputSequenceBuffer)[0] = (int) size;
+    ((uint32_t *) inputSequenceBuffer)[0] = size;
     size_t cursor = 4;
 
     memcpy(inputSequenceBuffer + cursor, data, size);
     cursor += size;
 
-    sprintf((char*) inputSequenceBuffer + cursor, "%s", fileExtension);
+    sprintf((char *) inputSequenceBuffer + cursor, "%s", fileExtension);
     cursor += strlen(fileExtension) + 1;
 
     // Total file size minus first 4 bytes used for file size :)
