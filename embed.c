@@ -1,36 +1,43 @@
-#include <stddef.h>
-#include "include/embed.h"
+#include "embed.h"
+#include "cryptoUtils.h"
+#include "lsbEmbed.h"
+#include <string.h>
 
-uint8_t    *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password);
-OUTPUT_BMP *lsbEmbed(STEGO_ALGO stegoAlgo, BMP *carrierBmp, MESSAGE *msg);
-OUTPUT_BMP *mergeBmpWithHeader(const uint8_t *bmpWithoutHeader, BMP *bmp);
 
-OUTPUT_BMP *
+size_t buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer);
+
+
+uint8_t *
 embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
 {
-    OUTPUT_BMP *output = NULL;
-    uint8_t *msgToEmbed;
+    uint8_t *outputBmp     = NULL;
+    // TODO: Change this to allocate size for ptextLen + plaintext + fileExtension
+    uint8_t *inputSequence = NULL;
+    size_t inputSeqLen     = buildInputSequence(msg->data, msg->size, msg->extension, inputSequence);
+    uint8_t *dataToEmbed;
+    size_t dataLen;
 
     if (userInput.encryption != NONE)
     {
-        msgToEmbed = encrypt(msg, userInput.encryption, userInput.mode, userInput.password);
+        dataToEmbed = malloc((msg->size/16 + 1) * 16);
+        dataLen     = encrypt(inputSequence, inputSeqLen, dataToEmbed, userInput.encryption, userInput.mode,
+                              userInput.password);
     }
     else
     {
-        msgToEmbed = msg;
+        dataLen     = inputSeqLen;
+        dataToEmbed = inputSequence;
     }
 
     switch (userInput.stegoAlgorithm)
     {
         case LSB1:
-            return lsbEmbed(LSB1, carrierBmp, msgToEmbed);
+            return lsbEmbed(LSB1, carrierBmp, dataToEmbed);
         case LSB4:
-            return lsbEmbed(LSB4, carrierBmp, msgToEmbed);
+            return lsbEmbed(LSB4, carrierBmp, dataToEmbed);
         case LSBI:
-            return lsbEmbed(LSBI, carrierBmp, msgToEmbed);
+            return lsbEmbed(LSBI, carrierBmp, dataToEmbed);
     }
-
-    return output;
 }
 
 OUTPUT_BMP *
@@ -73,9 +80,36 @@ mergeBmpWithHeader(const uint8_t *bmpWithoutHeader, BMP *bmp)
     return output;
 }
 
-uint8_t *encrypt(const uint8_t *msg, ENCRYPTION encryption, ENC_MODE mode, const char *password)
+int
+encrypt(const uint8_t *plaintext, int ptextLen, uint8_t *ciphertext, ENCRYPTION encryption, ENC_MODE mode,
+        const uint8_t *password)
 {
-    // TODO: Encrypt with OpenSSL API
+    EVP_CIPHER_CTX *ctx;
+    int auxLen, ciphertextLen;
+    const EVP_CIPHER *cipher = determineCipherAndMode(encryption, mode);
+    size_t keyLen = determineKeyLength(encryption);
+    uint8_t *key  = malloc(keyLen);
+    uint8_t *iv   = malloc(keyLen);
+    EVP_BytesToKey(cipher, EVP_sha256(), NULL, password, (int)strlen((char *)password), 1, key, iv);
+
+    if (!(ctx = EVP_CIPHER_CTX_new()))
+        failedToCreateCipherContext();
+
+    if (EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv) != 1)
+        failedToInitCipherContext();
+
+    if (EVP_EncryptUpdate(ctx, ciphertext, &auxLen, plaintext, ptextLen) != 1)
+        failedToEncrypt();
+
+    ciphertextLen = auxLen;
+
+    if (EVP_EncryptFinal_ex(ctx, ciphertext + auxLen, &auxLen) != 1)
+        failedToFinalizeEnc();
+
+    ciphertextLen += auxLen;
+    EVP_CIPHER_CTX_free(ctx);
+
+    return ciphertextLen;
 }
 
 size_t

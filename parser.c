@@ -128,7 +128,7 @@ parseOptionalParam(int opt, UserInput *parsedInput) {
             break;
         case 'p':
             parsedInput->password = calloc(strlen(optarg) + 1, sizeof(char));
-            strcpy(parsedInput->password, optarg);
+            memcpy(parsedInput->password, optarg, strlen(optarg));
             break;
         default:
             break;

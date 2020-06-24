@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdarg.h>
@@ -9,6 +10,7 @@
 
 void openFiles();
 void closeFiles();
+void getFileExtensionFrom(const char* fileName, char *fileExtension);
 
 static UserInput parsedInput;
 FILE *carrierBmpFile, *msgFile, *outputFile;
@@ -71,4 +73,15 @@ void closeFiles()
     fclose(carrierBmpFile);
     fclose(msgFile);
     fclose(outputFile);
+}
+
+void
+getFileExtensionFrom(const char* fileName, char *fileExtension)
+{
+    int i;
+
+    for (i = 0; fileName[i] != '.'; i++);
+
+    for (int j = 0; i < (int)strlen(fileName); i++, j++)
+        fileExtension[0] = fileName[i];
 }
