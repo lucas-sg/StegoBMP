@@ -34,10 +34,13 @@ void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
     case LSB1:
         printf("EN EL SWITCH\n");
         lsbEmbed(LSB1, carrierBmp, msg);
+        break;
     case LSB4:
         lsbEmbed(LSB4, carrierBmp, msg);
+        break;
     case LSBI:
         lsbEmbed(LSBI, carrierBmp, msg);
+        break;
     }
 }
 
@@ -54,10 +57,13 @@ void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg)
     // TODO: Change LSB1, LSB4 and LSBI prototype to lsbX(BMP *bmp, MESSAGE *msg);
     case LSB1:
         lsb1EmbedBytes(msg->data, bmp->data, msg->size);
+        break;
     case LSB4:
         lsb4EmbedBytes(msg->data, bmp->data, msg->size);
+        break;
     case LSBI:
         lsbiEncryptAndEmbed(msg->data, msg->size, bmp->data, bmp->infoHeader->imageSize);
+        break;
     default:
         break;
     }
@@ -99,7 +105,10 @@ buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, 
 {
     printf("%d, %s\n", size, fileExtension);
     // First 4 bytes for size
-    ((uint32_t *)inputSequenceBuffer)[0] = size;
+    inputSequenceBuffer[0] = (size & 0xFF000000) >> 24;
+    inputSequenceBuffer[1] = (size & 0x00FF0000) >> 16;
+    inputSequenceBuffer[2] = (size & 0x0000FF00) >> 8;
+    inputSequenceBuffer[3] = (size & 0x000000FF);
     size_t cursor = 4;
     printf("ANTES DEL MEMCPY\n");
     memcpy(inputSequenceBuffer + cursor, data, size);

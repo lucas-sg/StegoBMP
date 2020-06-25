@@ -14,15 +14,15 @@ extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
     uint8_t *plaintext;
     size_t embeddedSize  = extractFourBytesOfSizeFrom(carrierBMP->data, userInput.stegoAlgorithm);
-    uint8_t *embeddedMsg = malloc(embeddedSize);
+    uint8_t *embeddedMsg = malloc(embeddedSize + 16);
 
     switch (userInput.stegoAlgorithm)
     {
         case LSB1:
-            lsb1ExtractBytes(carrierBMP->data, embeddedMsg, embeddedSize);
+            lsb1ExtractBytes(carrierBMP->data + 4*8, embeddedMsg, embeddedSize);
             break;
         case LSB4:
-            lsb4ExtractBytes(carrierBMP->data, embeddedMsg, embeddedSize);
+            lsb4ExtractBytes(carrierBMP->data + 2*8, embeddedMsg, embeddedSize);
             break;
         case LSBI:
             lsbiExtractAndDecrypt(carrierBMP->data, embeddedMsg, embeddedSize);
@@ -40,9 +40,9 @@ extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
         plaintext = embeddedMsg;
     }
 
-    memcpy(&msg->size, plaintext, 4);
-    copyMsgData(msg, plaintext);
-    copyFileExtension(msg, plaintext);
+    msg->data = plaintext;
+    msg->size = embeddedSize;
+    msg->extension = plaintext + embeddedSize;
 }
 
 int decrypt(const uint8_t *ciphertext, int ctextLen, uint8_t *plaintext, ENCRYPTION encryption, ENC_MODE mode,

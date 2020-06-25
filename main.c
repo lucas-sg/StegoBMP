@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
         if ((carrierBmp = parseBmp(parsedInput.inputFileName)) == NULL)
             return EXIT_FAILURE;
 
+        msg = malloc(sizeof(MESSAGE));
+
         extract(carrierBmp, msg, parsedInput);
         char fileName[64];
         saveMessage(msg, parsedInput.outputFileName);
