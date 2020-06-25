@@ -9,9 +9,7 @@ uint8_t *initVectorT(const uint8_t *key);
 void    swap(uint8_t *s, uint32_t i, uint32_t j);
 uint8_t *PRGA(uint8_t *s, size_t len);
 
-static size_t KEY_SIZE    = 6;
-static size_t VECTOR_SIZE = 256;
-
+static const size_t VECTOR_SIZE = 256;
 
 uint8_t *
 RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
@@ -32,13 +30,13 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
 }
 
 uint8_t *
-RC4decrypt(const uint8_t *encryptedBmp, const size_t msgSize)
+RC4decrypt(const uint8_t *encryptedMsg, const uint8_t *bmpCarrier, const size_t msgSize)
 {
-    uint8_t *key          = calculateKey(encryptedBmp);
-    uint8_t *decryptedMsg = malloc(sizeof(*encryptedBmp) * msgSize);
+    uint8_t *key          = calculateKey(bmpCarrier);
+    uint8_t *decryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
 
     for (size_t i = 0; i < msgSize; i++)
-        decryptedMsg[i] = encryptedBmp[i] ^ key[i];
+        decryptedMsg[i] = encryptedMsg[i] ^ key[i];
 
     return decryptedMsg;
 }
