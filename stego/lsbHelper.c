@@ -1,4 +1,5 @@
 #include "../include/lsbHelper.h"
+#include "../include/types.h"
 
 // We assume always big endian
 unsigned int extractStegoSizeFrom(const uint8_t *bytes)
@@ -6,8 +7,53 @@ unsigned int extractStegoSizeFrom(const uint8_t *bytes)
     return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | (bytes[3] << 0);
 }
 
-const uint8_t* sizeToByteArray(uint32_t size) {
-    uint8_t* bytes = malloc(4);
+size_t extractFourBytesOfSizeFrom(const uint8_t *bytes, STEGO_ALGO stegoAlgo)
+{
+    if (stegoAlgo == LSB1)
+    {
+        return extractSizeFromLSB1(bytes);
+    }
+    return extractSizeFromLSB4(bytes);
+}
+
+size_t extractSizeFromLSB1(const uint8_t *bytes)
+{
+    uint8_t *dst = malloc(4);
+    for (int i = 0; i < 4; i++)
+    {
+        uint8_t byte = 0;
+
+        for (uint8_t j = 0; j < 7; j++)
+        {
+            uint8_t sourceByte = bytes[i * 8 + j] & 1;
+            byte |= (sourceByte & 1) << (7 - j);
+        }
+        dst[i] = byte;
+    }
+    return extractStegoSizeFrom(dst);
+}
+
+size_t extractSizeFromLSB4(const uint8_t *bytes)
+{
+    uint8_t *dst = malloc(4);
+    for (int i = 0; i < 4; i++)
+    {
+        uint8_t byte = 0;
+
+        uint8_t firstSourceByte = bytes[i * 8] & 0x0F;
+        uint8_t secondSourceByte = bytes[i * 8 + 1] & 0x0F;
+
+        byte |= firstSourceByte << 4;
+        byte |= secondSourceByte;
+
+        dst[i] = byte;
+    }
+    return extractStegoSizeFrom(dst);
+}
+
+const uint8_t *sizeToByteArray(uint32_t size)
+{
+    uint8_t *bytes = malloc(4);
     uint32_t mask = 0xFF;
 
     bytes[0] = size;

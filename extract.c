@@ -19,7 +19,7 @@ extract(BMP *carrierBMP, UserInput userInput)
     switch (userInput.stegoAlgorithm)
     {
     case LSB1:
-        lsb1ExtractBytes(user);
+        // lsb1ExtractBytes(user);
         break;
     case LSB4:
         break;
