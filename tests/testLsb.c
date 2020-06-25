@@ -3,7 +3,7 @@
 #include "../include/embed.h"
 #include "../include/lsbEmbed.h"
 #include "../include/lsbExtract.h"
-#include "../include/bmpParser.h"
+#include "../include/fileParser.h"
 
 static char *TEST_PASSED = "Test passed!!\n";
 static char *RUNNING_TEST = "Running test: ";
