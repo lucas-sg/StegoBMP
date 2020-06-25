@@ -380,7 +380,8 @@ void lsbiEmbedAndExtractTest() {
 }
 
 void lsbiEncryptedTest() {
-    int carrierSize = 6 + 4*8 + 8;
+    int byteCount = 64;
+    int carrierSize = 6 + 4*8 + byteCount*8;
 
     uint8_t* carrier = calloc(carrierSize, 1);
     //Hop is 3
@@ -391,14 +392,16 @@ void lsbiEncryptedTest() {
     carrier[4] = 43;
     carrier[5] = 240;
 
-    uint8_t byte = 0x0F;
+    uint8_t* bytes = malloc(byteCount);
 
-    lsbiEncryptAndEmbed(&byte, 1, carrier, carrierSize);
+    lsbiEncryptAndEmbed(bytes, byteCount, carrier, carrierSize);
 
-    uint8_t result = 0;
-    lsbiExtractAndDecrypt(carrier, carrierSize, &result);
+    uint8_t* result = malloc(byteCount);
+    lsbiExtractAndDecrypt(carrier, carrierSize, result);
 
-    assert(result == byte);
+    for (int i = 0; i < byteCount; i++) {
+        assert(result[i] == bytes[i]);
+    }
 }
 
 int main()

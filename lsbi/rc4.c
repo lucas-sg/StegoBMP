@@ -1,6 +1,6 @@
 #include "../include/rc4.h"
 #include <string.h>
-
+#include "lsbHelper.h"
 
 uint8_t *calculateKey(const uint8_t *bmpFile);
 uint8_t *KSA(const uint8_t *key);
@@ -19,8 +19,9 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
     uint8_t *keyStream    = PRGA(s, msgSize);
     uint8_t *encryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
 
-    for (int i = 0; i < msgSize; i++)
+    for (int i = 0; i < msgSize; i++) {
         encryptedMsg[i] = msg[i] ^ keyStream[i];
+    }
 
     free(key);
     free(s);
@@ -35,8 +36,9 @@ RC4decrypt(const uint8_t *encryptedMsg, const uint8_t *bmpCarrier, const size_t 
     uint8_t *key          = calculateKey(bmpCarrier);
     uint8_t *decryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
 
-    for (size_t i = 0; i < msgSize; i++)
+    for (size_t i = 0; i < msgSize; i++) {
         decryptedMsg[i] = encryptedMsg[i] ^ key[i];
+    }
 
     return decryptedMsg;
 }

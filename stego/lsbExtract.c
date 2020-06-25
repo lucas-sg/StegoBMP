@@ -96,7 +96,7 @@ void lsbiExtractAndDecrypt(const uint8_t* source, size_t sourceSize, uint8_t* ds
     int hop = source[0] == 0?255:source[0];
     uint8_t* encMsg = malloc(sourceSize);
     size_t msgSize = lsbiExtractBytes(source + 6, sourceSize - 6, encMsg, hop);
-    uint8_t* decrypted = RC4decrypt(encMsg, source, msgSize);
+    uint8_t* decrypted = RC4(encMsg, source, msgSize);
     memcpy(dst, decrypted, msgSize);
 }
 
