@@ -10,7 +10,7 @@ CFLAGS = -Wall
 # 	$(CC) -o testLSB ./tests/testLsb.c ./stego/lsbEmbed.c ./stego/lsbExtract.c bmpParser.c $(CFLAGS)
 
 main: 
-	$(CC) -o main main.c ./stego/lsbEmbed.c ./stego/lsbExtract.c parser.c bmpParser.c extract.c embed.c $(CFLAGS)
+	$(CC) -o main main.c ./stego/lsbEmbed.c ./stego/lsbExtract.c parser.c ./lsbi/rc4.c bmpParser.c extract.c embed.c $(CFLAGS)
 
 # bmpParserTest: 
 # 	$(CC) -o main ./tests/bmpParser.c ./stego/lsbEmbed.c ./stego/lsbExtract.c parser.c bmpParser.c extract.c embed.c $(CFLAGS)

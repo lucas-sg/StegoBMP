@@ -3,6 +3,102 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <arpa/inet.h>
+
+uint8_t assignNthBitOfXtoY(uint8_t x, uint8_t y, int n);
+
+void lsb1EmbedBytes(const uint8_t* src, uint8_t* dst, size_t size) {
+    for (int i = 0; i < size; i++) {
+        uint8_t byteToEmbed = src[i];
+
+        // Needing 8 destination bytes per source byte.
+        for (uint8_t j = 0; j < 8; j++) {
+            uint8_t dstByte = dst[i*8 + j];
+            dst[i*8 + j] = assignNthBitOfXtoY(byteToEmbed, dstByte, 8 - j - 1);
+        }
+    }
+}
+
+void lsb4EmbedBytes(const uint8_t* src, uint8_t* dst, size_t size) {
+    for (int i = 0; i < size; i++) {
+        uint8_t byteToEmbed = src[i];
+
+        uint8_t firstDstByte = dst[i*2] & 0xF0;
+        uint8_t secondDstByte = dst[i*2 + 1] & 0xF0;
+
+        firstDstByte |= (byteToEmbed & 0xF0) >> 4;
+        secondDstByte |= byteToEmbed & 0x0F;
+
+        dst[i*2] = firstDstByte;
+        dst[i*2 + 1] = secondDstByte;
+    }
+}
+
+void lsbiEncryptAndEmbed(const uint8_t* src, uint32_t msgSize, uint8_t* dst, size_t dstSize) {
+    int hop = dst[0] == 0?255:dst[0];
+    uint8_t* encSrc = RC4(src, dst, msgSize);
+    lsbiEmbedBytes(encSrc, msgSize, dst + 6, dstSize - 6, hop);
+}
+
+void lsbiEmbedSize(uint32_t msgSize, uint8_t* dst, size_t dstSize, size_t hop, int* cursor, int* laps) {
+    int auxCursor = *cursor, auxLaps = *laps;
+    uint8_t sizeBytes[4] = {0};
+    for (int i=0; i<4 ;++i)
+        sizeBytes[i] = ((uint8_t*)&msgSize)[3-i];
+
+    for (int i = 0; i < 4; i++) {
+        uint8_t byteToEmbed = sizeBytes[i];
+
+        for (uint8_t j = 0; j < 8; j++) {
+            dst[auxCursor] = assignNthBitOfXtoY(byteToEmbed, dst[auxCursor], 8 - j - 1);
+
+            auxCursor += hop;
+            if (auxCursor == dstSize) {
+                auxCursor = ++auxLaps;
+            } else if(auxCursor > dstSize) {
+                auxCursor %= dstSize;
+                auxLaps++;
+            }
+        }
+    }
+    *cursor = auxCursor;
+    *laps = auxLaps;
+}
+
+void lsbiEmbedBytes(const uint8_t* src, size_t msgSize, uint8_t* dst, size_t dstSize, size_t hop) {
+    int cursor = 0;
+    int laps = 0;
+    lsbiEmbedSize(msgSize, dst, dstSize, hop, &cursor, &laps);
+
+    for (int i = 0; i < msgSize; i++) {
+        uint8_t byteToEmbed = src[i];
+
+        // Needing 8 destination bytes per source byte.
+        for (uint8_t j = 0; j < 8; j++) {
+            dst[cursor] = assignNthBitOfXtoY(byteToEmbed, dst[cursor], 8 - j - 1);
+
+            cursor += hop;
+            if (cursor == dstSize) {
+                cursor = ++laps;
+            } else if(cursor > dstSize) {
+                cursor %= dstSize;
+                laps++;
+            }
+        }
+    }
+}
+
+uint8_t assignNthBitOfXtoY(uint8_t x, uint8_t y, int n) {
+    // Clear last bit of y
+    y &= 0xFE;
+
+    uint8_t bitToAssign = (x >> n) & 1;
+
+    y |= bitToAssign;
+    return y;
+}
+
+
 
 /* 
 * REMEMBER THAT BMP FILES ARE READ FROM DOWNSIDE-UP AND FROM LEFT TO RIGHT
@@ -176,51 +272,4 @@ uint8_t *lsbi(const uint8_t *bmpFile, const uint8_t *cipherText, const size_t bm
     }
     rowCursor = widthInBytes - 1;
     return stegoBmp;
-}
-
-int isCursorWithinOneByteRange(unsigned int cursor)
-{
-    return cursor >= 0 && cursor <= 7;
-}
-
-/* 
- * This function replaces the least significant bit of the current bmp files' byte
- * with the current position of the bit in the current uint8_tacter from the ciphertext
- *
- * @param bmpByte: the current bmp byte (pixel) to replace the LSB
- * @param cipherTextByte: the current ciphertext byte 
- * @param cBitCursor: represents the cipher text byte cursor (0 <= cBitCursor <= 7)
- */
-uint8_t replaceNthLSB(const uint8_t bmpByte, const uint8_t cipherTextByte, unsigned int cBitCursor, unsigned int bitToReplace)
-{
-    // flipping nth bit of bmpByte to 0
-    uint8_t bmpWithLSBToZero = flippingNthLSBToZero(bmpByte, bitToReplace);
-    // changing nth bit of bmpByte to cipherTextByte[cBitCursor]
-    uint8_t newBmpByte = (getCurrentBitOf(cipherTextByte, cBitCursor) << bitToReplace) | bmpWithLSBToZero;
-
-    return newBmpByte;
-}
-
-// TODO remove this, for test purposes
-void printingBits(int number)
-{
-    unsigned i;
-    // Reverse loop
-    for (i = 1 << 7; i > 0; i >>= 1)
-        printf("%u", !!(number & i));
-
-    // printf("\n");
-}
-
-uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace)
-{
-    return bytes & (~(1 << bitToReplace));
-}
-
-/**
- * Bits are count starting from LSB
- */
-uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor)
-{
-    return ((cipherTextuint8_t >> cBitCursor) & 1);
 }

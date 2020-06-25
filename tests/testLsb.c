@@ -232,6 +232,177 @@ void inputSequenceTest() {
     assert(strcmp((char*) buffer + 4, (char*) message) == 0);
 }
 
+void lsb1EmbedNBytesTest() {
+    uint8_t bytesToEmbed[2] = {1, 255};
+
+    uint8_t *dst = calloc(0, 16);
+    // Assign 8 1s at the beginning.
+    dst[0] = 255;
+
+    lsb1EmbedBytes(bytesToEmbed, dst, 2);
+
+    // First byte was 255 so it should have only the last bit set to 0.
+    assert(dst[0] == 254);
+    // Remaining bytes were all 0.
+    for(int i = 1; i < 7; i++ ){
+        assert(dst[i] == 0);
+    }
+    assert(dst[7] == 1);
+    for(int i = 8; i < 16; i++ ){
+        assert(dst[i] == 1);
+    }
+
+    free(dst);
+}
+
+void lsb4EmbedNBytesTest() {
+    uint8_t bytesToEmbed[2] = {0x01, 0xFF};
+
+    uint8_t *dst = calloc(0, 4);
+    // Assign 8 1s at the beginning.
+    dst[0] = 255;
+
+    lsb4EmbedBytes(bytesToEmbed, dst, 2);
+
+    // First byte was 255 so it should have only the first 4 bits set to 1.
+    assert(dst[0] == 0b11110000);
+
+    // Second byte was 0 so it should have the last bit set to 1.
+    assert(dst[1] == 1);
+
+    // Last 2 bytes were 0 so they should have the last 4 bits set to 1.
+    assert(dst[2] == 0x0F);
+    assert(dst[3] == 0x0F);
+
+    free(dst);
+}
+
+void lsb1ExtractNBytesTest() {
+    uint8_t src[8] = {0, 0, 0, 0, 7, 7, 0, 0};
+    uint8_t dst;
+
+    lsb1ExtractBytes(src, &dst, 1);
+
+    assert(dst == 0b00001100);
+}
+
+void lsb4ExtractNBytesTest() {
+    uint8_t src[2] = {0xFE, 0x73};
+    uint8_t dst;
+
+    lsb4ExtractBytes(src, &dst, 1);
+
+    assert(dst == 0xE3);
+}
+
+void lsbiEmbedTest()
+{
+    uint8_t dst[40] = {0};
+    const uint8_t byte = 0xF0;
+    lsbiEmbedBytes(&byte, 1, dst, 40, 2);
+
+    // First 31 bytes doing hops (2) should be 0.
+    // 0 - 2 - 4 - ... - 18 - 1 - 3 - 5 - 7 - 9 - 11 - 13 - 15 - 17 - 19 - 21 (31)
+    for(int i = 0; i < 31; i++) {
+        if(i%2 == 0 || i < 22) {
+            assert(dst[i] == 0);
+        }
+    }
+
+    // Size bit
+    assert(dst[23] == 1);
+
+    // First bits of hidden byte.
+    assert(dst[25] == 1);
+    assert(dst[27] == 1);
+    assert(dst[29] == 1);
+    assert(dst[31] == 1);
+
+    // Last bits of hidden byte.
+    assert(dst[33] == 0);
+    assert(dst[35] == 0);
+    assert(dst[37] == 0);
+    assert(dst[39] == 0);
+}
+
+void lsbiExtractTest()
+{
+    uint8_t byte;
+    uint8_t source[40] = {0};
+    // Last bit of last size byte.
+    source[23] = 1;
+
+    // Hidden byte will be 25-27-29-31-33-35-37-39 so setting bit 31 to 1 would result in 16.
+    source[31] = 1;
+
+    lsbiExtractBytes(source, 40, &byte, 2);
+
+    assert(byte == 16);
+}
+
+void lsb1EmbedAndExtractTest() {
+    uint8_t byte = 0b10011100;
+    uint8_t *carrier = malloc(8);
+
+    lsb1EmbedBytes(&byte, carrier, 1);
+
+    uint8_t result;
+    lsb1ExtractBytes(carrier, &result, 1);
+
+    assert(result == byte);
+}
+
+void lsb4EmbedAndExtractTest() {
+    uint8_t byte = 0b10011101;
+    uint8_t *carrier = malloc(2);
+
+    lsb4EmbedBytes(&byte, carrier, 1);
+
+    uint8_t result;
+    lsb4ExtractBytes(carrier, &result, 1);
+
+    assert(result == byte);
+}
+
+void lsbiEmbedAndExtractTest() {
+    int carrierSize = 14 * 8;
+    uint8_t bytes[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    uint8_t *carrier = malloc(carrierSize);
+
+    lsbiEmbedBytes(bytes, 10, carrier, carrierSize, 2);
+
+    uint8_t* result = malloc(10);
+    lsbiExtractBytes(carrier, carrierSize, result, 2);
+
+    for (int i = 0; i < 10; i++) {
+        assert(result[i] == i);
+    }
+}
+
+void lsbiEncryptedTest() {
+    int byteCount = 64;
+    int carrierSize = 6 + 4*8 + byteCount*8;
+
+    uint8_t* carrier = calloc(carrierSize, 1);
+    //Hop is 3
+    carrier[0] = 1;
+    carrier[1] = 5;
+    carrier[2] = 122;
+    carrier[3] = 6;
+    carrier[4] = 43;
+    carrier[5] = 240;
+
+    uint8_t* bytes = malloc(byteCount);
+
+    lsbiEncryptAndEmbed(bytes, byteCount, carrier, carrierSize);
+
+    uint8_t* result = malloc(byteCount);
+    lsbiExtractAndDecrypt(carrier, carrierSize, result);
+
+    for (int i = 0; i < byteCount; i++) {
+        assert(result[i] == bytes[i]);
+    }
+}
 
 int main()
 {
@@ -251,6 +422,20 @@ int main()
     // lsb1ExtractTest();
 
     //lsb1EmbedFullTest();
+
+    lsb1EmbedNBytesTest();
+    lsb4EmbedNBytesTest();
+    lsbiEmbedTest();
+
+    lsb1ExtractNBytesTest();
+    lsb4ExtractNBytesTest();
+    lsbiExtractTest();
+
+    lsb1EmbedAndExtractTest();
+    lsb4EmbedAndExtractTest();
+    lsbiEmbedAndExtractTest();
+
+    lsbiEncryptedTest();
 
     inputSequenceTest();
 }

@@ -1,6 +1,6 @@
 #include "../include/rc4.h"
 #include <string.h>
-
+#include "lsbHelper.h"
 
 uint8_t *calculateKey(const uint8_t *bmpFile);
 uint8_t *KSA(const uint8_t *key);
@@ -9,9 +9,7 @@ uint8_t *initVectorT(const uint8_t *key);
 void    swap(uint8_t *s, uint32_t i, uint32_t j);
 uint8_t *PRGA(uint8_t *s, size_t len);
 
-static size_t KEY_SIZE    = 6;
-static size_t VECTOR_SIZE = 256;
-
+static const size_t VECTOR_SIZE = 256;
 
 uint8_t *
 RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
@@ -21,14 +19,29 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
     uint8_t *keyStream    = PRGA(s, msgSize);
     uint8_t *encryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
 
-    for (size_t i = 0; i < msgSize; i++)
+    for (int i = 0; i < msgSize; i++)
+    {
         encryptedMsg[i] = msg[i] ^ keyStream[i];
+    }
 
     free(key);
     free(s);
     free(keyStream);
 
     return encryptedMsg;
+}
+
+uint8_t *
+RC4decrypt(const uint8_t *encryptedMsg, const uint8_t *bmpCarrier, const size_t msgSize)
+{
+    uint8_t *key          = calculateKey(bmpCarrier);
+    uint8_t *decryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
+
+    for (size_t i = 0; i < msgSize; i++) {
+        decryptedMsg[i] = encryptedMsg[i] ^ key[i];
+    }
+
+    return decryptedMsg;
 }
 
 uint8_t *
