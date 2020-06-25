@@ -6,45 +6,43 @@
 OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize);
 OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize);
 OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize);
+void copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes);
+void copyMsgData(MESSAGE *msg, uint8_t *sourceBytes);
 
-OUTPUT_BMP *
-extract(BMP *carrierBMP, UserInput userInput)
+void
+extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
-    uint8_t *plaintext, *originalMsg;
-    size_t embeddedSize, originalMsgSize;
-    
-    size_t stegoSize = extractStegoSizeFrom(carrierBMP->data);
-    uint8_t *embeddedData = malloc(stegoSize);
+    uint8_t *plaintext;
+    size_t embeddedSize  = extractFourBytesOfSizeFrom(carrierBMP->data, userInput.stegoAlgorithm);
+    uint8_t *embeddedMsg = malloc(embeddedSize);
 
     switch (userInput.stegoAlgorithm)
     {
-    case LSB1:
-        // lsb1ExtractBytes(user);
-        break;
-    case LSB4:
-        break;
-    case LSBI:
-        break;
+        case LSB1:
+            lsb1ExtractBytes(carrierBMP->data, embeddedMsg, embeddedSize);
+            break;
+        case LSB4:
+            lsb4ExtractBytes(carrierBMP->data, embeddedMsg, embeddedSize);
+            break;
+        case LSBI:
+            lsbiExtractAndDecrypt(carrierBMP->data, embeddedMsg, embeddedSize);
+            break;
     }
 
     if (userInput.encryption != NONE)
     {
         plaintext = malloc(sizeof(*plaintext) * embeddedSize);
-        decrypt(embeddedData, embeddedSize, plaintext, userInput.encryption, userInput.mode,
+        decrypt(embeddedMsg, embeddedSize, plaintext, userInput.encryption, userInput.mode,
                 userInput.password);
     }
     else
     {
-        plaintext = embeddedData;
+        plaintext = embeddedMsg;
     }
 
-    memcpy(&originalMsgSize, plaintext, 4);
-    originalMsg = malloc(sizeof(*originalMsg) * originalMsgSize);
-    memcpy(originalMsg, plaintext + 4, originalMsgSize);
-    // TODO: Fix this file extension thing
-    // strcpy(fileExtension, (char *)(plaintext + 4 + originalMsgSize));
-
-    return originalMsg;
+    memcpy(&msg->size, plaintext, 4);
+    copyMsgData(msg, plaintext);
+    copyFileExtension(msg, plaintext);
 }
 
 int decrypt(const uint8_t *ciphertext, int ctextLen, uint8_t *plaintext, ENCRYPTION encryption, ENC_MODE mode,
@@ -76,4 +74,19 @@ int decrypt(const uint8_t *ciphertext, int ctextLen, uint8_t *plaintext, ENCRYPT
     EVP_CIPHER_CTX_free(ctx);
 
     return plaintextLen;
+}
+
+void
+copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes)
+{
+    char *fileExtension = (char *) (sourceBytes + 4 + msg->size);
+    msg->extension = calloc(strlen(fileExtension) + 1, 1);
+    strcpy((char *)msg->extension, fileExtension);
+}
+
+void
+copyMsgData(MESSAGE *msg, uint8_t *sourceBytes)
+{
+    msg->data = malloc(sizeof(*msg->data) * msg->size);
+    memcpy(msg->data, sourceBytes + 4, msg->size);
 }

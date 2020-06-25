@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <extract.h>
 #include "include/parser.h"
 #include "include/embed.h"
 
@@ -44,10 +45,9 @@ int main(int argc, char *argv[])
         if ((carrierBmp = parseBmp(parsedInput.inputFileName)) == NULL)
             return EXIT_FAILURE;
 
-        if ((output = extract(carrierBmp, parsedInput)) == NULL)
-            return EXIT_FAILURE;
-
-        fwrite(output->data, sizeof(uint8_t), output->size, parsedInput.outputFileName);
+        extract(carrierBmp, msg, parsedInput);
+        char fileName[64];
+        saveMessage(msg, parsedInput.outputFileName);
     }
 
     // closeFiles();
@@ -55,32 +55,9 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-//void openFiles()
-//{
-//    carrierBmpFile = fopen(parsedInput.carrierFileName, "r+");
-//    msgFile = fopen(parsedInput.inputFileName, "r");
-//    outputFile = fopen(parsedInput.outputFileName, "w+");
-//    carrierBmp = malloc(sizeof(*carrierBmp) * carrierBmpSize);
-//    msg = malloc(sizeof(*msg) * msgSize);
-//
-//    fread(carrierBmp, sizeof(*carrierBmp), carrierBmpSize, carrierBmpFile);
-//    fread(msg, sizeof(*msg), 102, msgFile); // FIX THIS
-//}
-
 void closeFiles()
 {
     fclose(carrierBmpFile);
     fclose(msgFile);
     fclose(outputFile);
-}
-
-void getFileExtensionFrom(const char *fileName, char *fileExtension)
-{
-    int i;
-
-    for (i = 0; fileName[i] != '.'; i++)
-        ;
-
-    for (int j = 0; i < (int)strlen(fileName); i++, j++)
-        fileExtension[0] = fileName[i];
 }
