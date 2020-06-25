@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef enum PARSE_RET {
+typedef enum PARSE_RET
+{
     PARSED_OK = 0,
     EMBED_AND_EXTRACT_ERROR,
     MISSING_PARAMETER,
@@ -15,7 +16,8 @@ typedef enum PARSE_RET {
     NOT_MODE_OPTION_ERROR,
     MISSING_ACTION
 } PARSE_RET;
-typedef enum OPTION {
+typedef enum OPTION
+{
     EMBD = 0,
     EXTR,
     INPUT,
@@ -27,35 +29,41 @@ typedef enum OPTION {
     PASS,
     END
 } OPTION;
-typedef enum ACTION {
+typedef enum ACTION
+{
     EMBED,
     EXTRACT
 } ACTION;
-typedef enum STEGO_ALGO {
+typedef enum STEGO_ALGO
+{
     LSB1,
     LSB4,
     LSBI
 } STEGO_ALGO;
-typedef enum EXTENSION_CHECK {
+typedef enum EXTENSION_CHECK
+{
     BMP_OK,
     NOT_BMP_EXTENSION_ERROR,
     SMALL_FILE_NAME_ERROR
 } EXTENSION_CHECK;
-typedef enum ENCRYPTION {
+typedef enum ENCRYPTION
+{
+    NONE,
     AES_128,
     AES_192,
     AES_256,
-    DES,
-    NONE
+    DES
 } ENCRYPTION;
-typedef enum ENC_MODE {
+typedef enum ENC_MODE
+{
     ECB,
     CFB,
     OFB,
     CBC
 } ENC_MODE;
 
-struct UserInput {
+struct UserInput
+{
     ACTION action;
     char *inputFileName;
     char *outputFileName;

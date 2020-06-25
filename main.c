@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
         fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
 
-    closeFiles();
+    // closeFiles();
 
     return EXIT_SUCCESS;
 }
