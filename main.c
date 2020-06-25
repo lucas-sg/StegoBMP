@@ -41,11 +41,13 @@ int main(int argc, char *argv[])
     }
     else
     {
-        //output = extract(parsedInput.inputFileName, carrierBmpSize, parsedInput);
-        //if ((output = extract(parsedInput, carrierBmp, msg)) == NULL)
-        //    return EXIT_FAILURE;
+        if ((carrierBmp = parseBmp(parsedInput.inputFileName)) == NULL)
+            return EXIT_FAILURE;
 
-        fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
+        if ((output = extract(carrierBmp, parsedInput)) == NULL)
+            return EXIT_FAILURE;
+
+        fwrite(output->data, sizeof(uint8_t), output->size, parsedInput.outputFileName);
     }
 
     // closeFiles();
