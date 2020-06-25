@@ -1,5 +1,5 @@
-#include "extract.h"
-#include "cryptoUtils.h"
+#include "include/extract.h"
+#include "include/cryptoUtils.h"
 #include <string.h>
 
 OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize);

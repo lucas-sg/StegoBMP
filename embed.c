@@ -1,6 +1,6 @@
-#include "embed.h"
-#include "cryptoUtils.h"
-#include "lsbEmbed.h"
+#include "include/embed.h"
+#include "include/cryptoUtils.h"
+#include "include/lsbEmbed.h"
 #include <string.h>
 
 
