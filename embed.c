@@ -5,79 +5,60 @@
 
 
 size_t buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer);
+void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg);
 
-
-uint8_t *
+void
 embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
 {
     uint8_t *outputBmp     = NULL;
     // TODO: Change this to allocate size for ptextLen + plaintext + fileExtension
     uint8_t *inputSequence = NULL;
-    size_t inputSeqLen     = buildInputSequence(msg->data, msg->size, msg->extension, inputSequence);
+    size_t inputSeqLen     = buildInputSequence(msg->data, msg->size, (char *)msg->extension, inputSequence);
     uint8_t *dataToEmbed;
     size_t dataLen;
 
     if (userInput.encryption != NONE)
     {
-        dataToEmbed = malloc((msg->size/16 + 1) * 16);
-        dataLen     = encrypt(inputSequence, inputSeqLen, dataToEmbed, userInput.encryption, userInput.mode,
+        msg->data = malloc((msg->size/16 + 1) * 16);
+        msg->size = encrypt(inputSequence, inputSeqLen, msg->data, userInput.encryption, userInput.mode,
                               userInput.password);
     }
     else
     {
-        dataLen     = inputSeqLen;
-        dataToEmbed = inputSequence;
+        msg->size = inputSeqLen;
+        msg->data = inputSequence;
     }
 
     switch (userInput.stegoAlgorithm)
     {
         case LSB1:
-            return lsbEmbed(LSB1, carrierBmp, dataToEmbed);
+            lsbEmbed(LSB1, carrierBmp, msg);
         case LSB4:
-            return lsbEmbed(LSB4, carrierBmp, dataToEmbed);
+            lsbEmbed(LSB4, carrierBmp, msg);
         case LSBI:
-            return lsbEmbed(LSBI, carrierBmp, dataToEmbed);
+            lsbEmbed(LSBI, carrierBmp, msg);
     }
 }
 
-OUTPUT_BMP *
+void
 lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg)
 {
     if (getBytesNeededToStego(msg, stegoAlgo) > bmp->header->size)
-    {
         printf("The message you are trying to embed is too large for the .bmp carrier image (%d KB). "
                "Please choose a larger image or try to embed a smaller message.\n", (int) (bmp->header->size/1024));
-        return NULL;
-    }
-
-    uint8_t *bmpWithoutHeader;
 
     switch (stegoAlgo)
     {
         // TODO: Change LSB1, LSB4 and LSBI prototype to lsbX(BMP *bmp, MESSAGE *msg);
         case LSB1:
-//            bmpWithoutHeader = lsb1(bmp, msg);
+            lsb1EmbedBytes(msg->data, bmp->data, msg->size);
         case LSB4:
-//            bmpWithoutHeader = lsb4(bmp, msg);
+            lsb4EmbedBytes(msg->data, bmp->data, msg->size);
         case LSBI:
-//            bmpWithoutHeader = lsbi(bmp, msg);
+            lsbiEncryptAndEmbed(msg->data, msg->size, bmp->data, bmp->infoHeader->imageSize);
         default:
             break;
     }
-
-    return mergeBmpWithHeader(bmpWithoutHeader, bmp);
-}
-
-OUTPUT_BMP *
-mergeBmpWithHeader(const uint8_t *bmpWithoutHeader, BMP *bmp)
-{
-    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
-    output->data       = malloc(bmp->header->size);
-    memcpy(output->data, bmp->header, HEADER_SIZE);
-    memcpy(output->data + HEADER_SIZE, bmpWithoutHeader, bmp->infoHeader->imageSize);
-    output->size       = bmp->header->size;
-
-    return output;
 }
 
 int

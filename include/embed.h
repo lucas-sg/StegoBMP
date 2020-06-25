@@ -13,7 +13,7 @@ typedef struct
     size_t   size;
 } OUTPUT_BMP;
 
-OUTPUT_BMP *embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg);
+void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg);
 int encrypt(const uint8_t *plaintext, int plaintextLen, uint8_t *ciphertext, ENCRYPTION encryption, ENC_MODE mode,
             const uint8_t *password);
 OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath);

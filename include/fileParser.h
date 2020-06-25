@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "parser.h"
+#define HEADER_SIZE 54
 
 typedef struct __attribute__((packed))
 {
@@ -38,8 +39,6 @@ typedef struct
     uint8_t *extension;
     uint8_t *data;
 } MESSAGE;
-
-const size_t HEADER_SIZE = 54;
 
 uint32_t getExtensionSize(const char *fileName);
 uint32_t getBytesNeededToStego(MESSAGE * message, STEGO_ALGO method);

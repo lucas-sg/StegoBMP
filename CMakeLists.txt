@@ -5,8 +5,6 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 include_directories(include)
 find_package(OpenSSL REQUIRED)
 file(GLOB stego_SRC "lsbi/rc4.c" "stego/*.c" "*.c")
-add_executable(bmpParserTest tests/bmpParser.c bmpParser.c)
-add_executable(testLsb tests/testLsb.c bmpParser.c embed.c stego/lsbEmbed.c stego/lsbExtract.c stego/lsbHelper.c lsbi/rc4.c)
 add_executable(main ${stego_SRC})
 add_executable(test tests/testSuite.c tests/testParser.c parser.c tests/testRC4.c lsbi/rc4.c tests/testEncrypt.c
                     embed.c extract.c cryptoUtils.c)

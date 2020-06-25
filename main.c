@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <string.h>
 #include "include/parser.h"
 #include "include/embed.h"
-#include "include/extract.h"
 
 void openFiles();
 void closeFiles();
@@ -37,9 +34,7 @@ int main(int argc, char *argv[])
         if ((carrierBmp = parseBmp(parsedInput.carrierFileName)) == NULL)
             return EXIT_FAILURE;
 
-        if ((embed(parsedInput, carrierBmp, msg)) == NULL)
-            return EXIT_FAILURE;
-
+        embed(parsedInput, carrierBmp, msg);
         saveBmp(carrierBmp, parsedInput.outputFileName);
     }
     else
