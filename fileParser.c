@@ -102,6 +102,25 @@ MESSAGE* parseMessage(char* messagePath) {
     return msg;
 }
 
+void saveBmp(BMP* bmp, char *bmpPath) {
+    FILE *fp = fopen(bmpPath, "w+");
+
+    fwrite(bmp->header, sizeof(HEADER), 1, fp);
+    fwrite(bmp->infoHeader, sizeof(INFO_HEADER), 1, fp);
+    fwrite(bmp->data, bmp->infoHeader->imageSize, 1, fp);
+
+    fclose(fp);
+}
+
+void saveMessage(MESSAGE* msg, char *messagePathWithoutExtension) {
+    FILE *fp = fopen(strcat(messagePathWithoutExtension, msg->extension), "w+");
+
+    fwrite(msg->data, msg->size, 1, fp);
+
+    fclose(fp);
+}
+
+
 uint32_t getExtensionSize(const char *fileName)
 {
     return strlen(strrchr(fileName, '.'));

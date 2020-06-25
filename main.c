@@ -37,16 +37,16 @@ int main(int argc, char *argv[])
         if ((carrierBmp = parseBmp(parsedInput.carrierFileName)) == NULL)
             return EXIT_FAILURE;
 
-        if ((output = embed(parsedInput, carrierBmp, msg)) == NULL)
+        if ((embed(parsedInput, carrierBmp, msg)) == NULL)
             return EXIT_FAILURE;
 
-        fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
+        saveBmp(carrierBmp, parsedInput.outputFileName);
     }
     else
     {
-        output = extract(parsedInput.inputFileName, carrierBmpSize, parsedInput);
-        if ((output = extract(parsedInput, carrierBmp, msg)) == NULL)
-            return EXIT_FAILURE;
+        //output = extract(parsedInput.inputFileName, carrierBmpSize, parsedInput);
+        //if ((output = extract(parsedInput, carrierBmp, msg)) == NULL)
+        //    return EXIT_FAILURE;
 
         fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }

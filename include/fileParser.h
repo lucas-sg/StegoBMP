@@ -45,5 +45,7 @@ uint32_t getExtensionSize(const char *fileName);
 uint32_t getBytesNeededToStego(MESSAGE * message, STEGO_ALGO method);
 BMP *parseBmp(char *bmpPath);
 MESSAGE *parseMessage(char *messagePath);
+void saveBmp(BMP* bmp, char *bmpPath);
+void saveMessage(MESSAGE* msg, char *messagePathWithoutExtension);
 
 #endif
