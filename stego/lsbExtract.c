@@ -15,8 +15,8 @@ unsigned int extractDecimalFromBinary(uint8_t binary);
 
 // Extract N bytes from dst
 void lsb1ExtractBytes(const uint8_t* src, uint8_t* dst, size_t size) {
+    uint8_t byte = 0;
     for (int i = 0; i < size; i++) {
-        uint8_t byte = 0;
 
         for (uint8_t j = 0; j < 7; j++) {
             uint8_t sourceByte = src[i*8 + j] & 1;
@@ -25,7 +25,7 @@ void lsb1ExtractBytes(const uint8_t* src, uint8_t* dst, size_t size) {
         dst[i] = byte;
     }
 
-    uint8_t byte = 1;
+    byte = 1;
     for (int i = 0; byte > 0; i++ ) {
         byte = 0;
 

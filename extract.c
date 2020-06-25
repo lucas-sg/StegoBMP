@@ -14,7 +14,7 @@ extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
     uint8_t *plaintext;
     size_t embeddedSize  = extractFourBytesOfSizeFrom(carrierBMP->data, userInput.stegoAlgorithm);
-    uint8_t *embeddedMsg = malloc(embeddedSize + 16);
+    uint8_t *embeddedMsg = calloc(embeddedSize + 16, 1);
 
     switch (userInput.stegoAlgorithm)
     {
