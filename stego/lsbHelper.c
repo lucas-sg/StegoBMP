@@ -6,6 +6,13 @@ unsigned int extractStegoSizeFrom(const uint8_t *bytes)
     return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | (bytes[3] << 0);
 }
 
+const uint8_t* sizeToByteArray(uint32_t size) {
+    uint8_t* bytes = malloc(4);
+    uint32_t mask = 0xFF;
+
+    bytes[0] = size;
+}
+
 int isCursorWithinOneByteRange(unsigned int cursor)
 {
     return cursor >= 0 && cursor <= 7;
@@ -51,14 +58,6 @@ uint8_t flippingNthLSBToZero(const uint8_t bytes, int bitToReplace)
 uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor)
 {
     return ((cipherTextuint8_t >> cBitCursor) & 1);
-}
-
-uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
-{
-    uint8_t *rc4Key = malloc(6 * sizeof(uint8_t));
-    size_t firstPixelIndex = bmpSize - 1 - widthInBytes - 1;
-    memcpy(rc4Key, bmpFile - firstPixelIndex, 6);
-    return rc4Key;
 }
 
 int getHopFromBmpFile(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)

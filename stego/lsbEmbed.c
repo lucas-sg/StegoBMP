@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 uint8_t assignNthBitOfXtoY(uint8_t x, uint8_t y, int n);
 
@@ -33,15 +34,42 @@ void lsb4EmbedBytes(const uint8_t* src, uint8_t* dst, size_t size) {
     }
 }
 
-void lsbiPreEmbed(const uint8_t* src, size_t msgSize, uint8_t* dst, size_t dstSize) {
-    int hop = (int) dst[0]?dst[0]:255; //TODO
-    src = RC4(src, dst, msgSize);
-    lsbiEmbedBytes(src, msgSize, dst + 6, dstSize - 6, hop);
+void lsbiEncryptAndEmbed(const uint8_t* src, uint32_t msgSize, uint8_t* dst, size_t dstSize) {
+    int hop = dst[0] == 0?255:dst[0];
+    uint8_t* encSrc = RC4(src, dst, msgSize);
+    lsbiEmbedBytes(encSrc, msgSize, dst + 6, dstSize - 6, hop);
+}
+
+void lsbiEmbedSize(uint32_t msgSize, uint8_t* dst, size_t dstSize, size_t hop, int* cursor, int* laps) {
+    int auxCursor = *cursor, auxLaps = *laps;
+    uint8_t sizeBytes[4] = {0};
+    for (int i=0; i<4 ;++i)
+        sizeBytes[i] = ((uint8_t*)&msgSize)[3-i];
+
+    for (int i = 0; i < 4; i++) {
+        uint8_t byteToEmbed = sizeBytes[i];
+
+        for (uint8_t j = 0; j < 8; j++) {
+            dst[auxCursor] = assignNthBitOfXtoY(byteToEmbed, dst[auxCursor], 8 - j - 1);
+
+            auxCursor += hop;
+            if (auxCursor == dstSize) {
+                auxCursor = ++auxLaps;
+            } else if(auxCursor > dstSize) {
+                auxCursor %= dstSize;
+                auxLaps++;
+            }
+        }
+    }
+    *cursor = auxCursor;
+    *laps = auxLaps;
 }
 
 void lsbiEmbedBytes(const uint8_t* src, size_t msgSize, uint8_t* dst, size_t dstSize, size_t hop) {
     int cursor = 0;
     int laps = 0;
+    lsbiEmbedSize(msgSize, dst, dstSize, hop, &cursor, &laps);
+
     for (int i = 0; i < msgSize; i++) {
         uint8_t byteToEmbed = src[i];
 

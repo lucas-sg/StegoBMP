@@ -17,7 +17,8 @@ int isCursorWithinOneByteRange(unsigned int cursor);
 void printingBits(int number);
 void lsb1EmbedBytes(const uint8_t* src, uint8_t* dst, size_t size);
 void lsb4EmbedBytes(const uint8_t* src, uint8_t* dst, size_t size);
-void lsbiPreEmbed(const uint8_t* src, size_t msgSize, uint8_t* dst, size_t dstSize);
+void lsbiEncryptAndEmbed(const uint8_t* src, uint32_t msgSize, uint8_t* dst, size_t dstSize);
 void lsbiEmbedBytes(const uint8_t* src, size_t msgSize, uint8_t* dst, size_t dstSize, size_t hop);
+void lsbiEmbedSize(uint32_t msgSize, uint8_t* dst, size_t dstSize, size_t hop, int* cursor, int* laps);
 
 #endif
