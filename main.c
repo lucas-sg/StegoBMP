@@ -7,7 +7,7 @@
 
 void openFiles();
 void closeFiles();
-void getFileExtensionFrom(const char* fileName, char *fileExtension);
+void getFileExtensionFrom(const char *fileName, char *fileExtension);
 
 static UserInput parsedInput;
 FILE *carrierBmpFile, *msgFile, *outputFile;
@@ -30,12 +30,14 @@ int main(int argc, char *argv[])
     {
         if ((msg = parseMessage(parsedInput.inputFileName)) == NULL)
             return EXIT_FAILURE;
-
+        printf("%s\n", parsedInput.carrierFileName);
         if ((carrierBmp = parseBmp(parsedInput.carrierFileName)) == NULL)
             return EXIT_FAILURE;
-
+        printf("ANTES DE EMBEBER\n");
         embed(parsedInput, carrierBmp, msg);
+        printf("DESPUES DE EMBEBER\n");
         saveBmp(carrierBmp, parsedInput.outputFileName);
+        printf("DESPUES DE GUARDAR EL SAVE\n");
     }
     else
     {
@@ -46,7 +48,7 @@ int main(int argc, char *argv[])
         fwrite(output->data, sizeof(uint8_t), output->size, outputFile);
     }
 
-     closeFiles();
+    closeFiles();
 
     return EXIT_SUCCESS;
 }
@@ -70,12 +72,12 @@ void closeFiles()
     fclose(outputFile);
 }
 
-void
-getFileExtensionFrom(const char* fileName, char *fileExtension)
+void getFileExtensionFrom(const char *fileName, char *fileExtension)
 {
     int i;
 
-    for (i = 0; fileName[i] != '.'; i++);
+    for (i = 0; fileName[i] != '.'; i++)
+        ;
 
     for (int j = 0; i < (int)strlen(fileName); i++, j++)
         fileExtension[0] = fileName[i];

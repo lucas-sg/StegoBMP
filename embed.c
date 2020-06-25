@@ -14,6 +14,7 @@ embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
     // TODO: Change this to allocate size for ptextLen + plaintext + fileExtension
     uint8_t *inputSequence = NULL;
     size_t inputSeqLen     = buildInputSequence(msg->data, msg->size, (char *)msg->extension, inputSequence);
+    printf("BUILD SEQUECNE\n");
     uint8_t *dataToEmbed;
     size_t dataLen;
 
@@ -43,6 +44,7 @@ embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
 void
 lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg)
 {
+    printf("EN LSB EMBED\n");
     if (getBytesNeededToStego(msg, stegoAlgo) > bmp->header->size)
         printf("The message you are trying to embed is too large for the .bmp carrier image (%d KB). "
                "Please choose a larger image or try to embed a smaller message.\n", (int) (bmp->header->size/1024));
@@ -107,5 +109,6 @@ buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, 
     cursor += strlen(fileExtension) + 1;
 
     // Total file size minus first 4 bytes used for file size :)
+    printf("NO LLEGA A RETORNAR BUILD INPUT SEQUENCE\n");
     return cursor;
 }
