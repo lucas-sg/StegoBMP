@@ -42,19 +42,36 @@ void lsb1ExtractBytes(const uint8_t *src, uint8_t *dst, size_t size)
     }
 }
 
-void lsb4ExtractBytes(const uint8_t *source, uint8_t *dst, size_t N)
+void lsb4ExtractBytes(const uint8_t *source, uint8_t *dst, size_t size)
 {
-    for (int i = 0; i < N; i++)
+    uint8_t byte;
+    for (int i = 0, j = 0; j < size; j++)
     {
-        uint8_t byte = 0;
+        byte = 0;
 
-        uint8_t firstSourceByte = source[i * 8] & 0x0F;
-        uint8_t secondSourceByte = source[i * 8 + 1] & 0x0F;
+        uint8_t firstSourceByte = source[i] & 0x0F;
+        uint8_t secondSourceByte = source[i + 1] & 0x0F;
+
+        i += 2;
 
         byte |= firstSourceByte << 4;
         byte |= secondSourceByte;
+        dst[j] = byte;
+    }
+    byte = 1;
 
-        dst[i] = byte;
+    for (int i = size*2, j = size; byte > 0; j++)
+    {
+        byte = 0;
+
+        uint8_t firstSourceByte = source[i] & 0x0F;
+        uint8_t secondSourceByte = source[i + 1] & 0x0F;
+
+        i += 2;
+
+        byte |= firstSourceByte << 4;
+        byte |= secondSourceByte;
+        dst[j] = byte;
     }
 }
 

@@ -14,6 +14,7 @@ extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
     uint8_t *plaintext;
     size_t embeddedSize  = extractFourBytesOfSizeFrom(carrierBMP->data, userInput.stegoAlgorithm);
+    printf("El embedded size es %d\n", embeddedSize);
     uint8_t *embeddedMsg = calloc(embeddedSize + 16, 1);
 
     switch (userInput.stegoAlgorithm)
@@ -22,15 +23,15 @@ extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
             lsb1ExtractBytes(carrierBMP->data + 4*8, embeddedMsg, embeddedSize);
             break;
         case LSB4:
-            lsb4ExtractBytes(carrierBMP->data + 2*8, embeddedMsg, embeddedSize);
+            lsb4ExtractBytes(carrierBMP->data + 8, embeddedMsg, embeddedSize);
             break;
         case LSBI:
             lsbiExtractAndDecrypt(carrierBMP->data, embeddedMsg, embeddedSize);
             break;
     }
-
     if (userInput.encryption != NONE)
     {
+        printf("Va a decriptar\n");
         plaintext = malloc(sizeof(*plaintext) * embeddedSize);
         decrypt(embeddedMsg, embeddedSize, plaintext, userInput.encryption, userInput.mode,
                 userInput.password);
