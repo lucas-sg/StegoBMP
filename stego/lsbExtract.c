@@ -13,36 +13,43 @@ unsigned int extractDecimalFromBinary(uint8_t binary);
  * Keep in mind these functions could be abstracted a lot
  */
 
-// Extract N bytes from dst
-void lsb1ExtractBytes(const uint8_t* src, uint8_t* dst, size_t size) {
+// Extract size bytes from dst
+void lsb1ExtractBytes(const uint8_t *src, uint8_t *dst, size_t size)
+{
     uint8_t byte = 0;
-    for (int i = 0; i < size; i++) {
-
-        for (uint8_t j = 0; j < 7; j++) {
-            uint8_t sourceByte = src[i*8 + j] & 1;
+    for (int i = 0; i < size; i++)
+    {
+        byte = 0;
+        for (uint8_t j = 0; j <= 7; j++)
+        {
+            uint8_t sourceByte = src[i * 8 + j] & 1;
             byte |= (sourceByte & 1) << (7 - j);
         }
         dst[i] = byte;
     }
 
     byte = 1;
-    for (int i = 0; byte > 0; i++ ) {
+    for (int i = size; byte > 0; i++)
+    {
         byte = 0;
 
-        for (uint8_t j = 0; j < 7; j++) {
-            uint8_t sourceByte = src[i*8 + j] & 1;
+        for (uint8_t j = 0; j <= 7; j++)
+        {
+            uint8_t sourceByte = src[i * 8 + j] & 1;
             byte |= (sourceByte & 1) << (7 - j);
         }
         dst[i] = byte;
     }
 }
 
-void lsb4ExtractBytes(const uint8_t* source, uint8_t* dst, size_t N) {
-    for (int i = 0; i < N; i++) {
+void lsb4ExtractBytes(const uint8_t *source, uint8_t *dst, size_t N)
+{
+    for (int i = 0; i < N; i++)
+    {
         uint8_t byte = 0;
 
-        uint8_t firstSourceByte = source[i*8] & 0x0F;
-        uint8_t secondSourceByte = source[i*8 + 1] & 0x0F;
+        uint8_t firstSourceByte = source[i * 8] & 0x0F;
+        uint8_t secondSourceByte = source[i * 8 + 1] & 0x0F;
 
         byte |= firstSourceByte << 4;
         byte |= secondSourceByte;
@@ -51,20 +58,26 @@ void lsb4ExtractBytes(const uint8_t* source, uint8_t* dst, size_t N) {
     }
 }
 
-uint32_t lsbiExtractSize(const uint8_t* source, size_t sourceSize, int hop, int* cursor, int* laps) {
+uint32_t lsbiExtractSize(const uint8_t *source, size_t sourceSize, int hop, int *cursor, int *laps)
+{
     int auxCursor = *cursor, auxLaps = *laps;
     uint8_t msgBytes[4];
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++)
+    {
         uint8_t byte = 0;
         // Needing 8 destination bytes per source byte.
-        for (uint8_t j = 0; j < 8; j++) {
+        for (uint8_t j = 0; j < 8; j++)
+        {
             uint8_t sourceByte = source[auxCursor] & 1;
             byte |= (sourceByte & 1) << (7 - j);
 
             auxCursor += hop;
-            if (auxCursor == sourceSize) {
+            if (auxCursor == sourceSize)
+            {
                 auxCursor = ++auxLaps;
-            } else if(auxCursor > sourceSize) {
+            }
+            else if (auxCursor > sourceSize)
+            {
                 auxCursor %= sourceSize;
                 auxLaps++;
             }
@@ -77,23 +90,29 @@ uint32_t lsbiExtractSize(const uint8_t* source, size_t sourceSize, int hop, int*
     return extractStegoSizeFrom(msgBytes);
 }
 
-size_t lsbiExtractBytes(const uint8_t* source, size_t sourceSize, uint8_t* dst, int hop) {
+size_t lsbiExtractBytes(const uint8_t *source, size_t sourceSize, uint8_t *dst, int hop)
+{
     int cursor = 0;
     int laps = 0;
 
     uint32_t msgSize = lsbiExtractSize(source, sourceSize, hop, &cursor, &laps);
 
-    for (int i = 0; i < msgSize; i++) {
+    for (int i = 0; i < msgSize; i++)
+    {
         uint8_t byte = 0;
 
-        for (uint8_t j = 0; j < 8; j++) {
+        for (uint8_t j = 0; j < 8; j++)
+        {
             uint8_t sourceByte = source[cursor] & 1;
             byte |= (sourceByte & 1) << (7 - j);
 
             cursor += hop;
-            if (cursor == sourceSize) {
+            if (cursor == sourceSize)
+            {
                 cursor = ++laps;
-            } else if(cursor > sourceSize) {
+            }
+            else if (cursor > sourceSize)
+            {
                 cursor %= sourceSize;
                 laps++;
             }
@@ -103,11 +122,12 @@ size_t lsbiExtractBytes(const uint8_t* source, size_t sourceSize, uint8_t* dst, 
     return msgSize;
 }
 
-void lsbiExtractAndDecrypt(const uint8_t* source, uint8_t* dst, size_t sourceSize) {
-    int hop = source[0] == 0?255:source[0];
-    uint8_t* encMsg = malloc(sourceSize);
+void lsbiExtractAndDecrypt(const uint8_t *source, uint8_t *dst, size_t sourceSize)
+{
+    int hop = source[0] == 0 ? 255 : source[0];
+    uint8_t *encMsg = malloc(sourceSize);
     size_t msgSize = lsbiExtractBytes(source + 6, sourceSize - 6, encMsg, hop);
-    uint8_t* decrypted = RC4(encMsg, source, msgSize);
+    uint8_t *decrypted = RC4(encMsg, source, msgSize);
     memcpy(dst, decrypted, msgSize);
 }
 
