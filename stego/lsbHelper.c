@@ -7,13 +7,47 @@ unsigned int extractStegoSizeFrom(const uint8_t *bytes)
     return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | (bytes[3] << 0);
 }
 
-size_t extractFourBytesOfSizeFrom(const uint8_t *bytes, STEGO_ALGO stegoAlgo)
+size_t extractFourBytesOfSizeFrom(const uint8_t *bytes, STEGO_ALGO stegoAlgo, size_t bmpSize)
 {
     if (stegoAlgo == LSB1)
     {
         return extractSizeFromLSB1(bytes);
     }
-    return extractSizeFromLSB4(bytes);
+    else if (stegoAlgo == LSB4)
+    {
+        return extractSizeFromLSB4(bytes);
+    }
+    return extractSizeFromLSBI(bytes, bmpSize);
+}
+
+size_t extractSizeFromLSBI(const uint8_t *bytes, size_t sourceSize)
+{
+    int hop = bytes[0] == 0 ? 256 : bytes[0];
+    int laps = 0, cursor = 0;
+    int8_t *dst = malloc(4);
+    for (int i = 0, j = 0; i < sourceSize && j < 4; i++)
+    {
+        uint8_t byte = 0;
+
+        for (uint8_t j = 0; j < 8; j++)
+        {
+            uint8_t sourceByte = bytes[cursor] & 1;
+            byte |= (sourceByte & 1) << (7 - j);
+
+            cursor += hop;
+            if (cursor == sourceSize)
+            {
+                cursor = ++laps;
+            }
+            else if (cursor > sourceSize)
+            {
+                cursor %= sourceSize;
+                laps++;
+            }
+        }
+        dst[j++] = byte;
+    }
+    return extractStegoSizeFrom(dst);
 }
 
 size_t extractSizeFromLSB1(const uint8_t *bytes)

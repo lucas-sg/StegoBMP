@@ -60,7 +60,7 @@ void lsb4ExtractBytes(const uint8_t *source, uint8_t *dst, size_t size)
     }
     byte = 1;
 
-    for (int i = size*2, j = size; byte > 0; j++)
+    for (int i = size * 2, j = size; byte > 0; j++)
     {
         byte = 0;
 
@@ -113,7 +113,7 @@ size_t lsbiExtractBytes(const uint8_t *source, size_t sourceSize, uint8_t *dst, 
     int laps = 0;
 
     uint32_t msgSize = lsbiExtractSize(source, sourceSize, hop, &cursor, &laps);
-
+    printf("El msg size es %d\n", msgSize);
     for (int i = 0; i < msgSize; i++)
     {
         uint8_t byte = 0;
@@ -139,91 +139,14 @@ size_t lsbiExtractBytes(const uint8_t *source, size_t sourceSize, uint8_t *dst, 
     return msgSize;
 }
 
-void lsbiExtractAndDecrypt(const uint8_t *source, uint8_t *dst, size_t sourceSize)
+void lsbiExtractAndDecrypt(const uint8_t *source, uint8_t *dst, size_t sourceSize, size_t encryptedSize)
 {
-    int hop = source[0] == 0 ? 255 : source[0];
-    uint8_t *encMsg = malloc(sourceSize);
+    int hop = source[0] == 0 ? 256 : source[0];
+    uint8_t *encMsg = malloc(encryptedSize);
     size_t msgSize = lsbiExtractBytes(source + 6, sourceSize - 6, encMsg, hop);
+    printf("MGS SIZE %d\n", msgSize);
     uint8_t *decrypted = RC4(encMsg, source, msgSize);
     memcpy(dst, decrypted, msgSize);
-}
-
-uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
-{
-    int bmpCursor = bmpSize - 1;
-    int stegoIndex = 0;
-    int stegoBitCursor = 7;
-    uint8_t *stego = malloc(stegoSize + 1);
-    int rowCursor = widthInBytes - 1;
-    int stegoCount = stegoSize - 1;
-    while (bmpCursor >= 0 && stegoCount >= 0)
-    {
-        uint8_t auxByte;
-        while (stegoBitCursor >= 0 && bmpCursor >= 0 && stegoCount >= 0)
-        {
-            uint8_t bitToReplace = getCurrentBitOf(bmpFile[bmpCursor - rowCursor], 0);
-            auxByte = replaceNthLSB(auxByte, bitToReplace, 0, stegoBitCursor--);
-            rowCursor--;
-            if (rowCursor == -1)
-            {
-                bmpCursor -= widthInBytes;
-                rowCursor = widthInBytes - 1;
-            }
-        }
-        stego[stegoIndex] = auxByte;
-
-        stegoIndex++;
-        stegoBitCursor = 7;
-        stegoCount--;
-    }
-
-    stego[stegoSize] = 0;
-
-    return stego;
-}
-
-uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
-{
-    int bmpCursor = bmpSize - 1;
-    int stegoIndex = 0;
-    int stegoBitCursor = 7;
-    uint8_t *stego = malloc(stegoSize + 1);
-    int rowCursor = widthInBytes - 1;
-    int stegoCount = stegoSize - 1;
-    while (bmpCursor >= 0 && stegoCount >= 0)
-    {
-        uint8_t auxByte;
-        while (stegoBitCursor >= 0 && bmpCursor >= 0 && stegoCount >= 0)
-        {
-            // FIRST LSB
-            uint8_t firstBitToReplace = getCurrentBitOf(bmpFile[bmpCursor - rowCursor], 0);
-            auxByte = replaceNthLSB(auxByte, firstBitToReplace, 0, stegoBitCursor--);
-            // SECOND LSB
-            uint8_t secondBitToReplace = getCurrentBitOf(bmpFile[bmpCursor - rowCursor], 1);
-            auxByte = replaceNthLSB(auxByte, secondBitToReplace, 0, stegoBitCursor--);
-            // THIRD LSB
-            uint8_t thirdBitToReplace = getCurrentBitOf(bmpFile[bmpCursor - rowCursor], 2);
-            auxByte = replaceNthLSB(auxByte, thirdBitToReplace, 0, stegoBitCursor--);
-            // FOURTH LSB
-            uint8_t fourthBitToReplace = getCurrentBitOf(bmpFile[bmpCursor - rowCursor], 3);
-            auxByte = replaceNthLSB(auxByte, fourthBitToReplace, 0, stegoBitCursor--);
-
-            rowCursor--;
-            if (rowCursor == -1)
-            {
-                bmpCursor -= widthInBytes;
-                rowCursor = widthInBytes - 1;
-            }
-        }
-        stego[stegoIndex] = auxByte;
-
-        stegoIndex++;
-        stegoBitCursor = 7;
-        stegoCount--;
-    }
-
-    stego[stegoSize] = 0;
-    return stego;
 }
 
 // THIS FUNCTION SHOULD BE FIXED TO SUPPORT RC4 ENCRYPTION, SO KEY MUST BE EXTRACTED FROM LAST 6 BYTES OF BMP

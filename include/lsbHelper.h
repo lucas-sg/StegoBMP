@@ -20,6 +20,7 @@ uint8_t getCurrentBitOf(const uint8_t cipherTextuint8_t, unsigned int cBitCursor
 int getHopFromBmpFile(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes);
 size_t extractSizeFromLSB1(const uint8_t *bytes);
 size_t extractSizeFromLSB4(const uint8_t *bytes);
-size_t extractFourBytesOfSizeFrom(const uint8_t *bytes, STEGO_ALGO stegoAlgo);
+size_t extractSizeFromLSBI(const uint8_t *bytes, size_t sourceSize);
+size_t extractFourBytesOfSizeFrom(const uint8_t *bytes, STEGO_ALGO stegoAlgo, size_t bmpSize);
 
 #endif

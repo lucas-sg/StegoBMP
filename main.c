@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 
         extract(carrierBmp, msg, parsedInput);
         char fileName[64];
+        printf("CERRAMOS\n");
         saveMessage(msg, parsedInput.outputFileName);
     }
 

@@ -9,26 +9,30 @@ OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize);
 void copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes);
 void copyMsgData(MESSAGE *msg, uint8_t *sourceBytes);
 
-void
-extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
+// 
+// RC4KEY [TamañoEncripcion || encripcion(tamañoArchivo || datos || extension)]
+
+void extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
     uint8_t *plaintext;
-    size_t embeddedSize  = extractFourBytesOfSizeFrom(carrierBMP->data, userInput.stegoAlgorithm);
+    uint8_t *pointerToBMPToExtractSize = userInput.stegoAlgorithm == LSBI ? carrierBMP->data + 6 : carrierBMP->data;
+    size_t embeddedSize = extractFourBytesOfSizeFrom(carrierBMP->data + 6, userInput.stegoAlgorithm, carrierBMP->infoHeader->imageSize);
     printf("El embedded size es %d\n", embeddedSize);
-    uint8_t *embeddedMsg = calloc(embeddedSize + 16, 1);
+    uint8_t *embeddedMsg = calloc(embeddedSize, 1);
 
     switch (userInput.stegoAlgorithm)
     {
-        case LSB1:
-            lsb1ExtractBytes(carrierBMP->data + 4*8, embeddedMsg, embeddedSize);
-            break;
-        case LSB4:
-            lsb4ExtractBytes(carrierBMP->data + 8, embeddedMsg, embeddedSize);
-            break;
-        case LSBI:
-            lsbiExtractAndDecrypt(carrierBMP->data, embeddedMsg, embeddedSize);
-            break;
+    case LSB1:
+        lsb1ExtractBytes(carrierBMP->data + 4 * 8, embeddedMsg, embeddedSize);
+        break;
+    case LSB4:
+        lsb4ExtractBytes(carrierBMP->data + 8, embeddedMsg, embeddedSize);
+        break;
+    case LSBI:
+        lsbiExtractAndDecrypt(carrierBMP->data, embeddedMsg, carrierBMP->infoHeader->imageSize, embeddedSize);
+        break;
     }
+    printf("SALIO\n");
     if (userInput.encryption != NONE)
     {
         printf("Va a decriptar\n");
@@ -77,16 +81,14 @@ int decrypt(const uint8_t *ciphertext, int ctextLen, uint8_t *plaintext, ENCRYPT
     return plaintextLen;
 }
 
-void
-copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes)
+void copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes)
 {
-    char *fileExtension = (char *) (sourceBytes + 4 + msg->size);
+    char *fileExtension = (char *)(sourceBytes + 4 + msg->size);
     msg->extension = calloc(strlen(fileExtension) + 1, 1);
     strcpy((char *)msg->extension, fileExtension);
 }
 
-void
-copyMsgData(MESSAGE *msg, uint8_t *sourceBytes)
+void copyMsgData(MESSAGE *msg, uint8_t *sourceBytes)
 {
     msg->data = malloc(sizeof(*msg->data) * msg->size);
     memcpy(msg->data, sourceBytes + 4, msg->size);
