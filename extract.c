@@ -9,14 +9,15 @@ OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize);
 void copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes);
 void copyMsgData(MESSAGE *msg, uint8_t *sourceBytes);
 
-// 
+//
 // RC4KEY [TamañoEncripcion || encripcion(tamañoArchivo || datos || extension)]
 
 void extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
     uint8_t *plaintext;
     uint8_t *pointerToBMPToExtractSize = userInput.stegoAlgorithm == LSBI ? carrierBMP->data + 6 : carrierBMP->data;
-    size_t embeddedSize = extractFourBytesOfSizeFrom(carrierBMP->data + 6, userInput.stegoAlgorithm, carrierBMP->infoHeader->imageSize);
+    size_t embeddedSize = extractFourBytesOfSizeFrom(pointerToBMPToExtractSize, userInput.stegoAlgorithm,
+                                                     carrierBMP->infoHeader->imageSize);
     printf("El embedded size es %d\n", embeddedSize);
     uint8_t *embeddedMsg = calloc(embeddedSize, 1);
 
