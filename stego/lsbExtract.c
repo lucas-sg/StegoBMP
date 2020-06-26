@@ -139,17 +139,25 @@ size_t lsbiExtractBytes(const uint8_t *source, size_t sourceSize, uint8_t *dst, 
     return msgSize;
 }
 
+/**
+ * This functions is fucking wrong, encrypted size is needed to this function to work and extract the size
+ * but it also calculates it here. Size of stego thing that was embed MUST be different from the encryptedSize.
+ * 
+ * The extraction is also NOT working, it is extracting things without any sense
+ */ 
 void lsbiExtractAndDecrypt(const uint8_t *source, uint8_t *dst, size_t sourceSize, size_t encryptedSize)
 {
     int hop = source[0] == 0 ? 256 : source[0];
     uint8_t *encMsg = malloc(encryptedSize);
-    size_t msgSize = lsbiExtractBytes(source + 6, sourceSize - 6, encMsg, hop);
-    printf("MGS SIZE %d\n", msgSize);
-    uint8_t *decrypted = RC4(encMsg, source, msgSize);
-    memcpy(dst, decrypted, msgSize);
+    size_t encryptedMessageSize = lsbiExtractBytes(source + 6, sourceSize - 6, encMsg, hop);
+    printf("MGS SIZE %d\n", encryptedMessageSize);
+    uint8_t *decrypted = RC4(encMsg, source, encryptedMessageSize);
+    for (int i = 0 ; i < 102 ;i++)
+        printf("%c", decrypted[i]);
+    printf("\n");
+    memcpy(dst, decrypted, encryptedMessageSize);
 }
 
-// THIS FUNCTION SHOULD BE FIXED TO SUPPORT RC4 ENCRYPTION, SO KEY MUST BE EXTRACTED FROM LAST 6 BYTES OF BMP
 uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes)
 {
     int bmpCursor = bmpSize - 1;
