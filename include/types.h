@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define SUCCEEDED 1
+#define FAILED    0
+
 typedef enum PARSE_RET
 {
     PARSED_OK = 0,
@@ -75,5 +78,11 @@ struct UserInput
     PARSE_RET status;
 };
 typedef struct UserInput UserInput;
+
+typedef enum EXTRACT_RET
+{
+    EXTRACTION_SUCCEEDED,
+    WRONG_STEGO_ALGO_ERROR
+} EXTRACT_RET;
 
 #endif

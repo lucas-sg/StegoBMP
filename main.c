@@ -47,7 +47,9 @@ int main(int argc, char *argv[])
 
         msg = malloc(sizeof(MESSAGE));
 
-        extract(carrierBmp, msg, parsedInput);
+        if (extract(carrierBmp, msg, parsedInput) != EXTRACTION_SUCCEEDED)
+            return EXIT_FAILURE;
+
         char fileName[64];
         printf("CERRAMOS\n");
         saveMessage(msg, parsedInput.outputFileName);

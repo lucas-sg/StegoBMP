@@ -9,29 +9,36 @@ OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize);
 void copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes);
 void copyMsgData(MESSAGE *msg, uint8_t *sourceBytes);
 
-//
 // RC4KEY [TamañoEncripcion || encripcion(tamañoArchivo || datos || extension)]
 
-void extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
+EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
     uint8_t *plaintext;
     uint8_t *pointerToBMPToExtractSize = userInput.stegoAlgorithm == LSBI ? carrierBMP->data + 6 : carrierBMP->data;
     size_t embeddedSize = extractFourBytesOfSizeFrom(pointerToBMPToExtractSize, userInput.stegoAlgorithm,
                                                      carrierBMP->infoHeader->imageSize);
+
+    if (embeddedSize > carrierBMP->infoHeader->imageSize)
+    {
+        printf("The file you want to extract from this image is not embedded with "
+               "the specified steganography algorithm\n");
+        return WRONG_STEGO_ALGO_ERROR;
+    }
+
     printf("El embedded size es %d\n", embeddedSize);
     uint8_t *embeddedMsg = calloc(embeddedSize, 1);
 
     switch (userInput.stegoAlgorithm)
     {
-    case LSB1:
-        lsb1ExtractBytes(carrierBMP->data + 4 * 8, embeddedMsg, embeddedSize);
-        break;
-    case LSB4:
-        lsb4ExtractBytes(carrierBMP->data + 8, embeddedMsg, embeddedSize);
-        break;
-    case LSBI:
-        lsbiExtractAndDecrypt(carrierBMP->data, embeddedMsg, carrierBMP->infoHeader->imageSize, embeddedSize);
-        break;
+        case LSB1:
+            lsb1ExtractBytes(carrierBMP->data + 4 * SIZE_BYTES, embeddedMsg, embeddedSize);
+            break;
+        case LSB4:
+            lsb4ExtractBytes(carrierBMP->data + 8, embeddedMsg, embeddedSize);
+            break;
+        case LSBI:
+            lsbiExtractAndDecrypt(carrierBMP->data, embeddedMsg, carrierBMP->infoHeader->imageSize, embeddedSize);
+            break;
     }
     printf("SALIO\n");
     if (userInput.encryption != NONE)
@@ -49,6 +56,8 @@ void extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
     msg->data = plaintext;
     msg->size = embeddedSize;
     msg->extension = plaintext + embeddedSize;
+
+    return EXTRACTION_SUCCEEDED;
 }
 
 int decrypt(const uint8_t *ciphertext, int ctextLen, uint8_t *plaintext, ENCRYPTION encryption, ENC_MODE mode,

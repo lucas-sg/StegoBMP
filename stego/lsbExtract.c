@@ -9,70 +9,95 @@
 
 uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t stegoSize, const size_t widthInBytes);
 int getHopFromBmpFile(const uint8_t *bmpFile, const size_t stegoSize, const size_t widthInBytes);
+void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
+void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
+void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
+void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
 unsigned int extractDecimalFromBinary(uint8_t binary);
 /**
  * Keep in mind these functions could be abstracted a lot
  */
 
 // Extract size bytes from dst
-void lsb1ExtractBytes(const uint8_t *src, uint8_t *dst, size_t size)
+void lsb1ExtractBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
 {
-    uint8_t byte = 0;
-    for (int i = 0; i < size; i++)
-    {
-        byte = 0;
-        for (uint8_t j = 0; j <= 7; j++)
-        {
-            uint8_t sourceByte = src[i * 8 + j] & 1;
-            byte |= (sourceByte & 1) << (7 - j);
-        }
-        dst[i] = byte;
-    }
+    lsb1ExtractDataBytes(bmp, dst, size);
+    lsb1ExtractExtensionBytes(bmp, dst, size);
+}
 
-    byte = 1;
-    for (int i = size; byte > 0; i++)
-    {
-        byte = 0;
+void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
+{
+    uint8_t extractedByte;
 
-        for (uint8_t j = 0; j <= 7; j++)
+    for (size_t i = 0; i < size; i++)
+    {
+        extractedByte = 0;
+
+        for (uint8_t j = 0; j < 8; j++)
         {
-            uint8_t sourceByte = src[i * 8 + j] & 1;
-            byte |= (sourceByte & 1) << (7 - j);
+            uint8_t extractedBit = bmp[i * 8 + j] & 1u;
+            extractedByte |= (uint8_t) (extractedBit << (7u - j));
         }
-        dst[i] = byte;
+
+        dst[i] = extractedByte;
     }
 }
 
-void lsb4ExtractBytes(const uint8_t *source, uint8_t *dst, size_t size)
+void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
 {
-    uint8_t byte;
-    for (int i = 0, j = 0; j < size; j++)
+    uint8_t extractedByte = 1;
+
+    for (size_t i = size; extractedByte != 0; i++)
     {
-        byte = 0;
+        extractedByte = 0;
 
-        uint8_t firstSourceByte = source[i] & 0x0F;
-        uint8_t secondSourceByte = source[i + 1] & 0x0F;
+        for (uint8_t j = 0; j < 8; j++)
+        {
+            uint8_t extractedBit = bmp[i * 8 + j] & 1u;
+            extractedByte |= (uint8_t) (extractedBit << (7u - j));
+        }
 
-        i += 2;
-
-        byte |= firstSourceByte << 4;
-        byte |= secondSourceByte;
-        dst[j] = byte;
+        dst[i] = extractedByte;
     }
-    byte = 1;
+}
 
-    for (int i = size * 2, j = size; byte > 0; j++)
+void lsb4ExtractBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
+{
+    lsb4ExtractDataBytes(bmp, dst, size);
+    lsb4ExtractExtensionBytes(bmp, dst, size);
+}
+
+void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
+{
+    uint8_t extractedByte;
+
+    for (size_t i = 0, j = 0; j < size; i += 2, j++)
     {
-        byte = 0;
+        extractedByte = 0;
 
-        uint8_t firstSourceByte = source[i] & 0x0F;
-        uint8_t secondSourceByte = source[i + 1] & 0x0F;
+        uint8_t firstFourBits  = bmp[i]   & 0x0Fu;
+        uint8_t secondFourBits = bmp[i+1] & 0x0Fu;
 
-        i += 2;
+        extractedByte |= (uint8_t) (firstFourBits << 4u);
+        extractedByte |= secondFourBits;
+        dst[j] = extractedByte;
+    }
+}
 
-        byte |= firstSourceByte << 4;
-        byte |= secondSourceByte;
-        dst[j] = byte;
+void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
+{
+    uint8_t extractedByte = 1;
+
+    //  i = size * 2 because we need to extract 2 bmp bytes to get 1 byte
+    for (size_t i = size * 2, j = size; extractedByte != 0; i += 2, j++)
+    {
+        extractedByte = 0;
+
+        uint8_t firstFourBits  = bmp[i]   & 0x0Fu;
+        uint8_t secondFourBits = bmp[i+1] & 0x0Fu;
+        extractedByte         |= (uint8_t) (firstFourBits << 4u);
+        extractedByte         |= secondFourBits;
+        dst[j]                 = extractedByte;
     }
 }
 

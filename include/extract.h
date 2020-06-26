@@ -6,7 +6,7 @@
 #include "embed.h"
 #include "types.h"
 
-void extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput);
+EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput);
 int decrypt(const uint8_t *ciphertext, int ciphertextLen, uint8_t *plaintext, ENCRYPTION encryption, ENC_MODE mode,
             const uint8_t *password);
 
