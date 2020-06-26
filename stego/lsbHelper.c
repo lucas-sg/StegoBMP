@@ -50,21 +50,23 @@ size_t extractSizeFromLSBI(const uint8_t *bytes, size_t sourceSize)
     return extractStegoSizeFrom(dst);
 }
 
-size_t extractSizeFromLSB1(const uint8_t *bytes)
+size_t extractSizeFromLSB1(const uint8_t *bmp)
 {
-    uint8_t *dst = malloc(4);
-    for (int i = 0; i < 4; i++)
-    {
-        uint8_t byte = 0;
+    uint32_t size = 0;
 
-        for (uint8_t j = 0; j < 7; j++)
+    for (int i = 0; i < SIZE_BYTES; i++)
+    {
+        uint32_t extractedByte = 0;
+
+        for (uint8_t j = 0; j < 8; j++)
         {
-            uint8_t sourceByte = bytes[i * 8 + j] & 1;
-            byte |= (sourceByte & 1) << (7 - j);
+            uint8_t extractedBit = bmp[i * 8 + j] & 1u;
+            extractedByte |= (uint8_t) (extractedBit << (7u - j));
         }
-        dst[i] = byte;
+
+        size |= extractedByte << ((3u - i) * 8u);
     }
-    return extractStegoSizeFrom(dst);
+    return size;
 }
 
 size_t extractSizeFromLSB4(const uint8_t *bytes)

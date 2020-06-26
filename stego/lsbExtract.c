@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t stegoSize, const size_t widthInBytes);
 int getHopFromBmpFile(const uint8_t *bmpFile, const size_t stegoSize, const size_t widthInBytes);
@@ -234,13 +235,4 @@ unsigned int extractDecimalFromBinary(uint8_t binary)
         ++i;
     }
     return decimal;
-}
-
-unsigned int pow(int num, int times)
-{
-    if (times == 0)
-    {
-        return num;
-    }
-    return num * pow(num, times - 1);
 }
