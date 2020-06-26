@@ -31,7 +31,7 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
     switch (userInput.stegoAlgorithm)
     {
         case LSB1:
-            lsb1ExtractBytes(carrierBMP->data + 4 * SIZE_BYTES, embeddedMsg, embeddedSize);
+            lsb1ExtractBytes(carrierBMP->data + 8 * SIZE_BYTES, embeddedMsg, embeddedSize);
             break;
         case LSB4:
             lsb4ExtractBytes(carrierBMP->data + 8, embeddedMsg, embeddedSize);

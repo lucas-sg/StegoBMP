@@ -11,8 +11,10 @@ uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t stegoSize, const siz
 int getHopFromBmpFile(const uint8_t *bmpFile, const size_t stegoSize, const size_t widthInBytes);
 void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
 void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
+uint8_t lsb1ExtractByte(size_t byteIndex, const uint8_t *bmp);
 void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
 void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
+uint8_t lsb4ExtractByte(size_t byteIndex, const uint8_t *bmp);
 unsigned int extractDecimalFromBinary(uint8_t binary);
 /**
  * Keep in mind these functions could be abstracted a lot
@@ -31,14 +33,7 @@ void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
 
     for (size_t i = 0; i < size; i++)
     {
-        extractedByte = 0;
-
-        for (uint8_t j = 0; j < 8; j++)
-        {
-            uint8_t extractedBit = bmp[i * 8 + j] & 1u;
-            extractedByte |= (uint8_t) (extractedBit << (7u - j));
-        }
-
+        extractedByte = lsb1ExtractByte(i, bmp);
         dst[i] = extractedByte;
     }
 }
@@ -49,16 +44,22 @@ void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
 
     for (size_t i = size; extractedByte != 0; i++)
     {
-        extractedByte = 0;
-
-        for (uint8_t j = 0; j < 8; j++)
-        {
-            uint8_t extractedBit = bmp[i * 8 + j] & 1u;
-            extractedByte |= (uint8_t) (extractedBit << (7u - j));
-        }
-
+        extractedByte = lsb1ExtractByte(i, bmp);
         dst[i] = extractedByte;
     }
+}
+
+uint8_t lsb1ExtractByte(size_t byteIndex, const uint8_t *bmp)
+{
+    uint8_t extractedByte = 0;
+
+    for (uint8_t j = 0; j < 8; j++)
+    {
+        uint8_t extractedBit = bmp[byteIndex * 8 + j] & 1u;
+        extractedByte |= (uint8_t) (extractedBit << (7u - j));
+    }
+
+    return extractedByte;
 }
 
 void lsb4ExtractBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
@@ -73,13 +74,7 @@ void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
 
     for (size_t i = 0, j = 0; j < size; i += 2, j++)
     {
-        extractedByte = 0;
-
-        uint8_t firstFourBits  = bmp[i]   & 0x0Fu;
-        uint8_t secondFourBits = bmp[i+1] & 0x0Fu;
-
-        extractedByte |= (uint8_t) (firstFourBits << 4u);
-        extractedByte |= secondFourBits;
+        extractedByte = lsb4ExtractByte(i, bmp);
         dst[j] = extractedByte;
     }
 }
@@ -88,17 +83,25 @@ void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
 {
     uint8_t extractedByte = 1;
 
-    //  i = size * 2 because we need to extract 2 bmp bytes to get 1 byte
+    //  i = size * 2 because for each byte we want to extract, we need to go through 2 bmp bytes
     for (size_t i = size * 2, j = size; extractedByte != 0; i += 2, j++)
     {
-        extractedByte = 0;
-
-        uint8_t firstFourBits  = bmp[i]   & 0x0Fu;
-        uint8_t secondFourBits = bmp[i+1] & 0x0Fu;
-        extractedByte         |= (uint8_t) (firstFourBits << 4u);
-        extractedByte         |= secondFourBits;
-        dst[j]                 = extractedByte;
+        extractedByte = lsb4ExtractByte(i, bmp);
+        dst[j] = extractedByte;
     }
+}
+
+uint8_t lsb4ExtractByte(size_t byteIndex, const uint8_t *bmp)
+{
+    uint8_t extractedByte = 0;
+
+    uint8_t firstFourBits  = bmp[byteIndex]   & 0x0Fu;
+    uint8_t secondFourBits = bmp[byteIndex+1] & 0x0Fu;
+
+    extractedByte |= (uint8_t) (firstFourBits << 4u);
+    extractedByte |= secondFourBits;
+
+    return extractedByte;
 }
 
 uint32_t lsbiExtractSize(const uint8_t *source, size_t sourceSize, int hop, int *cursor, int *laps)
