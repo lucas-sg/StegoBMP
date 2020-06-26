@@ -25,7 +25,7 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
         return WRONG_STEGO_ALGO_ERROR;
     }
 
-    printf("El embedded size es %d\n", embeddedSize);
+    printf("El embedded size es %ul\n", embeddedSize);
     uint8_t *embeddedMsg = calloc(embeddedSize, 1);
 
     switch (userInput.stegoAlgorithm)
