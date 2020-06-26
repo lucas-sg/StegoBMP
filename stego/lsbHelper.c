@@ -36,17 +36,19 @@ size_t extractSizeFromLSB1(const uint8_t *bytes)
 size_t extractSizeFromLSB4(const uint8_t *bytes)
 {
     uint8_t *dst = malloc(4);
-    for (int i = 0; i < 4; i++)
+    for (int i = 0, j = 0; i < 8;)
     {
         uint8_t byte = 0;
 
-        uint8_t firstSourceByte = bytes[i * 8] & 0x0F;
-        uint8_t secondSourceByte = bytes[i * 8 + 1] & 0x0F;
+        uint8_t firstSourceByte = bytes[i] & 0x0F;
+        uint8_t secondSourceByte = bytes[i + 1] & 0x0F;
 
         byte |= firstSourceByte << 4;
         byte |= secondSourceByte;
 
-        dst[i] = byte;
+        dst[j] = byte;
+        j++;
+        i += 2;
     }
     return extractStegoSizeFrom(dst);
 }
