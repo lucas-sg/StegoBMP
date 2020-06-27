@@ -3,9 +3,6 @@
 #include "include/lsbHelper.h"
 #include <string.h>
 
-OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize);
-OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize);
-OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize);
 void copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes);
 void copyMsgData(MESSAGE *msg, uint8_t *sourceBytes);
 
@@ -18,7 +15,7 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
     size_t embeddedSize = extractFourBytesOfSizeFrom(pointerToBMPToExtractSize, userInput.stegoAlgorithm,
                                                      carrierBMP->infoHeader->imageSize);
 
-    if (embeddedSize > carrierBMP->infoHeader->imageSize && userInput.stegoAlgorithm != LSBI)
+    if (embeddedSize > carrierBMP->infoHeader->imageSize)
     {
         printf("The file you want to extract from this image is not embedded with "
                "the specified steganography algorithm\n");
@@ -31,10 +28,10 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
     switch (userInput.stegoAlgorithm)
     {
         case LSB1:
-            lsb1ExtractBytes(carrierBMP->data + 8 * SIZE_BYTES, embeddedMsg, embeddedSize);
+            lsb1Extract(carrierBMP->data + 8 * SIZE_BYTES, embeddedMsg, embeddedSize);
             break;
         case LSB4:
-            lsb4ExtractBytes(carrierBMP->data + 8, embeddedMsg, embeddedSize);
+            lsb4Extract(carrierBMP->data + 8, embeddedMsg, embeddedSize);
             break;
         case LSBI:
             lsbiExtract(carrierBMP->data, &embeddedMsg, carrierBMP->infoHeader->imageSize, embeddedSize);
