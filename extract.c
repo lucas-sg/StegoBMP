@@ -18,14 +18,14 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
     size_t embeddedSize = extractFourBytesOfSizeFrom(pointerToBMPToExtractSize, userInput.stegoAlgorithm,
                                                      carrierBMP->infoHeader->imageSize);
 
-    if (embeddedSize > carrierBMP->infoHeader->imageSize)
+    if (embeddedSize > carrierBMP->infoHeader->imageSize && userInput.stegoAlgorithm != LSBI)
     {
         printf("The file you want to extract from this image is not embedded with "
                "the specified steganography algorithm\n");
         return WRONG_STEGO_ALGO_ERROR;
     }
 
-    printf("El embedded size es %ul\n", embeddedSize);
+    printf("El embedded size es %lu MB\n", embeddedSize/(1024*1024));
     uint8_t *embeddedMsg = calloc(embeddedSize, 1);
 
     switch (userInput.stegoAlgorithm)
@@ -37,13 +37,13 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
             lsb4ExtractBytes(carrierBMP->data + 8, embeddedMsg, embeddedSize);
             break;
         case LSBI:
-            lsbiExtractAndDecrypt(carrierBMP->data, embeddedMsg, carrierBMP->infoHeader->imageSize, embeddedSize);
+            lsbiExtract(carrierBMP->data, &embeddedMsg, carrierBMP->infoHeader->imageSize, embeddedSize);
             break;
     }
     printf("SALIO\n");
     if (userInput.encryption != NONE)
     {
-        printf("Va a decriptar\n");
+        printf("Va a desencriptar\n");
         plaintext = malloc(sizeof(*plaintext) * embeddedSize);
         decrypt(embeddedMsg, embeddedSize, plaintext, userInput.encryption, userInput.mode,
                 userInput.password);

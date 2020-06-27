@@ -1,6 +1,10 @@
 #include "../include/lsbHelper.h"
 #include "../include/types.h"
 
+size_t extractSizeFromLSB1(const uint8_t *bmp);
+size_t extractSizeFromLSB4(const uint8_t *bmp);
+size_t extractSizeFromLSBI(const uint8_t *bytes, size_t sourceSize);
+
 // We assume always big endian
 unsigned int extractStegoSizeFrom(const uint8_t *bytes)
 {
@@ -20,34 +24,38 @@ size_t extractFourBytesOfSizeFrom(const uint8_t *bytes, STEGO_ALGO stegoAlgo, si
     return extractSizeFromLSBI(bytes, bmpSize);
 }
 
-size_t extractSizeFromLSBI(const uint8_t *bytes, size_t sourceSize)
+size_t extractSizeFromLSBI(const uint8_t *bmp, size_t bmpSize)
 {
-    int hop = bytes[0] == 0 ? 256 : bytes[0];
-    int laps = 0, cursor = 0;
-    int8_t *dst = malloc(4);
-    for (int i = 0, j = 0; i < sourceSize && j < 4; i++)
+    size_t hop = bmp[0] == 0 ? 256 : bmp[0];
+    size_t cursor = 0;
+    uint8_t *dst = malloc(4);
+
+    for (size_t i = 0, j = 0; i < bmpSize && j < 4; i++)
     {
-        uint8_t byte = 0;
-
-        for (uint8_t j = 0; j < 8; j++)
-        {
-            uint8_t sourceByte = bytes[cursor] & 1;
-            byte |= (sourceByte & 1) << (7 - j);
-
-            cursor += hop;
-            if (cursor == sourceSize)
-            {
-                cursor = ++laps;
-            }
-            else if (cursor > sourceSize)
-            {
-                cursor %= sourceSize;
-                laps++;
-            }
-        }
-        dst[j++] = byte;
+        uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, hop, &cursor);
+        dst[j++] = extractedByte;
     }
+
     return extractStegoSizeFrom(dst);
+}
+
+uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t hop, size_t *cursor)
+{
+    uint8_t extractedByte = 0;
+    size_t laps = 0;
+
+    for (uint8_t j = 0; j < 8; j++)
+    {
+        uint8_t extractedBit = bmp[*cursor] & 1u;
+        extractedByte |= (uint8_t) (extractedBit << (7u - j));
+
+        *cursor += hop;
+
+        if (*cursor >= bmpSize)
+        {
+            *cursor = ++laps;
+        }
+    }
 }
 
 size_t extractSizeFromLSB1(const uint8_t *bmp)
@@ -69,15 +77,15 @@ size_t extractSizeFromLSB1(const uint8_t *bmp)
     return size;
 }
 
-size_t extractSizeFromLSB4(const uint8_t *bytes)
+size_t extractSizeFromLSB4(const uint8_t *bmp)
 {
     uint8_t *dst = malloc(4);
     for (int i = 0, j = 0; i < 8;)
     {
         uint8_t byte = 0;
 
-        uint8_t firstSourceByte = bytes[i] & 0x0F;
-        uint8_t secondSourceByte = bytes[i + 1] & 0x0F;
+        uint8_t firstSourceByte = bmp[i] & 0x0F;
+        uint8_t secondSourceByte = bmp[i + 1] & 0x0F;
 
         byte |= firstSourceByte << 4;
         byte |= secondSourceByte;

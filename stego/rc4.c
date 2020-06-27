@@ -1,6 +1,6 @@
-#include "../include/rc4.h"
+#include "rc4.h"
 #include <string.h>
-#include "../include/lsbHelper.h"
+#include "lsbHelper.h"
 
 uint8_t *calculateKey(const uint8_t *bmpFile);
 uint8_t *KSA(const uint8_t *key);
