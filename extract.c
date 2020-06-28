@@ -11,8 +11,8 @@ void copyMsgData(MESSAGE *msg, uint8_t *sourceBytes);
 EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
     uint8_t *plaintext;
-    uint8_t *pointerToBMPToExtractSize = userInput.stegoAlgorithm == LSBI ? carrierBMP->data + 6 : carrierBMP->data;
-    size_t embeddedSize = extractFourBytesOfSizeFrom(pointerToBMPToExtractSize, userInput.stegoAlgorithm,
+//    uint8_t *pointerToBMPToExtractSize = userInput.stegoAlgorithm == LSBI ? carrierBMP->data + 6 : carrierBMP->data;
+    size_t embeddedSize = extractFourBytesOfSizeFrom(carrierBMP->data, userInput.stegoAlgorithm,
                                                      carrierBMP->infoHeader->imageSize);
 
     if (embeddedSize > carrierBMP->infoHeader->imageSize)

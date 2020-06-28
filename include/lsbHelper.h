@@ -9,6 +9,7 @@
 #include "../include/types.h"
 
 #define SIZE_BYTES 4
+#define RC4_KEY_SIZE 6
 
 size_t extractStegoSizeFrom(const uint8_t *bytes);
 int isCursorWithinOneByteRange(unsigned int cursor);
@@ -20,7 +21,7 @@ int getHopFromBmpFile(const uint8_t *bmpFile, const size_t bmpSize, const size_t
 size_t extractFourBytesOfSizeFrom(const uint8_t *bytes, STEGO_ALGO stegoAlgo, size_t bmpSize);
 uint8_t lsb1ExtractByte(size_t byteIndex, const uint8_t *bmp);
 uint8_t lsb4ExtractByte(size_t byteIndex, const uint8_t *bmp);
-uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size_t hop);
-size_t getHop(const uint8_t *bmp);
+uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size_t *laps, size_t hop);
+size_t getHop(const uint8_t bmp);
 
 #endif

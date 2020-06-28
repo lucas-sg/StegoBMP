@@ -71,21 +71,22 @@ uint8_t lsb4ExtractByte(size_t byteIndex, const uint8_t *bmp)
 
 size_t extractSizeFromLSBI(const uint8_t *bmp, size_t bmpSize)
 {
-    size_t cursor = 0, hop = getHop(bmp), resultingSize = 0;
+    size_t cursor = 0, laps = 0, hop = getHop(bmp[0]), resultingSize = 0;
+
+    bmp += RC4_KEY_SIZE;
 
     for (size_t i = 0; i < 4 && cursor < bmpSize; i++)
     {
-        uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, &cursor, hop);
+        uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, &cursor, &laps, hop);
         resultingSize |= (size_t) (extractedByte << ((3u - i) * 8u));
     }
 
     return resultingSize;
 }
 
-uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size_t hop)
+uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size_t *laps, size_t hop)
 {
     uint8_t extractedByte = 0;
-    size_t laps = 0;
 
     for (uint8_t i = 0; i < 8; i++)
     {
@@ -109,12 +110,12 @@ size_t extractStegoSizeFrom(const uint8_t *bytes)
     return (bytes[0] << 24u) | (bytes[1] << 16u) | (bytes[2] << 8u) | (bytes[3] << 0u);
 }
 
-size_t getHop(const uint8_t *bmp)
+size_t getHop(const uint8_t byte)
 {
-    if (bmp[0] == 0)
+    if (byte == 0)
         return 256;
     else
-        return getFirstBit(bmp[0]);
+        return getFirstBit(byte);
 }
 
 size_t getFirstBit(uint8_t byte)

@@ -69,12 +69,12 @@ void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
 
 void lsbiExtractEncryptedBytes(const uint8_t *bmp, uint8_t *dst, size_t bmpSize, size_t embedSize)
 {
-    size_t hop = getHop(bmp);
-    size_t cursor = SIZE_BYTES * 8 * hop;
+    size_t hop = getHop(bmp[0]);
+    size_t cursor = SIZE_BYTES * 8 * hop, laps = 0;
 
     for (size_t i = 0; i < embedSize; i++)
     {
-        uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, &cursor, hop);
+        uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, &cursor, &laps, hop);
         dst[i] = extractedByte;
     }
 }
@@ -87,7 +87,7 @@ void lsbiExtract(const uint8_t *bmp, uint8_t **dst, size_t bmpSize, size_t embed
     //msg = tamaño || datos || ext
     //msg = tamaño || openssl(tamaño || datos || ext)
 
-    lsbiExtractEncryptedBytes(bmp + 6, encMsg, bmpSize, embedSize);
+    lsbiExtractEncryptedBytes(bmp + RC4_KEY_SIZE, encMsg, bmpSize, embedSize);
 
     *dst = RC4(encMsg, bmp, embedSize);
 }
