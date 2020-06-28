@@ -73,7 +73,7 @@ size_t extractSizeFromLSBI(const uint8_t *bmp, size_t bmpSize)
 {
     size_t cursor = 0, hop = getHop(bmp), resultingSize = 0;
 
-    for (size_t i = 0, j = 0; i < 4 && j < bmpSize; i++, j++)
+    for (size_t i = 0; i < 4 && cursor < bmpSize; i++)
     {
         uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, &cursor, hop);
         resultingSize |= (size_t) (extractedByte << ((3u - i) * 8u));
@@ -87,10 +87,10 @@ uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size
     uint8_t extractedByte = 0;
     size_t laps = 0;
 
-    for (uint8_t j = 0; j < 8; j++)
+    for (uint8_t i = 0; i < 8; i++)
     {
         uint8_t extractedBit = bmp[*cursor] & 1u;
-        extractedByte |= (uint8_t) (extractedBit << (7u - j));
+        extractedByte |= (uint8_t) (extractedBit << (7u - i));
 
         *cursor += hop;
 
@@ -121,7 +121,7 @@ size_t getFirstBit(uint8_t byte)
 {
     size_t i;
 
-    for (i = 1; byte > 0 && i < 8; i++)
+    for (i = 1; byte > 1 && i < 8; i++)
         byte = byte >> 1u;
 
     return byte << (i - 1);
