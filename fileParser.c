@@ -111,9 +111,8 @@ void saveBmp(BMP* bmp, char *bmpPath) {
 }
 
 void saveMessage(MESSAGE* msg, char *messagePathWithoutExtension) {
-    printf("ASD\n");
-    printf("en save messages %s %s \n", messagePathWithoutExtension, msg->extension);
-    FILE *fp = fopen(strcat(messagePathWithoutExtension, msg->extension), "w+");
+    printf("Saving extracted message: %s%s\n", messagePathWithoutExtension, msg->extension);
+    FILE *fp = fopen(strcat(messagePathWithoutExtension, (char *) msg->extension), "w+");
 
     fwrite(msg->data, msg->size, 1, fp);
 

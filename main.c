@@ -50,19 +50,9 @@ int main(int argc, char *argv[])
         if (extract(carrierBmp, msg, parsedInput) != EXTRACTION_SUCCEEDED)
             return EXIT_FAILURE;
 
-        char fileName[64];
-        printf("CERRAMOS\n");
         saveMessage(msg, parsedInput.outputFileName);
+//        free(msg);
     }
 
-    // closeFiles();
-
     return EXIT_SUCCESS;
-}
-
-void closeFiles()
-{
-    fclose(carrierBmpFile);
-    fclose(msgFile);
-    fclose(outputFile);
 }

@@ -159,7 +159,7 @@ failedToDecrypt()
 void
 failedToFinalizeDec()
 {
-    failedTo("finalize the encryption process");
+    failedTo("finalize the decryption process");
 }
 
 void

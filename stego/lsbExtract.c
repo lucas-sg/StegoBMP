@@ -5,16 +5,16 @@
 #include <string.h>
 
 void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
-void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
+void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *fileExtension, size_t size);
 void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
-void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
-void lsbiExtractEncryptedBytes(const uint8_t *bmp, uint8_t *dst, size_t bmpSize, size_t embedSize);
+void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *fileExtension, size_t size);
+void lsbiExtractEncryptedBytes(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *encryptedMsg);
 
 
-void lsb1Extract(const uint8_t *bmp, uint8_t *dst, size_t size)
+void lsb1Extract(const uint8_t *bmp, MESSAGE *msg)
 {
-    lsb1ExtractDataBytes(bmp, dst, size);
-    lsb1ExtractExtensionBytes(bmp, dst, size);
+    lsb1ExtractDataBytes(bmp, msg->data, msg->size);
+    lsb1ExtractExtensionBytes(bmp, msg->extension, msg->size);
 }
 
 void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
@@ -28,21 +28,21 @@ void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
     }
 }
 
-void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
+void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *fileExtension, size_t size)
 {
     uint8_t extractedByte = 1;
 
     for (size_t i = size; extractedByte != 0; i++)
     {
         extractedByte = lsb1ExtractByte(i, bmp);
-        dst[i] = extractedByte;
+        fileExtension[i - size] = extractedByte;
     }
 }
 
-void lsb4Extract(const uint8_t *bmp, uint8_t *dst, size_t size)
+void lsb4Extract(const uint8_t *bmp, MESSAGE *msg)
 {
-    lsb4ExtractDataBytes(bmp, dst, size);
-    lsb4ExtractExtensionBytes(bmp, dst, size);
+    lsb4ExtractDataBytes(bmp, msg->data, msg->size);
+    lsb4ExtractExtensionBytes(bmp, msg->extension, msg->size);
 }
 
 void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
@@ -54,35 +54,57 @@ void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
     }
 }
 
-void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
+void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *fileExtension, size_t size)
 {
     uint8_t extractedByte = 1;
 
     //  i = size * 2 because for each byte we want to extract, we need to go through 2 bmp bytes
-    for (size_t i = size * 2, j = size; extractedByte != 0; i += 2, j++)
+    for (size_t i = size * 2, j = 0; extractedByte != 0; i += 2, j++)
     {
         extractedByte = lsb4ExtractByte(i, bmp);
-        dst[j] = extractedByte;
+        fileExtension[j] = extractedByte;
     }
 }
 
-void lsbiExtract(const uint8_t *bmp, uint8_t **dst, size_t bmpSize, size_t embedSize)
+void lsbiExtract(const uint8_t *bmp, size_t bmpSize, MESSAGE *msg)
 {
-    uint8_t *encMsg = malloc(embedSize);
+    ENC_MESSAGE *encryptedMsg = malloc(sizeof(ENC_MESSAGE));
+    encryptedMsg->size        = SIZE_BYTES + msg->size + MAX_EXTENSION_SIZE;
+    encryptedMsg->data        = calloc(encryptedMsg->size, 1);
 
-    lsbiExtractEncryptedBytes(bmp + RC4_KEY_SIZE, encMsg, bmpSize, embedSize);
+    lsbiExtractEncryptedBytes(bmp, bmpSize, encryptedMsg);
 
-    *dst = RC4(encMsg, bmp, embedSize);
+    uint8_t *decryptedMsg     = RC4(encryptedMsg->data, bmp, encryptedMsg->size);
+
+    memcpy(msg->data, decryptedMsg + SIZE_BYTES, msg->size);
+    copyFileExtension(msg->extension, decryptedMsg + SIZE_BYTES + msg->size);
 }
 
-void lsbiExtractEncryptedBytes(const uint8_t *bmp, uint8_t *dst, size_t bmpSize, size_t embedSize)
+void lsbiExtractEncryptedBytes(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *encryptedMsg)
 {
-    size_t hop = getHop(bmp[0]);
-    size_t cursor = SIZE_BYTES * 8 * hop, laps = 0;
+    size_t hop    = getHop(bmp[0]);
+    size_t cursor = RC4_KEY_SIZE, laps = 0;
 
-    for (size_t i = 0; i < embedSize; i++)
+    for (uint32_t i = 0; i < encryptedMsg->size; i++)
     {
-        uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, &cursor, &laps, hop);
-        dst[i] = extractedByte;
+        uint8_t extractedByte   = lsbiExtractByte(bmp, bmpSize, &cursor, &laps, hop);
+        (encryptedMsg->data)[i] = extractedByte;
     }
 }
+
+void lsb1ExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg)
+{
+    lsb1ExtractDataBytes(bmp, encMsg->data, encMsg->size);
+}
+
+void lsb4ExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg)
+{
+    lsb4ExtractDataBytes(bmp, encMsg->data, encMsg->size);
+}
+
+//void lsbiExtractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *encMsg)
+//{
+//    lsbiExtractEncryptedBytes(bmp, bmpSize, encMsg);
+//    *dst = RC4(encMsg, bmp, embedSize);
+//
+//}

@@ -8,7 +8,6 @@ size_t extractSizeFromLSBI(const uint8_t *bmp, size_t bmpSize);
 size_t getFirstBit(uint8_t byte);
 uint32_t lsbiDecryptSize(uint32_t encryptedSize, const uint8_t *bmp);
 uint8_t *getPointerFromSize(uint32_t size);
-uint32_t getSizeFromPointer(const uint8_t *pointer);
 
 
 size_t extractFourBytesOfSizeFrom(const uint8_t *bmp, STEGO_ALGO stegoAlgo, size_t bmpSize)
@@ -165,6 +164,12 @@ size_t getFirstBit(uint8_t byte)
         byte = byte >> 1u;
 
     return byte << (i - 1);
+}
+
+void copyFileExtension(uint8_t *dst, const uint8_t *src)
+{
+    for (int i = 0; src[i] != 0; i++)
+        dst[i] = src[i];
 }
 
 const uint8_t *sizeToByteArray(uint32_t size)
