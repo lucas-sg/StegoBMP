@@ -1,4 +1,5 @@
 #include "../include/lsbEmbed.h"
+#include "../include/lsbHelper.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -39,69 +40,55 @@ void lsb4EmbedBytes(const uint8_t *src, uint8_t *dst, size_t size)
     }
 }
 
+/**
+ * src: the thing to embed
+ * dst: the file to hide the src
+ * */
 void lsbiEncryptAndEmbed(const uint8_t *src, uint32_t msgSize, uint8_t *dst, size_t dstSize)
 {
-    int hop = dst[0] == 0 ? 255 : dst[0];
+    int hop = getHop(src[0]);
     uint8_t *encSrc = RC4(src, dst, msgSize);
-    lsbiEmbedBytes(encSrc, msgSize, dst + 6, dstSize - 6, hop);
-}
-
-void lsbiEmbedSize(uint32_t msgSize, uint8_t *dst, size_t dstSize, size_t hop, int *cursor, int *laps)
-{
-    int auxCursor = *cursor, auxLaps = *laps;
-    uint8_t sizeBytes[4] = {0};
-    for (int i = 0; i < 4; ++i)
-        sizeBytes[i] = ((uint8_t *)&msgSize)[3 - i];
-
-    for (int i = 0; i < 4; i++)
-    {
-        uint8_t byteToEmbed = sizeBytes[i];
-
-        for (uint8_t j = 0; j < 8; j++)
-        {
-            dst[auxCursor] = assignNthBitOfXtoY(byteToEmbed, dst[auxCursor], 8 - j - 1);
-
-            auxCursor += hop;
-            if (auxCursor == dstSize)
-            {
-                auxCursor = ++auxLaps;
-            }
-            else if (auxCursor > dstSize)
-            {
-                auxCursor %= dstSize;
-                auxLaps++;
-            }
-        }
-    }
-    *cursor = auxCursor;
-    *laps = auxLaps;
+    lsbiEmbedBytes(encSrc, msgSize, dst, dstSize, hop);
 }
 
 void lsbiEmbedBytes(const uint8_t *src, size_t msgSize, uint8_t *dst, size_t dstSize, size_t hop)
 {
-    int cursor = 0;
     int laps = 0;
-    lsbiEmbedSize(msgSize, dst, dstSize, hop, &cursor, &laps);
-
-    for (int i = 0; i < msgSize; i++)
+    uint8_t j = 0;
+    size_t msgCount = 0;
+    int endOfFileReached = 0;
+    while (laps < hop && msgCount < msgSize)
     {
-        uint8_t byteToEmbed = src[i];
-
-        // Needing 8 destination bytes per source byte.
-        for (uint8_t j = 0; j < 8; j++)
+        printf("LAPS %d | msgcount %d | msgSize %d \n", laps, msgCount, msgSize);
+        for (int i = laps + RC4_KEY_SIZE; i < msgSize; i++)
         {
-            dst[cursor] = assignNthBitOfXtoY(byteToEmbed, dst[cursor], 8 - j - 1);
+            endOfFileReached = 0;
+            uint8_t byteToEmbed = src[i];
+            int cursor = i;
 
-            cursor += hop;
-            if (cursor == dstSize)
+            if (cursor >= dstSize)
             {
-                cursor = ++laps;
-            }
-            else if (cursor > dstSize)
-            {
-                cursor %= dstSize;
+                endOfFileReached = 1;
                 laps++;
+                break;
             }
+
+            // Needing 8 destination bytes per source byte.
+            for (; j < 8; j++)
+            {
+                cursor = i + j * hop;
+                if (cursor >= dstSize)
+                {
+                    endOfFileReached = 1;
+                    laps++;
+                    break;
+                }
+                // printf("Cursor %d\n", cursor);
+                uint8_t dstByte = dst[cursor];
+                dst[cursor] = assignNthBitOfXtoY(byteToEmbed, dstByte, 7 - j);
+            }
+            if (!endOfFileReached)
+                msgCount++;
         }
     }
 }
@@ -116,12 +103,6 @@ uint8_t assignNthBitOfXtoY(uint8_t x, uint8_t y, int n)
     y |= bitToAssign;
     return y;
 }
-
-/* 
-* REMEMBER THAT BMP FILES ARE READ FROM DOWNSIDE-UP AND FROM LEFT TO RIGHT
-* so if [[0,2,3], [4,5,7]] is a bmp file, 
-* then the order to read will be [4 -> 5 -> 7] -> [0 -> 2 -> 3] 
-*/
 
 /*
  * This function inserts into the least significant bits of the bmp file, all the

@@ -17,7 +17,6 @@ void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
     uint8_t *dataToEmbed;
     size_t dataLen;
 
-    printf("%d\n", userInput.encryption);
     if (userInput.encryption != NONE)
     {
         msg->data = malloc((msg->size / 16 + 1) * 16);
@@ -33,7 +32,6 @@ void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
     switch (userInput.stegoAlgorithm)
     {
     case LSB1:
-        printf("EN EL SWITCH\n");
         lsbEmbed(LSB1, carrierBmp, msg);
         break;
     case LSB4:

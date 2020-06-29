@@ -101,10 +101,3 @@ void lsb4ExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg)
 {
     lsb4ExtractDataBytes(bmp, encMsg->data, encMsg->size);
 }
-
-//void lsbiExtractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *encMsg)
-//{
-//    lsbiExtractEncryptedBytes(bmp, bmpSize, encMsg);
-//    *dst = RC4(encMsg, bmp, embedSize);
-//
-//}
