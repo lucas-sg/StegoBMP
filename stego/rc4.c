@@ -1,12 +1,12 @@
-#include "rc4.h"
+#include "../include/rc4.h"
 #include <string.h>
-#include "lsbHelper.h"
+#include "../include/lsbHelper.h"
 
 uint8_t *calculateKey(const uint8_t *bmpFile);
 uint8_t *KSA(const uint8_t *key);
 uint8_t *initVectorS();
 uint8_t *initVectorT(const uint8_t *key);
-void    swap(uint8_t *s, uint32_t i, uint32_t j);
+void swap(uint8_t *s, uint32_t i, uint32_t j);
 uint8_t *PRGA(uint8_t *s, size_t len);
 
 static const size_t VECTOR_SIZE = 256;
@@ -14,9 +14,9 @@ static const size_t VECTOR_SIZE = 256;
 uint8_t *
 RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
 {
-    uint8_t *key          = calculateKey(bmpFile);
-    uint8_t *s            = KSA(key);
-    uint8_t *keyStream    = PRGA(s, msgSize);
+    uint8_t *key = calculateKey(bmpFile);
+    uint8_t *s = KSA(key);
+    uint8_t *keyStream = PRGA(s, msgSize);
     uint8_t *encryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
 
     for (int i = 0; i < msgSize; i++)
@@ -34,10 +34,11 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
 uint8_t *
 RC4decrypt(const uint8_t *encryptedMsg, const uint8_t *bmpCarrier, const size_t msgSize)
 {
-    uint8_t *key          = calculateKey(bmpCarrier);
+    uint8_t *key = calculateKey(bmpCarrier);
     uint8_t *decryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
 
-    for (size_t i = 0; i < msgSize; i++) {
+    for (size_t i = 0; i < msgSize; i++)
+    {
         decryptedMsg[i] = encryptedMsg[i] ^ key[i];
     }
 
@@ -74,10 +75,10 @@ KSA(const uint8_t *key)
 uint8_t *
 initVectorS()
 {
-    uint8_t *s = malloc(sizeof(*s) *   VECTOR_SIZE);
+    uint8_t *s = malloc(sizeof(*s) * VECTOR_SIZE);
 
     for (size_t i = 0; i < VECTOR_SIZE; i++)
-        s[i] = (uint8_t) i;
+        s[i] = (uint8_t)i;
 
     return s;
 }
@@ -111,11 +112,10 @@ PRGA(uint8_t *s, const size_t len)
     return keyStream;
 }
 
-void
-swap(uint8_t *s, const uint32_t i, const uint32_t j)
+void swap(uint8_t *s, const uint32_t i, const uint32_t j)
 {
     uint8_t aux;
-    aux  = s[i];
+    aux = s[i];
     s[i] = s[j];
     s[j] = aux;
 }

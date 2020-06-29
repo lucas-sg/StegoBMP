@@ -1,5 +1,5 @@
 #include "../include/lsbHelper.h"
-#include "rc4.h"
+#include "../include/rc4.h"
 
 
 size_t extractSizeFromLSB1(const uint8_t *bmp);
