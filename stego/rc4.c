@@ -19,7 +19,7 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
     uint8_t *keyStream    = PRGA(s, msgSize);
     uint8_t *encryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
 
-    for (int i = 0; i < msgSize; i++)
+    for (size_t i = 0; i < msgSize; i++)
     {
         encryptedMsg[i] = msg[i] ^ keyStream[i];
     }

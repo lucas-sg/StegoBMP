@@ -102,9 +102,15 @@ void lsb4ExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg)
     lsb4ExtractDataBytes(bmp, encMsg->data, encMsg->size);
 }
 
-//void lsbiExtractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *encMsg)
-//{
-//    lsbiExtractEncryptedBytes(bmp, bmpSize, encMsg);
-//    *dst = RC4(encMsg, bmp, embedSize);
-//
-//}
+void lsbiExtractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *openSSLEncMsg)
+{
+    ENC_MESSAGE *rc4Msg = malloc(sizeof(ENC_MESSAGE));
+    rc4Msg->size        = SIZE_BYTES + openSSLEncMsg->size;
+    rc4Msg->data        = calloc(rc4Msg->size, 1);
+
+    lsbiExtractEncryptedBytes(bmp, bmpSize, rc4Msg);
+
+    uint8_t *decryptedRC4 = RC4(rc4Msg->data, bmp, rc4Msg->size);
+
+    memcpy(openSSLEncMsg->data, decryptedRC4 + SIZE_BYTES, openSSLEncMsg->size);
+}
