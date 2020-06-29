@@ -6,8 +6,8 @@
 int
 main(int argc, char *argv[])
 {
-//    testEncryptDecrypt();
-//    testParser();
-//    testRC4();
+    testEncryptDecrypt();
+    testParser();
+    testRC4();
     testLsbHelper();
 }

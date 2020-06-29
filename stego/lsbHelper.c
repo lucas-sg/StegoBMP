@@ -1,10 +1,14 @@
 #include "../include/lsbHelper.h"
+#include "rc4.h"
 
 
 size_t extractSizeFromLSB1(const uint8_t *bmp);
 size_t extractSizeFromLSB4(const uint8_t *bmp);
 size_t extractSizeFromLSBI(const uint8_t *bmp, size_t bmpSize);
 size_t getFirstBit(uint8_t byte);
+uint32_t lsbiDecryptSize(uint32_t encryptedSize, const uint8_t *bmp);
+uint8_t *getPointerFromSize(uint32_t size);
+uint32_t getSizeFromPointer(const uint8_t *pointer);
 
 
 size_t extractFourBytesOfSizeFrom(const uint8_t *bmp, STEGO_ALGO stegoAlgo, size_t bmpSize)
@@ -71,17 +75,51 @@ uint8_t lsb4ExtractByte(size_t byteIndex, const uint8_t *bmp)
 
 size_t extractSizeFromLSBI(const uint8_t *bmp, size_t bmpSize)
 {
-    size_t cursor = 0, laps = 0, hop = getHop(bmp[0]), resultingSize = 0;
-
-    bmp += RC4_KEY_SIZE;
+    size_t cursor = RC4_KEY_SIZE, laps = 0, hop = getHop(bmp[0]), encryptedSize = 0;
 
     for (size_t i = 0; i < 4 && cursor < bmpSize; i++)
     {
         uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, &cursor, &laps, hop);
-        resultingSize |= (size_t) (extractedByte << ((3u - i) * 8u));
+        encryptedSize |= (size_t) (extractedByte << ((3u - i) * 8u));
     }
 
-    return resultingSize;
+    return lsbiDecryptSize(encryptedSize, bmp);
+}
+
+uint32_t lsbiDecryptSize(uint32_t encryptedSize, const uint8_t *bmp)
+{
+    uint8_t *encryptedSizePtr = getPointerFromSize(encryptedSize);
+    uint8_t *decryptedSizePtr = RC4(encryptedSizePtr, bmp, SIZE_BYTES);
+    uint32_t decryptedSize    = getSizeFromPointer(decryptedSizePtr);
+
+    free(encryptedSizePtr);
+    free(decryptedSizePtr);
+
+    return decryptedSize;
+}
+
+uint8_t *getPointerFromSize(uint32_t size)
+{
+    uint8_t *pointer = malloc(SIZE_BYTES);
+
+    pointer[0] = (size & 0xFF000000u) >> 24u;
+    pointer[1] = (size & 0x00FF0000u) >> 16u;
+    pointer[2] = (size & 0x0000FF00u) >> 8u;
+    pointer[3] =  size & 0x000000FFu;
+
+    return pointer;
+}
+
+uint32_t getSizeFromPointer(const uint8_t *pointer)
+{
+    uint32_t size = 0;
+
+    size |= (uint32_t) (pointer[0] << 24u);
+    size |= (uint32_t) (pointer[1] << 16u);
+    size |= (uint32_t) (pointer[2] << 8u);
+    size |= (uint32_t) (pointer[3]);
+
+    return size;
 }
 
 uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size_t *laps, size_t hop)
@@ -97,7 +135,8 @@ uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size
 
         if (*cursor >= bmpSize)
         {
-            *cursor = ++laps;
+            *laps  += 1;
+            *cursor = *laps + RC4_KEY_SIZE;
         }
     }
 

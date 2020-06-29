@@ -7,11 +7,9 @@ void copyFileExtension(MESSAGE *msg, uint8_t *sourceBytes);
 void copyMsgData(MESSAGE *msg, uint8_t *sourceBytes);
 
 // RC4KEY [TamañoEncripcion || encripcion(tamañoArchivo || datos || extension)]
-
 EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
     uint8_t *plaintext;
-//    uint8_t *pointerToBMPToExtractSize = userInput.stegoAlgorithm == LSBI ? carrierBMP->data + 6 : carrierBMP->data;
     size_t embeddedSize = extractFourBytesOfSizeFrom(carrierBMP->data, userInput.stegoAlgorithm,
                                                      carrierBMP->infoHeader->imageSize);
 
@@ -22,7 +20,7 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
         return WRONG_STEGO_ALGO_ERROR;
     }
 
-    printf("El embedded size es %lu MB\n", embeddedSize/(1024*1024));
+    printf("El embedded size es %lu KB\n", embeddedSize/1024);
     uint8_t *embeddedMsg = calloc(embeddedSize, 1);
 
     switch (userInput.stegoAlgorithm)
@@ -37,7 +35,7 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
             lsbiExtract(carrierBMP->data, &embeddedMsg, carrierBMP->infoHeader->imageSize, embeddedSize);
             break;
     }
-    printf("SALIO\n");
+
     if (userInput.encryption != NONE)
     {
         printf("Va a desencriptar\n");

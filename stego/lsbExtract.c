@@ -4,12 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t stegoSize, const size_t widthInBytes);
 void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
 void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
 void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
 void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
-unsigned int extractDecimalFromBinary(uint8_t binary);
+void lsbiExtractEncryptedBytes(const uint8_t *bmp, uint8_t *dst, size_t bmpSize, size_t embedSize);
 
 
 void lsb1Extract(const uint8_t *bmp, uint8_t *dst, size_t size)
@@ -67,6 +66,15 @@ void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *dst, size_t size)
     }
 }
 
+void lsbiExtract(const uint8_t *bmp, uint8_t **dst, size_t bmpSize, size_t embedSize)
+{
+    uint8_t *encMsg = malloc(embedSize);
+
+    lsbiExtractEncryptedBytes(bmp + RC4_KEY_SIZE, encMsg, bmpSize, embedSize);
+
+    *dst = RC4(encMsg, bmp, embedSize);
+}
+
 void lsbiExtractEncryptedBytes(const uint8_t *bmp, uint8_t *dst, size_t bmpSize, size_t embedSize)
 {
     size_t hop = getHop(bmp[0]);
@@ -77,25 +85,4 @@ void lsbiExtractEncryptedBytes(const uint8_t *bmp, uint8_t *dst, size_t bmpSize,
         uint8_t extractedByte = lsbiExtractByte(bmp, bmpSize, &cursor, &laps, hop);
         dst[i] = extractedByte;
     }
-}
-
-void lsbiExtract(const uint8_t *bmp, uint8_t **dst, size_t bmpSize, size_t embedSize)
-{
-    uint8_t *encMsg = malloc(embedSize);
-
-    //tamaño || RC4(msg)
-    //msg = tamaño || datos || ext
-    //msg = tamaño || openssl(tamaño || datos || ext)
-
-    lsbiExtractEncryptedBytes(bmp + RC4_KEY_SIZE, encMsg, bmpSize, embedSize);
-
-    *dst = RC4(encMsg, bmp, embedSize);
-}
-
-uint8_t *extractRC4Key(const uint8_t *bmpFile, const size_t bmpSize, const size_t widthInBytes)
-{
-    uint8_t *rc4Key = malloc(6 * sizeof(uint8_t));           // extract 6 to another constant
-    size_t firstPixelIndex = bmpSize - 1 - widthInBytes - 1; // extract 3 to another constant
-    memcpy(rc4Key, bmpFile - firstPixelIndex, 6);
-    return rc4Key;
 }
