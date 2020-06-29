@@ -1,4 +1,4 @@
-#include "cryptoUtils.h"
+#include "include/cryptoUtils.h"
 #include <string.h>
 
 const EVP_CIPHER *determineModeForAES128(ENC_MODE mode);
@@ -6,7 +6,6 @@ const EVP_CIPHER *determineModeForAES192(ENC_MODE mode);
 const EVP_CIPHER *determineModeForAES256(ENC_MODE mode);
 const EVP_CIPHER *determineModeForDES(ENC_MODE mode);
 void failedTo(const char *errorMsg);
-
 
 const EVP_CIPHER *
 determineCipherAndMode(ENCRYPTION encryption, ENC_MODE mode)
@@ -160,7 +159,7 @@ failedToDecrypt()
 void
 failedToFinalizeDec()
 {
-    failedTo("finalize the encryption process");
+    failedTo("finalize the decryption process");
 }
 
 void

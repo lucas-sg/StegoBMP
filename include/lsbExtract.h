@@ -1,17 +1,24 @@
-#ifndef LSBDECRYPT_H
-#define LSBDECRYPT_H
+#ifndef LSB_EXTRACT_H
+#define LSB_EXTRACT_H
 
 #include <stdio.h>
 #include <assert.h>
 #include <stdint.h>
 #include "rc4.h"
+// TODO: Change this, the message structure should be moved out of fileParser.h
+#include "fileParser.h"
 
-uint8_t *lsb1Extract(const uint8_t *bmpFile, const size_t cipherTextSize, const size_t bmpSize, const size_t widthInPixels);
-uint8_t *lsb4Extract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes);
-uint8_t *lsbiExtract(const uint8_t *bmpFile, const size_t stegoSize, const size_t bmpSize, const size_t widthInBytes);
+typedef struct
+{
+    uint32_t size;
+    uint8_t *data;
+} ENC_MESSAGE;
 
-void lsb1ExtractBytes(const uint8_t* src, uint8_t* dst, size_t size);
-void lsb4ExtractBytes(const uint8_t* src, uint8_t* dst, size_t size);
-size_t lsbiExtractBytes(const uint8_t* source, size_t sourceSize, uint8_t* dst, int hop);
-void lsbiExtractAndDecrypt(const uint8_t* source, size_t sourceSize, uint8_t* dst);
+void lsb1Extract(const uint8_t* bmp, MESSAGE *msg);
+void lsb4Extract(const uint8_t* bmp, MESSAGE *msg);
+void lsbiExtract(const uint8_t *bmp, size_t bmpSize, MESSAGE *msg);
+void lsb1ExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg);
+void lsb4ExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg);
+void lsbiExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg);
+
 #endif

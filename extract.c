@@ -1,98 +1,107 @@
-#include "extract.h"
-#include "cryptoUtils.h"
+#include "include/extract.h"
+#include "include/cryptoUtils.h"
+#include "include/lsbHelper.h"
 #include <string.h>
 
-OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize);
-OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize);
-OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize);
 
-OUTPUT_BMP *
-extract(char *bmpPath, size_t bmpSize, UserInput userInput)
+int isEmbeddedSizeLargerThanBmp(size_t embeddedSize, BMP *bmp, STEGO_ALGO stegoAlgo);
+ENC_MESSAGE * extractEncryptedMsg(const uint8_t *bmp, uint32_t embeddedSize, UserInput userInput);
+void buildMessage(MESSAGE *msg, const uint8_t *decryptedMsg);
+uint8_t * decrypt(const ENC_MESSAGE *encMsg, ENCRYPTION encryption, ENC_MODE mode, const uint8_t *password);
+void extractMsg(BMP *bmp, MESSAGE *msg, UserInput userInput);
+
+
+EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 {
-    uint8_t *embeddedData, *plaintext, *originalMsg;
-    size_t embeddedSize, originalMsgSize;
+    uint32_t embeddedSize = extractFourBytesOfSizeFrom(carrierBMP->data, userInput.stegoAlgorithm,
+                                                        carrierBMP->infoHeader->imageSize);
+
+    if (isEmbeddedSizeLargerThanBmp(embeddedSize, carrierBMP, userInput.stegoAlgorithm))
+    {
+        printf("The file you want to extract from this image is not embedded with "
+               "the specified steganography algorithm\n");
+        return WRONG_STEGO_ALGO_ERROR;
+    }
+
+    if (userInput.encryption != NONE)
+    {
+        ENC_MESSAGE *encryptedMsg = extractEncryptedMsg(carrierBMP->data, embeddedSize, userInput);
+        uint8_t *decryptedMsg     = decrypt(encryptedMsg, userInput.encryption, userInput.mode, userInput.password);
+
+        buildMessage(msg, decryptedMsg);
+        free(encryptedMsg);
+        free(decryptedMsg);
+    }
+    else
+    {
+        msg->size      = embeddedSize;
+        msg->data      = malloc(msg->size);
+        msg->extension = calloc(MAX_EXTENSION_SIZE, 1);
+
+        extractMsg(carrierBMP, msg, userInput);
+    }
+
+    return EXTRACTION_SUCCEEDED;
+}
+
+int isEmbeddedSizeLargerThanBmp(size_t embeddedSize, BMP *bmp, STEGO_ALGO stegoAlgo)
+{
+    int lsb1OrLsbi = (stegoAlgo == LSB1 || stegoAlgo == LSBI) && (embeddedSize * 8 > bmp->infoHeader->imageSize);
+    int lsb4       =  stegoAlgo == LSB4 && embeddedSize * 2 > bmp->infoHeader->imageSize;
+
+    return lsb1OrLsbi || lsb4;
+}
+
+ENC_MESSAGE *extractEncryptedMsg(const uint8_t *bmp, uint32_t embeddedSize, UserInput userInput)
+{
+    ENC_MESSAGE *encryptedMsg = malloc(sizeof(ENC_MESSAGE));
+    encryptedMsg->size        = embeddedSize;
+    encryptedMsg->data        = malloc(encryptedMsg->size);
 
     switch (userInput.stegoAlgorithm)
     {
         case LSB1:
-            // TODO: Merge call to LSB1 implementation
-//            embeddedSize = lsb1Extract(carrierBmp, carrierSize, embeddedData);
+            lsb1ExtractEncryptedMsg(bmp + 8 * SIZE_BYTES, encryptedMsg);
             break;
         case LSB4:
-            // TODO: Merge call to LSB4 implementation
-//            embeddedSize = lsb4Extract(carrierBmp, carrierSize, embeddedData);
+            lsb4ExtractEncryptedMsg(bmp + 8, encryptedMsg);
             break;
         case LSBI:
-            // TODO: Merge call to LSB1 implementation
-//            embeddedSize = lsbiExtract(carrierBmp, carrierSize, embeddedData);
+            // TODO: Implement this, and MAKE SURE that the embedded size was properly calculated
+//            lsbiExtractEncryptedMsg(bmp, bmpSize, encryptedMsg);
             break;
     }
 
+    return encryptedMsg;
+}
 
-    if (userInput.encryption != NONE)
+void extractMsg(BMP *bmp, MESSAGE *msg, UserInput userInput)
+{
+    switch (userInput.stegoAlgorithm)
     {
-        plaintext = malloc(sizeof(*plaintext) * embeddedSize);
-        decrypt(embeddedData, embeddedSize, plaintext, userInput.encryption, userInput.mode,
-                userInput.password);
+        case LSB1:
+            lsb1Extract(bmp->data + 8 * SIZE_BYTES, msg);
+            break;
+        case LSB4:
+            lsb4Extract(bmp->data + 8, msg);
+            break;
+        case LSBI:
+            lsbiExtract(bmp->data, bmp->infoHeader->imageSize, msg);
+            break;
     }
-    else
-    {
-        plaintext = embeddedData;
-    }
-
-    memcpy(&originalMsgSize, plaintext, 4);
-    originalMsg = malloc(sizeof(*originalMsg) * originalMsgSize);
-    memcpy(originalMsg, plaintext + 4, originalMsgSize);
-    // TODO: Fix this file extension thing
-    // strcpy(fileExtension, (char *)(plaintext + 4 + originalMsgSize));
-
-    return originalMsg;
 }
 
-
-OUTPUT_BMP *lsb1ExtractForPath(char *bmpPath, size_t bmpSize)
-{
-    BMP *bmpHeader = parseBmp(bmpPath);
-    uint8_t *bmp = malloc(bmpHeader->header->size);
-    uint8_t *decryption = lsb1Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
-    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
-    output->data = decryption;
-    output->size = 102;
-    return output;
-}
-
-OUTPUT_BMP *lsb4ExtractForPath(char *bmpPath, size_t bmpSize)
-{
-    BMP *bmpHeader = parseBmp(bmpPath);
-    uint8_t *bmp = malloc(bmpHeader->header->size);
-    uint8_t *decryption = lsb4Extract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
-    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
-    output->data = decryption;
-    output->size = 102;
-    return output;
-}
-
-OUTPUT_BMP *lsbiExtractForPath(char *bmpPath, size_t bmpSize)
-{
-    BMP *bmpHeader = parseBmp(bmpPath);
-    uint8_t *bmp = malloc(bmpHeader->header->size);
-    uint8_t *decryption = lsbiExtract(bmpHeader->data, 102, bmpHeader->infoHeader->imageSize, bmpHeader->infoHeader->width * 3);
-    OUTPUT_BMP *output = malloc(sizeof(OUTPUT_BMP));
-    output->data = decryption;
-    output->size = 102;
-    return output;
-}
-
-int
-decrypt(const uint8_t *ciphertext, int ctextLen, uint8_t *plaintext, ENCRYPTION encryption, ENC_MODE mode,
-        const uint8_t *password)
+uint8_t *decrypt(const ENC_MESSAGE *encMsg, ENCRYPTION encryption, ENC_MODE mode, const uint8_t *password)
 {
     EVP_CIPHER_CTX *ctx;
-    int auxLen, plaintextLen;
+//    int plaintextLen;
+    int auxLen;
     const EVP_CIPHER *cipher = determineCipherAndMode(encryption, mode);
-    size_t keyLen = determineKeyLength(encryption);
-    uint8_t *key  = malloc(keyLen);
-    uint8_t *iv   = malloc(keyLen);
+    uint8_t *plaintext       = calloc(encMsg->size, 1);
+    size_t keyLen            = determineKeyLength(encryption);
+    uint8_t *key             = malloc(keyLen);
+    uint8_t *iv              = malloc(keyLen);
+
     EVP_BytesToKey(cipher, EVP_sha256(), NULL, password, (int)strlen((char *)password), 1, key, iv);
 
     if (!(ctx = EVP_CIPHER_CTX_new()))
@@ -101,16 +110,26 @@ decrypt(const uint8_t *ciphertext, int ctextLen, uint8_t *plaintext, ENCRYPTION 
     if (EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv) != 1)
         failedToInitCipherContext();
 
-    if (EVP_DecryptUpdate(ctx, plaintext, &auxLen, ciphertext, ctextLen) != 1)
+    if (EVP_DecryptUpdate(ctx, plaintext, &auxLen, encMsg->data, encMsg->size) != 1)
         failedToDecrypt();
 
-    plaintextLen = auxLen;
+//    plaintextLen = auxLen;
 
     if (EVP_DecryptFinal_ex(ctx, plaintext + auxLen, &auxLen) != 1)
         failedToFinalizeDec();
 
-    plaintextLen += auxLen;
+//    plaintextLen += auxLen;
     EVP_CIPHER_CTX_free(ctx);
 
-    return plaintextLen;
+    return plaintext;
+}
+
+void buildMessage(MESSAGE *msg, const uint8_t *decryptedMsg)
+{
+    msg->size      = getSizeFromPointer(decryptedMsg);
+    msg->data      = calloc(msg->size, 1);
+    msg->extension = calloc(MAX_EXTENSION_SIZE, 1);
+
+    memcpy(msg->data, decryptedMsg + SIZE_BYTES, msg->size);
+    copyFileExtension(msg->extension, decryptedMsg + SIZE_BYTES + msg->size);
 }

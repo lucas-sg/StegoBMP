@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -L/usr/lib -lssl -lcrypto
 
 # We should fix this makefile
 
@@ -10,7 +10,7 @@ CFLAGS = -Wall
 # 	$(CC) -o testLSB ./tests/testLsb.c ./stego/lsbEmbed.c ./stego/lsbExtract.c bmpParser.c $(CFLAGS)
 
 main: 
-	$(CC) -o main main.c ./stego/lsbEmbed.c ./stego/lsbExtract.c parser.c ./lsbi/rc4.c bmpParser.c extract.c embed.c $(CFLAGS)
+	$(CC) -o main main.c ./stego/lsbEmbed.c ./stego/lsbExtract.c cryptoUtils.c parser.c ./lsbi/rc4.c extract.c ./stego/lsbHelper.c embed.c fileParser.c $(CFLAGS)
 
 # bmpParserTest: 
 # 	$(CC) -o main ./tests/bmpParser.c ./stego/lsbEmbed.c ./stego/lsbExtract.c parser.c bmpParser.c extract.c embed.c $(CFLAGS)

@@ -30,7 +30,6 @@ getBytesNeededToStego(MESSAGE * msg, STEGO_ALGO method)
 
     return sizeNeeded;
 }
-
 BMP *parseBmp(char *bmpPath)
 {
     FILE *bmpFd;
@@ -41,8 +40,8 @@ BMP *parseBmp(char *bmpPath)
         return NULL;
     }
 
-    BMP *bmp        = malloc(sizeof(BMP));
-    bmp->header     = malloc(sizeof(HEADER));
+    BMP *bmp = malloc(sizeof(BMP));
+    bmp->header = malloc(sizeof(HEADER));
     bmp->infoHeader = malloc(sizeof(INFO_HEADER));
 
     if (fread(bmp->header, sizeof(HEADER), 1, bmpFd) != 1)
@@ -58,7 +57,7 @@ BMP *parseBmp(char *bmpPath)
         freeAll(3, bmp->header, bmp->infoHeader, bmp);
         return NULL;
     }
-
+    
     if (bmp->infoHeader->bits != BITS_PER_PIXEL)
     {
         fprintf(stderr, "Bits per pixel is %d. Expected %d.", bmp->infoHeader->bits, BITS_PER_PIXEL);
@@ -67,7 +66,6 @@ BMP *parseBmp(char *bmpPath)
     }
 
     bmp->data = malloc(bmp->infoHeader->imageSize);
-
     if (fread(bmp->data, bmp->infoHeader->imageSize, 1, bmpFd) != 1) {
         perror("Error reading data.\n");
         freeAll(3, bmp->header, bmp->infoHeader, bmp->data, bmp);
@@ -101,6 +99,26 @@ MESSAGE* parseMessage(char* messagePath) {
 
     return msg;
 }
+
+void saveBmp(BMP* bmp, char *bmpPath) {
+    FILE *fp = fopen(bmpPath, "w+");
+
+    fwrite(bmp->header, sizeof(HEADER), 1, fp);
+    fwrite(bmp->infoHeader, sizeof(INFO_HEADER), 1, fp);
+    fwrite(bmp->data, bmp->infoHeader->imageSize, 1, fp);
+
+    fclose(fp);
+}
+
+void saveMessage(MESSAGE* msg, char *messagePathWithoutExtension) {
+    printf("Saving extracted message: %s%s\n", messagePathWithoutExtension, msg->extension);
+    FILE *fp = fopen(strcat(messagePathWithoutExtension, (char *) msg->extension), "w+");
+
+    fwrite(msg->data, msg->size, 1, fp);
+
+    // fclose(fp);
+}
+
 
 uint32_t getExtensionSize(const char *fileName)
 {
