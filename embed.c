@@ -45,7 +45,7 @@ void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
 
 void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg)
 {
-    printf("EN LSB EMBED\n");
+    printf("EN LSB EMBED %d\n", getBytesNeededToStego(msg, stegoAlgo));
     if (getBytesNeededToStego(msg, stegoAlgo) > bmp->header->size)
         printf("The message you are trying to embed is too large for the .bmp carrier image (%d KB). "
                "Please choose a larger image or try to embed a smaller message.\n",
@@ -102,21 +102,17 @@ int encrypt(const uint8_t *plaintext, int ptextLen, uint8_t *ciphertext, ENCRYPT
 size_t
 buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer)
 {
-    printf("%d, %s\n", size, fileExtension);
     // First 4 bytes for size
     inputSequenceBuffer[0] = (size & 0xFF000000) >> 24;
     inputSequenceBuffer[1] = (size & 0x00FF0000) >> 16;
     inputSequenceBuffer[2] = (size & 0x0000FF00) >> 8;
     inputSequenceBuffer[3] = (size & 0x000000FF);
     size_t cursor = 4;
-    printf("ANTES DEL MEMCPY\n");
     memcpy(inputSequenceBuffer + cursor, data, size);
     cursor += size;
-    printf("DESPUES\n");
     sprintf((char *)inputSequenceBuffer + cursor, "%s", fileExtension);
     cursor += strlen(fileExtension) + 1;
 
     // Total file size minus first 4 bytes used for file size :)
-    printf("NO LLEGA A RETORNAR BUILD INPUT SEQUENCE\n");
     return cursor;
 }
