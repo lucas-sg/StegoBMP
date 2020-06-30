@@ -56,7 +56,11 @@ size_t extractSizeFromLSB4(const uint8_t *bmp)
         dst[j] = extractedByte;
     }
 
-    return extractStegoSizeFrom(dst);
+    uint32_t size = extractStegoSizeFrom(dst);
+
+    free(dst);
+
+    return size;
 }
 
 uint8_t lsb4ExtractByte(size_t byteIndex, const uint8_t *bmp)

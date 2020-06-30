@@ -1,6 +1,5 @@
 #include "rc4.h"
 #include <string.h>
-#include "lsbHelper.h"
 
 uint8_t *calculateKey(const uint8_t *bmpFile);
 uint8_t *KSA(const uint8_t *key);
@@ -11,8 +10,7 @@ uint8_t *PRGA(uint8_t *s, size_t len);
 
 static const size_t VECTOR_SIZE = 256;
 
-uint8_t *
-RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
+uint8_t * RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
 {
     uint8_t *key          = calculateKey(bmpFile);
     uint8_t *s            = KSA(key);
@@ -31,21 +29,7 @@ RC4(const uint8_t *msg, const uint8_t *bmpFile, const size_t msgSize)
     return encryptedMsg;
 }
 
-uint8_t *
-RC4decrypt(const uint8_t *encryptedMsg, const uint8_t *bmpCarrier, const size_t msgSize)
-{
-    uint8_t *key          = calculateKey(bmpCarrier);
-    uint8_t *decryptedMsg = malloc(sizeof(*encryptedMsg) * msgSize);
-
-    for (size_t i = 0; i < msgSize; i++) {
-        decryptedMsg[i] = encryptedMsg[i] ^ key[i];
-    }
-
-    return decryptedMsg;
-}
-
-uint8_t *
-calculateKey(const uint8_t *bmpFile)
+uint8_t * calculateKey(const uint8_t *bmpFile)
 {
     uint8_t *key = malloc(sizeof(*key) * KEY_SIZE);
 
@@ -54,8 +38,7 @@ calculateKey(const uint8_t *bmpFile)
     return key;
 }
 
-uint8_t *
-KSA(const uint8_t *key)
+uint8_t * KSA(const uint8_t *key)
 {
     uint8_t *s = initVectorS();
     uint8_t *t = initVectorT(key);
@@ -71,8 +54,7 @@ KSA(const uint8_t *key)
     return s;
 }
 
-uint8_t *
-initVectorS()
+uint8_t * initVectorS()
 {
     uint8_t *s = malloc(sizeof(*s) *   VECTOR_SIZE);
 
@@ -82,8 +64,7 @@ initVectorS()
     return s;
 }
 
-uint8_t *
-initVectorT(const uint8_t *key)
+uint8_t * initVectorT(const uint8_t *key)
 {
     uint8_t *t = malloc(sizeof(*t) * VECTOR_SIZE);
 
@@ -93,8 +74,7 @@ initVectorT(const uint8_t *key)
     return t;
 }
 
-uint8_t *
-PRGA(uint8_t *s, const size_t len)
+uint8_t * PRGA(uint8_t *s, const size_t len)
 {
     uint32_t i = 0, j = 0, k = 0, t;
     uint8_t *keyStream = malloc(sizeof(*keyStream) * len);
@@ -111,8 +91,7 @@ PRGA(uint8_t *s, const size_t len)
     return keyStream;
 }
 
-void
-swap(uint8_t *s, const uint32_t i, const uint32_t j)
+void swap(uint8_t *s, const uint32_t i, const uint32_t j)
 {
     uint8_t aux;
     aux  = s[i];

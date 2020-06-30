@@ -78,6 +78,8 @@ void lsbiExtract(const uint8_t *bmp, size_t bmpSize, MESSAGE *msg)
 
     memcpy(msg->data, decryptedMsg + SIZE_BYTES, msg->size);
     copyFileExtension(msg->extension, decryptedMsg + SIZE_BYTES + msg->size);
+    free(encryptedMsg);
+    free(decryptedMsg);
 }
 
 void lsbiExtractEncryptedBytes(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *encryptedMsg)
@@ -113,4 +115,6 @@ void lsbiExtractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *op
     uint8_t *decryptedRC4 = RC4(rc4Msg->data, bmp, rc4Msg->size);
 
     memcpy(openSSLEncMsg->data, decryptedRC4 + SIZE_BYTES, openSSLEncMsg->size);
+    free(rc4Msg);
+    free(decryptedRC4);
 }
