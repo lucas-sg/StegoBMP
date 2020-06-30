@@ -16,10 +16,8 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 
     if (isEmbeddedSizeLargerThanBmp(embeddedSize, carrierBMP, userInput.stegoAlgorithm))
     {
-        printf("HOP %d\n", getHop(carrierBMP->data[0]));
         printf("The file you want to extract from this image is not embedded with "
                "the specified steganography algorithm\n");
-        printf("Embedded size %d MB\n", embeddedSize/1024/1024);
         return WRONG_STEGO_ALGO_ERROR;
     }
 

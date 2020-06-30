@@ -11,9 +11,7 @@ void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
     uint8_t *outputBmp = NULL;
     // TODO: Change this to allocate size for ptextLen + plaintext + fileExtension
     uint8_t *inputSequence = malloc(getBytesNeededToStego(msg, userInput.stegoAlgorithm));
-    printf("Bytes needed to stego %d\n", getBytesNeededToStego(msg, userInput.stegoAlgorithm));
     size_t inputSeqLen = buildInputSequence(msg->data, msg->size, (char *)msg->extension, inputSequence);
-    printf("BUILD SEQUECNE\n");
     uint8_t *dataToEmbed;
     size_t dataLen;
 
@@ -45,7 +43,6 @@ void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
 
 void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg)
 {
-    printf("EN LSB EMBED %d\n", getBytesNeededToStego(msg, stegoAlgo));
     if (getBytesNeededToStego(msg, stegoAlgo) > bmp->header->size)
         printf("The message you are trying to embed is too large for the .bmp carrier image (%d KB). "
                "Please choose a larger image or try to embed a smaller message.\n",

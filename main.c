@@ -31,14 +31,10 @@ int main(int argc, char *argv[])
     {
         if ((msg = parseMessage(parsedInput.inputFileName)) == NULL)
             return EXIT_FAILURE;
-        printf("%s\n", parsedInput.carrierFileName);
         if ((carrierBmp = parseBmp(parsedInput.carrierFileName)) == NULL)
             return EXIT_FAILURE;
-        printf("ANTES DE EMBEBER\n");
         embed(parsedInput, carrierBmp, msg);
-        printf("DESPUES DE EMBEBER\n");
         saveBmp(carrierBmp, parsedInput.outputFileName);
-        printf("DESPUES DE GUARDAR EL SAVE\n");
     }
     else
     {
