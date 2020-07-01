@@ -1,72 +1,30 @@
+function embed () {
+  for stego_algorithm in "LSB1" "LSB4" "LSBI"
+  do
+    TOTAL_TIME=0
+    LOOPS=2
 
-echo "RUNNING EMBEDING METRICS ON A BIG FILE (~2MB SIZE):\n"
+    for ((i=1; i <= LOOPS; i++))
+    do
+      START_TIME=$(($(date +%s%N)/1000000))
+      $(./main -embed -in $1 -p tests/resources/lima.bmp -out sampleLSB1.bmp -steg $stego_algorithm)
+      END_TIME=$(($(date +%s%N)/1000000))
+      TOTAL_TIME=$((TOTAL_TIME + END_TIME - START_TIME))
+    done
 
-echo "About to run LSB1 embeding of a samplePdf (~2MB size) using LSB1 algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in pdfSample.pdf -p tests/resources/lima.bmp -out sampleLSB1.bmp -steg LSB1
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSB1 Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
+    echo "$stego_algorithm: It took $((TOTAL_TIME / LOOPS)) ms to completely embed the file"
+  done
+}
 
-echo "About to run LSB1 embeding of a samplePdf (~2MB size) using LSB4 algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in pdfSample.pdf -p tests/resources/lima.bmp -out sampleLSB4.bmp -steg LSB4
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSB4 Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
+printf "Running embedding metrics on three files with different sizes:\n\n"
 
-echo "About to run LSB1 embeding of a samplePdf (~2MB size) using LSBI algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in pdfSample.pdf -p tests/resources/lima.bmp -out sampleLSBI.bmp -steg LSBI
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSBI Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
-echo "_________________________________________________________________________________\n"
+printf "Embedding loremIpsum.txt (~30KB)\n"
+embed "tests/resources/loremIpsum.txt"
+printf "\n\n"
 
-echo "RUNNING EMBEDING METRICS ON A MEDIUM FILE (~900KB SIZE):\n"
+printf "Embedding sample.bmp (~900KB)\n"
+embed "tests/resources/sample.bmp"
+printf "\n\n"
 
-echo "About to run LSB1 embeding of a samplePdf (~900KB size) using LSB1 algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in tests/resources/sample.bmp -p tests/resources/lima.bmp -out sampleLSB1.bmp -steg LSB1
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSB1 Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
-
-echo "About to run LSB1 embeding of a samplePdf (~900KB size) using LSB4 algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in tests/resources/sample.bmp -p tests/resources/lima.bmp -out sampleLSB4.bmp -steg LSB4
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSB4 Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
-
-echo "About to run LSB1 embeding of a samplePdf (~900KB size) using LSBI algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in tests/resources/sample.bmp -p tests/resources/lima.bmp -out sampleLSBI.bmp -steg LSBI
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSBI Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
-echo "_________________________________________________________________________________\n"
-
-echo "RUNNING EMBEDING METRICS ON A SMALL FILE (~30KB SIZE):\n"
-
-echo "About to run LSB1 embeding of a sampleTxt (~30KB size) using LSB1 algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in tests/resources/loremIpsum.txt -p tests/resources/lima.bmp -out sampleLSB1.bmp -steg LSB1
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSB1 Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
-
-echo "About to run LSB1 embeding of a sampleTxt (~30KB size) using LSB4 algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in tests/resources/loremIpsum.txt -p tests/resources/lima.bmp -out sampleLSB4.bmp -steg LSB4
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSB4 Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
-
-echo "About to run LSB1 embeding of a sampleTxt (~30KB size) using LSBI algorithm"
-STARTTIME=$(($(date +%s%N)/1000000))
-./main -embed -in tests/resources/loremIpsum.txt -p tests/resources/lima.bmp -out sample.bmp -steg LSBI
-ENDTIME=$(($(date +%s%N)/1000000))
-echo "It takes $(($ENDTIME - $STARTTIME)) millis to complete LSBI Embed of a BMP..."
-echo "_________________________________________________________________________________\n"
-
+printf "Embedding pdfSample.pdf (~2MB)\n"
+embed "pdfSample.pdf"
