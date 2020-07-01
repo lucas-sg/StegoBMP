@@ -1,9 +1,9 @@
 #include "include/embed.h"
 #include "include/cryptoUtils.h"
 #include "include/lsbEmbed.h"
+#include "include/lsbHelper.h"
 #include <string.h>
 
-size_t buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer);
 void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg);
 
 void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
@@ -12,13 +12,19 @@ void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
     MESSAGE* msgToEmbed = malloc(sizeof(MESSAGE));
     msgToEmbed->extension = (uint8_t *) strdup((char*) msg->extension);
     uint8_t *inputSequence = malloc(getBytesNeededToStego(msg, userInput.stegoAlgorithm));
-    size_t inputSeqLen = buildInputSequence(msg->data, msg->size, (char *)msg->extension, inputSequence);
+    size_t inputSeqLen = packMessage(msg->data, msg->size, (char *)msg->extension, inputSequence);
 
     if (userInput.encryption != NONE)
     {
-        msgToEmbed->data = malloc((msg->size / 16 + 1) * 16);
-        msgToEmbed->size = encrypt(inputSequence, inputSeqLen, msgToEmbed->data, userInput.encryption, userInput.mode,
+        uint8_t *encPayload = malloc((msg->size / 16 + 1) * 16);
+        size_t payloadSize = encrypt(inputSequence, inputSeqLen, encPayload, userInput.encryption, userInput.mode,
                             userInput.password);
+
+        msgToEmbed->size = SIZE_BYTES + payloadSize;
+        msgToEmbed->data = malloc(msgToEmbed->size);
+        packEncPayload(encPayload, payloadSize, msgToEmbed->data);
+
+        free(encPayload);
         free(inputSequence);
     }
     else
@@ -102,19 +108,38 @@ int encrypt(const uint8_t *plaintext, int ptextLen, uint8_t *ciphertext, ENCRYPT
 }
 
 size_t
-buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer)
-{
+prependSize(size_t size, uint8_t *buffer) {
     // First 4 bytes for size
-    inputSequenceBuffer[0] = (size & 0xFF000000) >> 24;
-    inputSequenceBuffer[1] = (size & 0x00FF0000) >> 16;
-    inputSequenceBuffer[2] = (size & 0x0000FF00) >> 8;
-    inputSequenceBuffer[3] = (size & 0x000000FF);
-    size_t cursor = 4;
+    buffer[0] = (size & 0xFF000000) >> 24;
+    buffer[1] = (size & 0x00FF0000) >> 16;
+    buffer[2] = (size & 0x0000FF00) >> 8;
+    buffer[3] = (size & 0x000000FF);
+
+    return SIZE_BYTES;
+}
+
+size_t
+packMessage(const uint8_t *data, size_t size,  const char *fileExtension, uint8_t *inputSequenceBuffer)
+{
+    size_t cursor = prependSize(size, inputSequenceBuffer);
     memcpy(inputSequenceBuffer + cursor, data, size);
     cursor += size;
-    sprintf((char *)inputSequenceBuffer + cursor, "%s", fileExtension);
-    cursor += strlen(fileExtension) + 1;
+
+    if(fileExtension != NULL && strlen(fileExtension) > 0)
+    {
+        sprintf((char *) inputSequenceBuffer + cursor, "%s", fileExtension);
+        cursor += strlen(fileExtension) + 1;
+    }
 
     // Total file size minus first 4 bytes used for file size :)
+    return cursor;
+}
+
+size_t
+packEncPayload(const uint8_t *data, size_t size, uint8_t *buffer)
+{
+    size_t cursor = prependSize(size, buffer);
+    memcpy(buffer + cursor, data, size);
+    cursor += size;
     return cursor;
 }
