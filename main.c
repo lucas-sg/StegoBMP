@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
 
         saveMessage(msg, parsedInput.outputFileName);
-//        free(msg);
+        free(carrierBmp);
+        free(msg);
     }
 
     return EXIT_SUCCESS;

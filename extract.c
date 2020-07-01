@@ -5,7 +5,7 @@
 
 
 int isEmbeddedSizeLargerThanBmp(size_t embeddedSize, BMP *bmp, STEGO_ALGO stegoAlgo);
-ENC_MESSAGE * extractEncryptedMsg(const uint8_t *bmp, uint32_t embeddedSize, UserInput userInput);
+ENC_MESSAGE *extractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, uint32_t embeddedSize, UserInput userInput);
 void buildMessage(MESSAGE *msg, const uint8_t *decryptedMsg);
 uint8_t * decrypt(const ENC_MESSAGE *encMsg, ENCRYPTION encryption, ENC_MODE mode, const uint8_t *password);
 void extractMsg(BMP *bmp, MESSAGE *msg, UserInput userInput);
@@ -25,7 +25,8 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 
     if (userInput.encryption != NONE)
     {
-        ENC_MESSAGE *encryptedMsg = extractEncryptedMsg(carrierBMP->data, embeddedSize, userInput);
+        ENC_MESSAGE *encryptedMsg = extractEncryptedMsg(carrierBMP->data, carrierBMP->infoHeader->imageSize,
+                                                        embeddedSize, userInput);
         uint8_t *decryptedMsg     = decrypt(encryptedMsg, userInput.encryption, userInput.mode, userInput.password);
 
         buildMessage(msg, decryptedMsg);
@@ -46,13 +47,13 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
 
 int isEmbeddedSizeLargerThanBmp(size_t embeddedSize, BMP *bmp, STEGO_ALGO stegoAlgo)
 {
-    int lsb1OrLsbi = (stegoAlgo == LSB1 || stegoAlgo == LSBI) && (embeddedSize * 8 > bmp->infoHeader->imageSize);
+    int LSB1orLSB4 = (stegoAlgo == LSB1 || stegoAlgo == LSBI) && (embeddedSize * 8 > bmp->infoHeader->imageSize);
     int lsb4       =  stegoAlgo == LSB4 && embeddedSize * 2 > bmp->infoHeader->imageSize;
 
-    return lsb1OrLsbi || lsb4;
+    return LSB1orLSB4 || lsb4;
 }
 
-ENC_MESSAGE *extractEncryptedMsg(const uint8_t *bmp, uint32_t embeddedSize, UserInput userInput)
+ENC_MESSAGE *extractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, uint32_t embeddedSize, UserInput userInput)
 {
     ENC_MESSAGE *encryptedMsg = malloc(sizeof(ENC_MESSAGE));
     encryptedMsg->size        = embeddedSize;
@@ -67,8 +68,7 @@ ENC_MESSAGE *extractEncryptedMsg(const uint8_t *bmp, uint32_t embeddedSize, User
             lsb4ExtractEncryptedMsg(bmp + 8, encryptedMsg);
             break;
         case LSBI:
-            // TODO: Implement this, and MAKE SURE that the embedded size was properly calculated
-//            lsbiExtractEncryptedMsg(bmp, bmpSize, encryptedMsg);
+            lsbiExtractEncryptedMsg(bmp, bmpSize, encryptedMsg);
             break;
     }
 
@@ -94,7 +94,6 @@ void extractMsg(BMP *bmp, MESSAGE *msg, UserInput userInput)
 uint8_t *decrypt(const ENC_MESSAGE *encMsg, ENCRYPTION encryption, ENC_MODE mode, const uint8_t *password)
 {
     EVP_CIPHER_CTX *ctx;
-//    int plaintextLen;
     int auxLen;
     const EVP_CIPHER *cipher = determineCipherAndMode(encryption, mode);
     uint8_t *plaintext       = calloc(encMsg->size, 1);
@@ -113,12 +112,9 @@ uint8_t *decrypt(const ENC_MESSAGE *encMsg, ENCRYPTION encryption, ENC_MODE mode
     if (EVP_DecryptUpdate(ctx, plaintext, &auxLen, encMsg->data, encMsg->size) != 1)
         failedToDecrypt();
 
-//    plaintextLen = auxLen;
-
     if (EVP_DecryptFinal_ex(ctx, plaintext + auxLen, &auxLen) != 1)
         failedToFinalizeDec();
 
-//    plaintextLen += auxLen;
     EVP_CIPHER_CTX_free(ctx);
 
     return plaintext;
