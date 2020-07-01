@@ -8,46 +8,43 @@ void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg);
 
 void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
 {
-    uint8_t *outputBmp = NULL;
     // TODO: Change this to allocate size for ptextLen + plaintext + fileExtension
+    MESSAGE* msgToEmbed = malloc(sizeof(MESSAGE));
+    msgToEmbed->extension = (uint8_t *) strdup((char*) msg->extension);
     uint8_t *inputSequence = malloc(getBytesNeededToStego(msg, userInput.stegoAlgorithm));
-    printf("Bytes needed to stego %d\n", getBytesNeededToStego(msg, userInput.stegoAlgorithm));
     size_t inputSeqLen = buildInputSequence(msg->data, msg->size, (char *)msg->extension, inputSequence);
-    printf("BUILD SEQUECNE\n");
-    uint8_t *dataToEmbed;
-    size_t dataLen;
 
-    printf("%d\n", userInput.encryption);
     if (userInput.encryption != NONE)
     {
-        msg->data = malloc((msg->size / 16 + 1) * 16);
-        msg->size = encrypt(inputSequence, inputSeqLen, msg->data, userInput.encryption, userInput.mode,
+        msgToEmbed->data = malloc((msg->size / 16 + 1) * 16);
+        msgToEmbed->size = encrypt(inputSequence, inputSeqLen, msgToEmbed->data, userInput.encryption, userInput.mode,
                             userInput.password);
+        free(inputSequence);
     }
     else
     {
-        msg->size = inputSeqLen;
-        msg->data = inputSequence;
+        msgToEmbed->size = inputSeqLen;
+        msgToEmbed->data = inputSequence;
     }
 
     switch (userInput.stegoAlgorithm)
     {
     case LSB1:
-        printf("EN EL SWITCH\n");
-        lsbEmbed(LSB1, carrierBmp, msg);
+        lsbEmbed(LSB1, carrierBmp, msgToEmbed);
         break;
     case LSB4:
-        lsbEmbed(LSB4, carrierBmp, msg);
+        lsbEmbed(LSB4, carrierBmp, msgToEmbed);
         break;
     case LSBI:
-        lsbEmbed(LSBI, carrierBmp, msg);
+        lsbEmbed(LSBI, carrierBmp, msgToEmbed);
         break;
     }
+
+    destroyMsg(msgToEmbed);
 }
 
 void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg)
 {
-    printf("EN LSB EMBED\n");
     if (getBytesNeededToStego(msg, stegoAlgo) > bmp->header->size)
         printf("The message you are trying to embed is too large for the .bmp carrier image (%d KB). "
                "Please choose a larger image or try to embed a smaller message.\n",
@@ -98,27 +95,26 @@ int encrypt(const uint8_t *plaintext, int ptextLen, uint8_t *ciphertext, ENCRYPT
     ciphertextLen += auxLen;
     EVP_CIPHER_CTX_free(ctx);
 
+    free(key);
+    free(iv);
+
     return ciphertextLen;
 }
 
 size_t
 buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer)
 {
-    printf("%d, %s\n", size, fileExtension);
     // First 4 bytes for size
     inputSequenceBuffer[0] = (size & 0xFF000000) >> 24;
     inputSequenceBuffer[1] = (size & 0x00FF0000) >> 16;
     inputSequenceBuffer[2] = (size & 0x0000FF00) >> 8;
     inputSequenceBuffer[3] = (size & 0x000000FF);
     size_t cursor = 4;
-    printf("ANTES DEL MEMCPY\n");
     memcpy(inputSequenceBuffer + cursor, data, size);
     cursor += size;
-    printf("DESPUES\n");
     sprintf((char *)inputSequenceBuffer + cursor, "%s", fileExtension);
     cursor += strlen(fileExtension) + 1;
 
     // Total file size minus first 4 bytes used for file size :)
-    printf("NO LLEGA A RETORNAR BUILD INPUT SEQUENCE\n");
     return cursor;
 }
