@@ -4,7 +4,7 @@
 #include "./include/testLsbHelper.h"
 
 int
-main(int argc, char *argv[])
+main()
 {
     testEncryptDecrypt();
     testParser();
