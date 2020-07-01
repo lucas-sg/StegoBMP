@@ -28,6 +28,7 @@ EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput)
         uint8_t *decryptedMsg = decrypt(encryptedMsg, userInput.encryption, userInput.mode, userInput.password);
 
         buildMessage(msg, decryptedMsg);
+        free(encryptedMsg->data);
         free(encryptedMsg);
         free(decryptedMsg);
     }
@@ -114,6 +115,9 @@ uint8_t *decrypt(const ENC_MESSAGE *encMsg, ENCRYPTION encryption, ENC_MODE mode
         failedToFinalizeDec();
 
     EVP_CIPHER_CTX_free(ctx);
+
+    free(key);
+    free(iv);
 
     return plaintext;
 }

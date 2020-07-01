@@ -19,6 +19,8 @@ int encrypt(const uint8_t *plaintext, int plaintextLen, uint8_t *ciphertext, ENC
 OUTPUT_BMP *lsb1Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath);
 OUTPUT_BMP *lsb4Embed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath);
 OUTPUT_BMP *lsbiEmbed(const uint8_t *carrierBmp, const char *bmpPath, const uint8_t *msg, const char *msgPath);
-size_t buildInputSequence(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer);
+size_t packMessage(const uint8_t *data, size_t size, const char *fileExtension, uint8_t *inputSequenceBuffer);
+size_t packEncPayload(const uint8_t *data, size_t size, uint8_t *buffer);
+size_t prependSize(size_t size, uint8_t *buffer);
 
 #endif
