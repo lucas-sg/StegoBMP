@@ -112,11 +112,28 @@ void saveBmp(BMP* bmp, char *bmpPath) {
 
 void saveMessage(MESSAGE* msg, char *messagePathWithoutExtension) {
     printf("Saving extracted message: %s%s\n", messagePathWithoutExtension, msg->extension);
-    FILE *fp = fopen(strcat(messagePathWithoutExtension, (char *) msg->extension), "w+");
+    char* path = malloc(strlen(messagePathWithoutExtension) + strlen((char*) msg->extension) + 1);
+    path = strcpy(path, messagePathWithoutExtension);
+    path = strcat(path, (char*) msg->extension);
+    FILE *fp = fopen(path, "w+");
 
     fwrite(msg->data, msg->size, 1, fp);
 
-    // fclose(fp);
+    fclose(fp);
+    free(path);
+}
+
+void destroyBmp(BMP* bmp) {
+    free(bmp->header);
+    free(bmp->infoHeader);
+    free(bmp->data);
+    free(bmp);
+}
+
+void destroyMsg(MESSAGE* msg) {
+    free(msg->extension);
+    free(msg->data);
+    free(msg);
 }
 
 

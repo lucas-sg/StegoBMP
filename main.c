@@ -17,7 +17,6 @@ int main(int argc, char *argv[])
 {
     MESSAGE *msg;
     BMP *carrierBmp;
-    OUTPUT_BMP *output;
     PARSE_RET ret = parseInput(argc, argv, &parsedInput);
 
     if (ret != PARSED_OK)
@@ -35,6 +34,9 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         embed(parsedInput, carrierBmp, msg);
         saveBmp(carrierBmp, parsedInput.outputFileName);
+
+        destroyBmp(carrierBmp);
+        destroyMsg(msg);
     }
     else
     {
@@ -47,7 +49,9 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
 
         saveMessage(msg, parsedInput.outputFileName);
-//        free(msg);
+
+        destroyBmp(carrierBmp);
+        destroyMsg(msg);
     }
 
     return EXIT_SUCCESS;

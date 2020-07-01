@@ -47,5 +47,7 @@ BMP *parseBmp(char *bmpPath);
 MESSAGE *parseMessage(char *messagePath);
 void saveBmp(BMP* bmp, char *bmpPath);
 void saveMessage(MESSAGE* msg, char *messagePathWithoutExtension);
+void destroyBmp(BMP* bmp);
+void destroyMsg(MESSAGE * bmp);
 
 #endif

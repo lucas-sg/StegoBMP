@@ -8,37 +8,39 @@ void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg);
 
 void embed(UserInput userInput, BMP *carrierBmp, MESSAGE *msg)
 {
-    uint8_t *outputBmp = NULL;
     // TODO: Change this to allocate size for ptextLen + plaintext + fileExtension
+    MESSAGE* msgToEmbed = malloc(sizeof(MESSAGE));
+    msgToEmbed->extension = (uint8_t *) strdup((char*) msg->extension);
     uint8_t *inputSequence = malloc(getBytesNeededToStego(msg, userInput.stegoAlgorithm));
     size_t inputSeqLen = buildInputSequence(msg->data, msg->size, (char *)msg->extension, inputSequence);
-    uint8_t *dataToEmbed;
-    size_t dataLen;
 
     if (userInput.encryption != NONE)
     {
-        msg->data = malloc((msg->size / 16 + 1) * 16);
-        msg->size = encrypt(inputSequence, inputSeqLen, msg->data, userInput.encryption, userInput.mode,
+        msgToEmbed->data = malloc((msg->size / 16 + 1) * 16);
+        msgToEmbed->size = encrypt(inputSequence, inputSeqLen, msgToEmbed->data, userInput.encryption, userInput.mode,
                             userInput.password);
+        free(inputSequence);
     }
     else
     {
-        msg->size = inputSeqLen;
-        msg->data = inputSequence;
+        msgToEmbed->size = inputSeqLen;
+        msgToEmbed->data = inputSequence;
     }
 
     switch (userInput.stegoAlgorithm)
     {
     case LSB1:
-        lsbEmbed(LSB1, carrierBmp, msg);
+        lsbEmbed(LSB1, carrierBmp, msgToEmbed);
         break;
     case LSB4:
-        lsbEmbed(LSB4, carrierBmp, msg);
+        lsbEmbed(LSB4, carrierBmp, msgToEmbed);
         break;
     case LSBI:
-        lsbEmbed(LSBI, carrierBmp, msg);
+        lsbEmbed(LSBI, carrierBmp, msgToEmbed);
         break;
     }
+
+    destroyMsg(msgToEmbed);
 }
 
 void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg)
@@ -92,6 +94,9 @@ int encrypt(const uint8_t *plaintext, int ptextLen, uint8_t *ciphertext, ENCRYPT
 
     ciphertextLen += auxLen;
     EVP_CIPHER_CTX_free(ctx);
+
+    free(key);
+    free(iv);
 
     return ciphertextLen;
 }
