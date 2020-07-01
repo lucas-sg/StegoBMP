@@ -1,7 +1,7 @@
 #include "include/embed.h"
 #include "include/cryptoUtils.h"
 #include "include/lsbEmbed.h"
-#include "lsbHelper.h"
+#include "include/lsbHelper.h"
 #include <string.h>
 
 void lsbEmbed(STEGO_ALGO stegoAlgo, BMP *bmp, MESSAGE *msg);
