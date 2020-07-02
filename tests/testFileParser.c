@@ -34,9 +34,8 @@ void testParseMessage() {
     assert(strcmp((char*) msg->data, "mensaje de prueba \n") == 0);
 }
 
-//int main() {
-//    testParseSampleImage();
-//    testgetBytesNeededToStegoForMessage();
-//    testParseMessage();
-//    printf("Tests passed!\n");
-//}
+void testFileParser() {
+   testParseSampleImage();
+   testgetBytesNeededToStegoForMessage();
+   testParseMessage();
+}
