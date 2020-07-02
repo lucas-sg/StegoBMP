@@ -1,15 +1,6 @@
 #include "../include/lsbHelper.h"
 #include "../include/rc4.h"
 
-
-size_t extractSizeFromLSB1(const uint8_t *bmp);
-size_t extractSizeFromLSB4(const uint8_t *bmp);
-size_t extractSizeFromLSBI(const uint8_t *bmp, size_t bmpSize);
-size_t getFirstBit(uint8_t byte);
-uint32_t lsbiDecryptSize(uint32_t encryptedSize, const uint8_t *bmp);
-uint8_t *getPointerFromSize(uint32_t size);
-
-
 size_t extractFourBytesOfSizeFrom(const uint8_t *bmp, STEGO_ALGO stegoAlgo, size_t bmpSize)
 {
     if (stegoAlgo == LSB1)
@@ -170,17 +161,9 @@ void copyFileExtension(uint8_t *dst, const uint8_t *src)
         dst[i] = src[i];
 }
 
-const uint8_t *sizeToByteArray(uint32_t size)
-{
-    uint8_t *bytes = malloc(4);
-    uint32_t mask = 0xFF;
-
-    bytes[0] = size;
-}
-
 int isCursorWithinOneByteRange(unsigned int cursor)
 {
-    return cursor >= 0 && cursor <= 7;
+    return cursor <= 7;
 }
 
 /* 

@@ -1,16 +1,13 @@
 #include "../include/lsbEmbed.h"
 #include "../include/lsbHelper.h"
-#include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
 
 uint8_t assignNthBitOfXtoY(uint8_t x, uint8_t y, int n);
 
 void lsb1EmbedBytes(const uint8_t *src, uint8_t *dst, size_t size)
 {
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         uint8_t byteToEmbed = src[i];
 
@@ -25,7 +22,7 @@ void lsb1EmbedBytes(const uint8_t *src, uint8_t *dst, size_t size)
 
 void lsb4EmbedBytes(const uint8_t *src, uint8_t *dst, size_t size)
 {
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         uint8_t byteToEmbed = src[i];
 
@@ -53,13 +50,13 @@ void lsbiEncryptAndEmbed(const uint8_t *src, uint32_t msgSize, uint8_t *dst, siz
 
 void lsbiEmbedBytes(const uint8_t *src, size_t msgSize, uint8_t *dst, size_t dstSize, size_t hop)
 {
-    int laps = 0;
+    size_t laps = 0;
     uint8_t srcBitCursor = 0;
     size_t msgCount = 0;
-    int bmpCursor = laps + RC4_KEY_SIZE;
+    size_t bmpCursor = laps + RC4_KEY_SIZE;
     while (laps < hop && msgCount < msgSize)
     {
-        int auxCursor = bmpCursor;
+        size_t auxCursor = bmpCursor;
         if (auxCursor >= dstSize)
         {
             bmpCursor = ++laps + RC4_KEY_SIZE;

@@ -8,7 +8,6 @@ void lsb1ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
 void lsb1ExtractExtensionBytes(const uint8_t *bmp, uint8_t *fileExtension, size_t size);
 void lsb4ExtractDataBytes(const uint8_t *bmp, uint8_t *dst, size_t size);
 void lsb4ExtractExtensionBytes(const uint8_t *bmp, uint8_t *fileExtension, size_t size);
-void lsbiExtractEncryptedBytes(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *encryptedMsg);
 
 
 void lsb1Extract(const uint8_t *bmp, MESSAGE *msg)

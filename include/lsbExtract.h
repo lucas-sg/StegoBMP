@@ -20,5 +20,6 @@ void lsbiExtract(const uint8_t *bmp, size_t bmpSize, MESSAGE *msg);
 void lsb1ExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg);
 void lsb4ExtractEncryptedMsg(const uint8_t *bmp, ENC_MESSAGE *encMsg);
 void lsbiExtractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *openSSLEncMsg);
+void lsbiExtractEncryptedBytes(const uint8_t *bmp, size_t bmpSize, ENC_MESSAGE *encryptedMsg);
 
 #endif
