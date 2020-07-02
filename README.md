@@ -7,5 +7,5 @@
 ## To build stegobmp:
 `make stegobmp`
 
-## To run tests:
+## To build tests:
 `make testSuite`
