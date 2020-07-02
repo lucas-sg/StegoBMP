@@ -3,7 +3,6 @@
 function embed () {
   for stego_algorithm in "LSB1" "LSB4" "LSBI"
   do
-    TOTAL_TIME=0
     LOOPS=1
 
     printf "\n"
@@ -11,14 +10,11 @@ function embed () {
 
     for ((i=1; i <= LOOPS; i++))
     do
-      # START_TIME=$(($(date +%s%N)/1000000))
-      $(/usr/bin/time -f'%E' ./main -embed -in $1 -p tests/resources/lima.bmp -out sampleLSB1.bmp -steg $stego_algorithm)
-      # END_TIME=$(($(date +%s%N)/1000000))
-      # TOTAL_TIME=$((TOTAL_TIME + END_TIME - START_TIME))
+      /usr/bin/time -f'%E' ./main -embed -in "$1" -p tests/resources/lima.bmp -out sampleLSB1.bmp -steg $stego_algorithm
+
     done
     sleep 0.5
 
-    # echo "$stego_algorithm: It took $((TOTAL_TIME / LOOPS)) ms to completely embed the file"
   done
 }
 
