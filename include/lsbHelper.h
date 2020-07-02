@@ -26,5 +26,11 @@ uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size
 size_t getHop(const uint8_t bmp);
 uint32_t getSizeFromPointer(const uint8_t *pointer);
 void copyFileExtension(uint8_t *dst, const uint8_t *src);
+size_t extractSizeFromLSB1(const uint8_t *bmp);
+size_t extractSizeFromLSB4(const uint8_t *bmp);
+size_t extractSizeFromLSBI(const uint8_t *bmp, size_t bmpSize);
+size_t getFirstBit(uint8_t byte);
+uint32_t lsbiDecryptSize(uint32_t encryptedSize, const uint8_t *bmp);
+uint8_t *getPointerFromSize(uint32_t size);
 
 #endif

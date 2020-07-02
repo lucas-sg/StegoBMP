@@ -1,20 +1,11 @@
 CC = gcc
 CFLAGS = -Wall -L/usr/lib -lssl -lcrypto
 
-# We should fix this makefile
-
-# testsParser: parser.c ./tests/testParser.c ./tests/testSuite.c ./tests/testRC4.c
-# 	$(CC) -o parser parser.c ./tests/testParser.c ./tests/testSuite.c ./tests/testRC4.c $(CFLAGS)
-
-# testsLSB: ./tests/testLsb.c  ./stego/lsbEmbed.c ./tests/testLsb.c ./stego/lsbExtract.c
-# 	$(CC) -o testLSB ./tests/testLsb.c ./stego/lsbEmbed.c ./stego/lsbExtract.c bmpParser.c $(CFLAGS)
-
 main: 
 	$(CC) -o main main.c ./stego/lsbEmbed.c ./stego/lsbExtract.c cryptoUtils.c parser.c ./stego/rc4.c extract.c ./stego/lsbHelper.c embed.c fileParser.c $(CFLAGS)
 
-# bmpParserTest: 
-# 	$(CC) -o main ./tests/bmpParser.c ./stego/lsbEmbed.c ./stego/lsbExtract.c parser.c bmpParser.c extract.c embed.c $(CFLAGS)
-
-
+testSuite: 
+	$(CC) -o testSuite tests/testSuite.c tests/testParser.c tests/testRC4.c tests/testLsb.c tests/testLsbHelper.c ./stego/lsbEmbed.c ./stego/lsbExtract.c cryptoUtils.c parser.c ./stego/rc4.c extract.c ./stego/lsbHelper.c embed.c fileParser.c $(CFLAGS)
+	
 clean: 
 	rm f *.o ./tests/*.o
