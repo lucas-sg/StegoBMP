@@ -6,12 +6,8 @@
 int
 main()
 {
-    printf("RUNNING PARSER TESTS\n");
     testParser();
-    printf("RUNNING RC4 TESTS\n");
     testRC4();
-    printf("RUNNING LSB HELPER TESTS \n");
     testLsbHelper();
-    printf("RUNNING LSB TEST\n");
     testLsb();
 }
