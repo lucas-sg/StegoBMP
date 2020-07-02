@@ -56,7 +56,7 @@ size_t extractSizeFromLSB4(const uint8_t *bmp)
         dst[j] = extractedByte;
     }
 
-    uint32_t size = extractStegoSizeFrom(dst);
+    uint32_t size = getSizeFromPointer(dst);
 
     free(dst);
 
@@ -144,12 +144,6 @@ uint8_t lsbiExtractByte(const uint8_t *bmp, size_t bmpSize, size_t *cursor, size
     }
 
     return extractedByte;
-}
-
-// We assume always big endian
-size_t extractStegoSizeFrom(const uint8_t *bytes)
-{
-    return (bytes[0] << 24u) | (bytes[1] << 16u) | (bytes[2] << 8u) | (bytes[3] << 0u);
 }
 
 size_t getHop(const uint8_t byte)

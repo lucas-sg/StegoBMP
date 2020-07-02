@@ -12,6 +12,7 @@ void compareBothRC4Files(const uint8_t *theseRC4Bytes, const uint8_t *onlineRC4B
 void
 testRC4()
 {
+    printf("Running RC4 tests:\n\n");
     testOkRC4();
 }
 
@@ -22,7 +23,7 @@ testOkRC4()
     const char *key           = "CRIPTO";
     size_t len                = strlen(msg);
     uint8_t *encrypted        = RC4((uint8_t *)msg, (uint8_t *)key, len);
-    FILE *onlineRC4Encryption = fopen("../onlineRC4example.dat", "r");
+    FILE *onlineRC4Encryption = fopen("../tests/resources/onlineRC4example.dat", "r");
     uint8_t onlineRC4Bytes[len];
 
     fread(onlineRC4Bytes, sizeof(*onlineRC4Bytes), len, onlineRC4Encryption);

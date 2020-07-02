@@ -7,5 +7,6 @@
 #include "types.h"
 
 EXTRACT_RET extract(BMP *carrierBMP, MESSAGE *msg, UserInput userInput);
+uint8_t *decrypt(const ENC_MESSAGE *encMsg, ENCRYPTION encryption, ENC_MODE mode, const uint8_t *password);
 
 #endif

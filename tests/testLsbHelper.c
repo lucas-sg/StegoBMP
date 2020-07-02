@@ -33,5 +33,5 @@ testExtractSizeFromLSB1()
 
     size_t size = extractSizeFromLSB1(bmp2);
     // TODO: Add assertion comparing the int or uint values of expected size and extracted size
-    printf("%lx", size);
+//    printf("%lx", size);
 }

@@ -6,6 +6,7 @@
 int isEmbeddedSizeLargerThanBmp(size_t embeddedSize, BMP *bmp, STEGO_ALGO stegoAlgo);
 ENC_MESSAGE *extractEncryptedMsg(const uint8_t *bmp, size_t bmpSize, uint32_t embeddedSize, UserInput userInput);
 void buildMessage(MESSAGE *msg, const uint8_t *decryptedMsg);
+// TODO: Delete definition if it's already declared in .h
 uint8_t *decrypt(const ENC_MESSAGE *encMsg, ENCRYPTION encryption, ENC_MODE mode, const uint8_t *password);
 void extractMsg(BMP *bmp, MESSAGE *msg, UserInput userInput);
 
